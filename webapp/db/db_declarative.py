@@ -19,7 +19,17 @@ def create_session():
 
 # Create an engine that stores data in the local directory's
 # sqlalchemy_example.db file.
-engine = create_engine('sqlite:///highschool.db')
+engine = create_engine('sqlite:///webapp/db/highschool.db')
+
+
+def _fk_pragma_on_connect(dbapi_con, con_record):
+    dbapi_con.execute('pragma foreign_keys=ON')
+
+
+from sqlalchemy import event
+
+event.listen(engine, 'connect', _fk_pragma_on_connect)
+
 
 # A declarative base class is created with the declarative_base() function.
 Base = declarative_base()
@@ -152,6 +162,7 @@ Base.metadata.create_all(engine)
 session = create_session()
 
 
+
 # new_parent = Parent(name='Marco', lastname= 'Rossi', pwd='pwd')
 # # With the add() method, we add the specified instance of Parent classes
 # # to the session.
@@ -161,8 +172,12 @@ session = create_session()
 # session.commit()
 
 
-rs = session.query(Parent).all()
-for parent in rs:
-    print(parent.id, parent.name, parent.lastname, parent.pwd)
+# rs = session.query(Parent).all()
+# for parent in rs:
+#     print(parent.id, parent.name, parent.lastname, parent.pwd)
 
 # IPython.embed()
+
+# new_student = Student(name='Rosa', lastname='Monte', parent_id= 8)
+# session.add(new_student)
+# session.commit()
