@@ -102,6 +102,7 @@ class Parent(Base):
 class Class(Base):
     __tablename__ = 'class'
     id = Column(Integer, primary_key=True)
+    name = Column(String(2), nullable=False, unique=True)
     room = Column(String(5), nullable=False)
     notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
@@ -142,8 +143,6 @@ class Grade(Base):
 
 
 # Bind the engine to the metadata of the Base class so that the
-
-
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
 
