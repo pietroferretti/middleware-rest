@@ -39,11 +39,35 @@ def teacher():
     '''admin endpoint'''
     if request.method == 'POST':
         '''create a new teacher'''
-        pass
+        # check content type TODO
+        # check, validate json TODO
+        # create new teacher object
+        data = request.get_json()
+        name = data['name']
+        lastname = data['lastname']
+        pwd = data['pwd']
+        new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
+        # open db session
+        session = create_session()
+        # insert new teacher in db
+        session.add(new_teacher)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_teacher.id
+        return jsonify({'id': new_id})
+        # TODO 201 status code
     else:
         '''list of teachers'''
+        # open db session
+        session = create_session()
+        # get list of teachers from db
+        teachers = session.query(Teacher).all()        
+        res = []
+        for t in teachers:
+            res.append({'id': t.id, 'name': t.name, 'lastname': t.lastname})
+        # return structured list
+        return jsonify(res)
 
-        pass
 
 @app.route('/teacher/<teacher_id>/')
 def teacher_with_id(teacher_id):
@@ -162,16 +186,27 @@ def parent_with_id(parent_id):
 def parent_data(parent_id):
     if request.method == 'PUT':
         '''edit parent personal data'''
-        pass
+        # check content type
+        # if == json
+        # parse json
+        data = request.get_json()
+        newname = data['name']
+        newlastname = data['lastname']
+        session = create_session()
+        parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
+        parent.name = newname
+        parent.lastname = newlastname
+        session.commit()
+        return jsonify('ok')
     else:
         '''show parent personal data'''
         # create session
         session = create_session()
         # get data from teachers with id
-        rs = session.query(Parent).filter(Parent.id == int(parent_id)).first()
+        parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
         resp = {}
-        resp['name'] = rs.name
-        resp['lastname'] = rs.lastname
+        resp['name'] = parent.name
+        resp['lastname'] = parent.lastname
         return jsonify(resp)
 
 @app.route('/parent/<parent_id>/child/')
