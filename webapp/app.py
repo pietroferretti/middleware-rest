@@ -16,14 +16,20 @@
 
 from flask import Flask
 from flask import request
+from flask import jsonify
 app = Flask(__name__)
 
+from db.db_declarative import *
+
+import IPython
 
 @app.route('/')
 def index():
     '''Root endpoint'''
     # hypermedia qui?
-    return 'Hello, World!'
+    d = {'data':2, 'error':None}
+    return jsonify(d)
+    #return 'Hello, World!'
 
 
 '''TEACHER'''
@@ -36,11 +42,13 @@ def teacher():
         pass
     else:
         '''list of teachers'''
+
         pass
 
 @app.route('/teacher/<teacher_id>/')
 def teacher_with_id(teacher_id):
     '''teacher main index: show teacher info, hypermedia'''
+
     pass
 
 @app.route('/teacher/<teacher_id>/data/', methods=['GET', 'PUT'])
@@ -50,6 +58,11 @@ def teacher_data(teacher_id):
         pass
     else:
         '''show personal data'''
+        # create session
+        session = create_session()
+        # get data from teachers with id
+        rs = session.query(Teacher).filter(Teacher.id).first()
+        return jsonify(rs)
         pass
 
 @app.route('/teacher/<teacher_id>/class/')
@@ -152,7 +165,14 @@ def parent_data(parent_id):
         pass
     else:
         '''show parent personal data'''
-        pass
+        # create session
+        session = create_session()
+        # get data from teachers with id
+        rs = session.query(Parent).filter(Parent.id == int(parent_id)).first()
+        resp = {}
+        resp['name'] = rs.name
+        resp['lastname'] = rs.lastname
+        return jsonify(resp)
 
 @app.route('/parent/<parent_id>/child/')
 def parent_child(parent_id):
