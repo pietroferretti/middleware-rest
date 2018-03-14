@@ -2,6 +2,20 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
 from sqlalchemy import create_engine, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import sessionmaker
+
+
+def create_session():
+    # A session object is created.
+    DBSession = sessionmaker(bind=engine)
+    # A DBSession() instance establishes all conversations with the database
+    # and represents a "staging zone" for all the objects loaded into the
+    # database session object. Any change made against the objects in the
+    # session won't be persisted into the database until you call
+    # session.commit(). If you're not happy about the changes, you can
+    # revert all of them back to the last commit by calling
+    # session.rollback()
+    return DBSession()
 
 # Create an engine that stores data in the local directory's
 # sqlalchemy_example.db file.
@@ -136,16 +150,7 @@ Base.metadata.bind = engine
 # The declarative Base is bound to the database engine.
 Base.metadata.create_all(engine)
 
-# # A session object is created.
-# DBSession = sessionmaker(bind=engine)
-# # A DBSession() instance establishes all conversations with the database
-# # and represents a "staging zone" for all the objects loaded into the
-# # database session object. Any change made against the objects in the
-# # session won't be persisted into the database until you call
-# # session.commit(). If you're not happy about the changes, you can
-# # revert all of them back to the last commit by calling
-# # session.rollback()
-# session = DBSession()
+session = create_session()
 
 
 # new_parent = Parent(name='Marco', lastname= 'Rossi', pwd='pwd')
@@ -155,3 +160,10 @@ Base.metadata.create_all(engine)
 
 # # The changes are committed to the database with the commit() method.
 # session.commit()
+
+
+rs = session.query(Parent).all()
+for parent in rs:
+    print(parent.id, parent.name, parent.lastname, parent.pwd)
+
+# IPython.embed()
