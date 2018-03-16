@@ -1,4 +1,5 @@
 #!/usr/bin/env/python3
+# coding: utf-8
 
 # from teacher import *
 # from parent import *
@@ -9,7 +10,6 @@
 # TODO
 # definire tutte le funzioni per ogni endpoint
 # spostare funzioni in altri file?
-# Blueprints?
 # che tipo per gli id? dipende da database schema
 # aggiungere PUT dove ci sono POST?
 # aggiungere metodi DELETE dove servono (es notification)
@@ -22,6 +22,16 @@ app = Flask(__name__)
 from db.db_declarative import *
 
 import IPython
+
+def build_response(content, restype='json', error=None):
+    '''Builds a HTTP response with the specified content in a JSON (TODO or xml) envelope'''
+    # TODO add hypermedia as parameter
+    if restype == 'json':
+        resp_dict = {'content': content, 'error': error}
+        return jsonify(resp_dict)
+    else:
+        raise ValueError('Response type {} not recognized'.format(restype))
+
 
 @app.route('/')
 def index():
@@ -39,10 +49,18 @@ def teacher():
     '''admin endpoint'''
     if request.method == 'POST':
         '''create a new teacher'''
-        # check content type TODO
-        # check, validate json TODO
+        # validate json TODO
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
         # create new teacher object
-        data = request.get_json()
         name = data['name']
         lastname = data['lastname']
         pwd = data['pwd']
@@ -54,67 +72,112 @@ def teacher():
         session.commit()
         # return confirmation, new id
         new_id = new_teacher.id
-        return jsonify({'id': new_id})
-        # TODO 201 status code
+        return build_response({'id': new_id}), 201
+
     else:
         '''list of teachers'''
         # open db session
         session = create_session()
         # get list of teachers from db
-        teachers = session.query(Teacher).all()        
+        teachers = session.query(Teacher).all()
         res = []
         for t in teachers:
             res.append({'id': t.id, 'name': t.name, 'lastname': t.lastname})
         # return structured list
-        return jsonify(res)
+        return build_response(res)
 
 
-@app.route('/teacher/<teacher_id>/')
+@app.route('/teacher/<int:teacher_id>/')
 def teacher_with_id(teacher_id):
     '''teacher main index: show teacher info, hypermedia'''
+    # create db session
+    session = create_session()
+    # get teacher with id
+    teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+    # check if the teacher was found
+    if not teacher:
+        # OAuth should avoid this
+        return build_response(None, error='Teacher id not found.'), 404
+    # return response
+    res = {'name': teacher.name, 
+           'lastname': teacher.lastname}
+    # TODO ritorna tutto cio' che puo' servire a un teacher?
+    # numero di classi, subject, appointments?
+    # e' ridondante con /data/, /class/, ecc.
+    # possiamo usarlo magari solo per l'hypermedia
 
-    pass
+    return build_response(res)
 
-@app.route('/teacher/<teacher_id>/data/', methods=['GET', 'PUT'])
+
+@app.route('/teacher/<int:teacher_id>/data/', methods=['GET', 'PUT'])
 def teacher_data(teacher_id):
     if request.method == 'PUT':
         '''modify personal data'''
-        pass
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        # check json content
+        if 'name' not in data and 'lastname' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+        # TODO check if type is str (sempre in validazione json?)
+        session 
+        if 'name' in data:
+            newname = data['name']
+
+        newname = data['name']
+        newlastname = data['lastname']
+        session = create_session()
+        teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+        if 'name' in data:
+            teacher.name = data['name']
+        if 'lastname' in data:
+            teacher.lastname = data['lastname']
+        session.commit()
+        return build_response({'message':'Update successful.'})
+        # TODO ha senso 'message'?
     else:
         '''show personal data'''
         # create session
         session = create_session()
         # get data from teachers with id
-        rs = session.query(Teacher).filter(Teacher.id).first()
-        return jsonify(rs)
-        pass
+        teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+        # check if the teacher was found
+        if not teacher:
+            # OAuth should avoid this
+            return build_response(None, error='Teacher id not found.'), 404
+        res = {'name': teacher.name, 
+               'lastname': teacher.lastname}
+        return build_response(res)
 
-@app.route('/teacher/<teacher_id>/class/')
+@app.route('/teacher/<int:teacher_id>/class/')
 def teacher_class(teacher_id):
     '''show list of classes for the specific teacher'''
     pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/')
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/')
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
     pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/subject/')
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
     pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/subject/<subject_id>/')
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/')
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
     pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/subject/<subject_id>/student/')
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/')
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
     pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/subject/<subject_id>/student/<student_id>/grade/', methods=['GET', 'POST', 'PUT'])
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     if request.method == 'POST':
         '''add new grade'''
@@ -126,7 +189,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     else:
         '''show grades list'''
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
 def teacher_class_grades(teacher_id, class_id, subject_id):
     if request.method == 'POST':
         '''add new list of grades for the whole class'''
@@ -135,23 +198,23 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         '''show grades for the whole class for that subject'''
         pass
 
-@app.route('/teacher/<teacher_id>/class/<class_id>/timetable/')
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/timetable/')
 def teacher_class_timetable(teacher_id, class_id):
     '''show timetable for that class'''
     # FIXME serve? informazioni complete vengono date da /class/
     pass
 
-@app.route('/teacher/<teacher_id>/timetable/')
+@app.route('/teacher/<int:teacher_id>/timetable/')
 def teacher_timetable(teacher_id):
     '''show complete timetable for a teacher'''
     pass
 
-@app.route('/teacher/<teacher_id>/appointment/')
+@app.route('/teacher/<int:teacher_id>/appointment/')
 def teacher_appointment(teacher_id):
     '''show list of appointments for a teacher'''
     pass
 
-@app.route('/teacher/<teacher_id>/appointment/<appointment_id>/', methods=['GET', 'PUT'])
+@app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 def teacher_appointment_with_id(teacher_id, appointment_id):
     if request.method == 'PUT':
         '''edit appointment'''
@@ -160,7 +223,7 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         '''show appointment info'''
         pass
 
-@app.route('/teacher/<teacher_id>/notifications/')
+@app.route('/teacher/<int:teacher_id>/notifications/')
 def teacher_notifications(teacher_id):
     '''show notifications for this teacher'''
     pass
@@ -177,12 +240,12 @@ def parent():
     else:
         '''show list of parents'''
 
-@app.route('/parent/<parent_id>/')
+@app.route('/parent/<int:parent_id>/')
 def parent_with_id(parent_id):
     '''parent main index: parent info, hypermedia'''
     pass
 
-@app.route('/parent/<parent_id>/data/', methods=['GET', 'PUT'])
+@app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
 def parent_data(parent_id):
     if request.method == 'PUT':
         '''edit parent personal data'''
@@ -209,17 +272,17 @@ def parent_data(parent_id):
         resp['lastname'] = parent.lastname
         return jsonify(resp)
 
-@app.route('/parent/<parent_id>/child/')
+@app.route('/parent/<int:parent_id>/child/')
 def parent_child(parent_id):
     '''list children of parent'''
     pass
 
-@app.route('/parent/<parent_id>/child/<student_id>/')
+@app.route('/parent/<int:parent_id>/child/<int:student_id>/')
 def parent_child_with_id(parent_id, student_id):
     '''show info of student?'''
     pass
 
-@app.route('/parent/<parent_id>/child/<student_id>/data/', methods=['GET', 'PUT'])
+@app.route('/parent/<int:parent_id>/child/<int:student_id>/data/', methods=['GET', 'PUT'])
 def parent_child_data(parent_id, student_id):
     if request.method == 'PUT':
         '''edit child personal data'''
@@ -228,17 +291,17 @@ def parent_child_data(parent_id, student_id):
         '''show child personal data'''
         pass
 
-@app.route('/parent/<parent_id>/child/<student_id>/grades/')
+@app.route('/parent/<int:parent_id>/child/<int:student_id>/grades/')
 def parent_child_grades(parent_id, student_id):
     '''show all grades of the student'''
     pass
 
-@app.route('/parent/<parent_id>/child/<student_id>/teachers/')
+@app.route('/parent/<int:parent_id>/child/<int:student_id>/teachers/')
 def parent_child_teacher(parent_id, student_id):
     '''list all child's teachers'''
     pass
 
-@app.route('/parent/<parent_id>/appointment/', methods=['GET', 'POST'])
+@app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 def parent_appointment(parent_id):
     if request.method == 'POST':
         '''create new appointment'''
@@ -248,7 +311,7 @@ def parent_appointment(parent_id):
         pass
 # TODO calendar-like support
 
-@app.route('/parent/<parent_id>/appointment/<appointment_id>/', methods=['GET', 'PUT'])
+@app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 def parent_appointment_with_id(parent_id, appointment_id):
     if request.method == 'PUT':
         '''edit appointment'''
@@ -257,32 +320,32 @@ def parent_appointment_with_id(parent_id, appointment_id):
         '''show appointment info'''
         pass
 
-@app.route('/parent/<parent_id>/payment/')
+@app.route('/parent/<int:parent_id>/payment/')
 def parent_payment(parent_id):
     '''list all payments, paid or pending'''
     pass
 
-@app.route('/parent/<parent_id>/payment/paid/')
+@app.route('/parent/<int:parent_id>/payment/paid/')
 def parent_payment_paid(parent_id):
     '''list old paid payments'''
     pass
 
-@app.route('/parent/<parent_id>/payment/pending/')
+@app.route('/parent/<int:parent_id>/payment/pending/')
 def parent_payment_pending(parent_id):
     '''list pending payments'''
     pass
 
-@app.route('/parent/<parent_id>/payment/<payment_id>/')
+@app.route('/parent/<int:parent_id>/payment/<int:payment_id>/')
 def parent_payment_with_id(parent_id, payment_id):
     '''show payment info'''
     pass
 
-@app.route('/parent/<parent_id>/payment/<payment_id>/pay/', methods=['POST'])
+@app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['POST'])
 def parent_pay(parent_id, payment_id):
     '''magic payment endpoint'''
     pass
 
-@app.route('/parent/<parent_id>/notifications/')
+@app.route('/parent/<int:parent_id>/notifications/')
 def parent_notifications(parent_id):
     '''show notifications for this parent'''
     pass
@@ -305,12 +368,12 @@ def classes():
     '''POST create new classes non c'e' nelle specifiche'''
     pass
 
-@app.route('/class/<class_id>/')
+@app.route('/class/<int:class_id>/')
 def class_with_id(class_id):
     '''show class info? non nelle specifiche'''
     pass
 
-@app.route('/class/<class_id>/student/', methods=['GET', 'POST'])
+@app.route('/class/<int:class_id>/student/', methods=['GET', 'POST'])
 def class_student(class_id):
     if request.method == 'POST':
         '''create new student'''
@@ -323,7 +386,7 @@ def student():
     '''show list of students (non nelle specifiche)'''
     pass
 
-@app.route('/student/<student_id>/')
+@app.route('/student/<int:student_id>/')
 def student_with_id(student_id):
     '''show student info (spostare in /class/student/?'''
     pass
@@ -337,7 +400,7 @@ def payment():
         '''list school-wide payments'''
         pass
 
-@app.route('/payment/parent/<parent_id>/', methods=['GET', 'POST'])
+@app.route('/payment/parent/<int:parent_id>/', methods=['GET', 'POST'])
 def payment_parent(parent_id):
     if request.method == 'POST':
         '''create new payment for a parent'''
@@ -346,7 +409,7 @@ def payment_parent(parent_id):
         '''list payments for a parent'''
         pass
 
-@app.route('/payment/class/<class_id>/', methods=['GET', 'POST'])
+@app.route('/payment/class/<int:class_id>/', methods=['GET', 'POST'])
 def payment_class(class_id):
     if request.method == 'POST':
         '''create new payment for a class'''
@@ -374,7 +437,7 @@ def notification_parents():
         '''list notifications to all parents'''
         pass
 
-@app.route('/notification/parent/<parent_id>/', methods=['GET', 'POST'])
+@app.route('/notification/parent/<int:parent_id>/', methods=['GET', 'POST'])
 def notification_parent_with_id(parent_id):
     if request.method == 'POST':
         '''create parent notification'''
@@ -392,7 +455,7 @@ def notification_teachers():
         '''list notifications to all teachers'''
         pass
 
-@app.route('/notification/teacher/<teacher_id>/', methods=['GET', 'POST'])
+@app.route('/notification/teacher/<int:teacher_id>/', methods=['GET', 'POST'])
 def notification_teacher_with_id(teacher_id):
     if request.method == 'POST':
         '''create notification for a teacher'''
@@ -401,7 +464,7 @@ def notification_teacher_with_id(teacher_id):
         '''list a teacher's notifications'''
         pass
 
-@app.route('/notification/class/<class_id>/', methods=['GET', 'POST'])
+@app.route('/notification/class/<int:class_id>/', methods=['GET', 'POST'])
 def notification_class(class_id):
     if request.method == 'POST':
         '''create class-wide notification'''
@@ -410,7 +473,7 @@ def notification_class(class_id):
         '''list class-wide notifications'''
         pass
 
-@app.route('/notification/class/<class_id>/parents/', methods=['GET', 'POST'])
+@app.route('/notification/class/<int:class_id>/parents/', methods=['GET', 'POST'])
 def notification_class_parents(class_id):
     if request.method == 'POST':
         '''create a notification for the parents in a class'''
@@ -419,7 +482,7 @@ def notification_class_parents(class_id):
         '''list all notifications for the parents in a class'''
         pass
 
-@app.route('/notification/class/<class_id>/teachers/', methods=['GET', 'POST'])
+@app.route('/notification/class/<int:class_id>/teachers/', methods=['GET', 'POST'])
 def notification_class_teachers(class_id):
     if request.method == 'POST':
         '''create a notification for the teachers in a class'''
