@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
+import IPython
 
 
 def create_session():
@@ -34,7 +35,7 @@ event.listen(engine, 'connect', _fk_pragma_on_connect)
 # A declarative base class is created with the declarative_base() function.
 Base = declarative_base()
 
-teachers_classes_table = Table('teachers_clases', Base.metadata,
+teachers_classes_table = Table('teachers_classes', Base.metadata,
                                Column('teacher_id', Integer, ForeignKey('teacher.id')),
                                Column('class_id', Integer, ForeignKey('class.id'))
                                )
@@ -84,7 +85,7 @@ class Teacher(Base):
     lastname = Column(String(50), nullable=False)
     subjects = relationship("Subject")
     appointments = relationship("Appointment")
-    classes = relationship("Class", secondary=teachers_classes_table, backref="teachers")
+    classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
     notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
 
 
@@ -159,8 +160,21 @@ Base.metadata.bind = engine
 # The declarative Base is bound to the database engine.
 Base.metadata.create_all(engine)
 
-session = create_session()
+# session = create_session()
 
+
+# rs = session.query(Parent).first()
+# rs.name
+# rs.id
+# rs.children
+# rs.children.name
+# rs.children.first()
+# list = rs.children
+# for l in list:
+#     print l.name
+# for l in list:
+#     print (l.name)
+    
 
 
 # new_parent = Parent(name='Marco', lastname= 'Rossi', pwd='pwd')

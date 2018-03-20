@@ -89,7 +89,7 @@ def teacher():
 
 @app.route('/teacher/<int:teacher_id>/')
 def teacher_with_id(teacher_id):
-    '''teacher main index: show teacher info, hypermedia'''
+    """teacher main index: show teacher info, hypermedia"""
     # create db session
     session = create_session()
     # get teacher with id
@@ -104,7 +104,7 @@ def teacher_with_id(teacher_id):
     # TODO ritorna tutto cio' che puo' servire a un teacher?
     # numero di classi, subject, appointments?
     # e' ridondante con /data/, /class/, ecc.
-    # possiamo usarlo magari solo per l'hypermedia
+    # possiamo usarlo magari solo per l'hypermedia --> si meglio
 
     return build_response(res)
 
@@ -155,12 +155,54 @@ def teacher_data(teacher_id):
 @app.route('/teacher/<int:teacher_id>/class/')
 def teacher_class(teacher_id):
     '''show list of classes for the specific teacher'''
-    pass
+    session = create_session()
+    teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+    # check if the teacher was found
+    if not teacher:
+        # OAuth should avoid this
+        return build_response(None, error='Teacher id not found.'), 404
+    # return response
+    classes = teacher.classes
+    cl = []
+
+    for c in classes:
+        cl.append({'id': c.id, 'name': c.name, 'room': c.room})
+
+    res = {'name': teacher.name,
+           'lastname': teacher.lastname,
+           'class': cl}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/')
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
-    pass
+    session = create_session()
+    teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+    # check if the teacher was found
+    if not teacher:
+        # OAuth should avoid this
+        return build_response(None, error='Teacher id not found.'), 404
+
+    for c in teacher.classes:
+        if (c.id == class_id):
+            cl = c
+            break
+
+    if not cl:
+        return build_response(None, error='Class id not found.'), 404
+
+    students = cl.students
+    st = []
+
+    for s in students:
+        st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
+
+    res = {'name': teacher.name,
+           'lastname': teacher.lastname,
+           'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st}}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
 def teacher_subject(teacher_id, class_id):
@@ -236,15 +278,57 @@ def parent():
     '''admin endpoint'''
     if request.method == 'POST':
         '''create new parent account'''
-        pass
+        # validate json TODO
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        # create new object
+        name = data['name']
+        lastname = data['lastname']
+        pwd = data['pwd']
+        new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
+        # open db session
+        session = create_session()
+        # insert new teacher in db
+        session.add(new_parent)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_parent.id
+        return build_response({'id': new_id}), 201
+
     else:
         '''show list of parents'''
+        # open db session
+        session = create_session()
+        parents = session.query(Parent).all()
+        res = []
+        for p in parents:
+            res.append({'id': p.id, 'name': p.name, 'lastname': p.lastname})
+        # return structured list
+        return build_response(res)
 
 @app.route('/parent/<int:parent_id>/')
 def parent_with_id(parent_id):
     '''parent main index: parent info, hypermedia'''
-    pass
+    session = create_session()
 
+    parent = session.query(Parent).filter_by(id=parent_id).first()
+
+    if not parent:
+        return build_response(None, error='Parent id not found'), 404
+    res = {'name': parent.name,
+           'lastname': parent.lastname}
+    return build_response(res)
+
+
+# todo standardizzare
 @app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
 def parent_data(parent_id):
     if request.method == 'PUT':
