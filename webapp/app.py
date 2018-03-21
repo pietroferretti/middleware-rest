@@ -14,14 +14,17 @@
 # aggiungere PUT dove ci sono POST?
 # aggiungere metodi DELETE dove servono (es notification)
 
-from flask import Flask
-from flask import request
-from flask import jsonify
-app = Flask(__name__)
-
+from flask import Flask, request, jsonify, abort
+from flask import session as clienttoken
+from functools import wraps
 from db.db_declarative import *
 
 import IPython
+
+DEBUG = False
+
+app = Flask(__name__)
+app.secret_key = '\x8d)2m_\xa4\x8e\xe1\xaa\x8ca\xbd\xc6\xed@\xcbxw~\xe8x\xa2\xa2^'
 
 def build_response(content, restype='json', error=None):
     '''Builds a HTTP response with the specified content in a JSON (TODO or xml) envelope'''
@@ -31,6 +34,98 @@ def build_response(content, restype='json', error=None):
         return jsonify(resp_dict)
     else:
         raise ValueError('Response type {} not recognized'.format(restype))
+
+
+# default error handlers
+# TODO add hypermedia to error handlers
+@app.errorhandler(400)
+def bad_request(e):
+    # hypermedia back to endpoint
+    return build_response(None, error='Bad Request'), 400
+
+@app.errorhandler(401)
+def authorization_required(e):
+    # TODO add hypermedia redirecting to /login
+    return build_response(None, error='Authorization Required'), 401
+
+@app.errorhandler(403)
+def forbidden(e):
+    # hypermedia back to index
+    return build_response(None, error='Forbidden'), 403
+
+@app.errorhandler(404)
+def page_not_found(e):
+    # hypermedia back to index
+    return build_response(None, error='Page Not Found'), 404
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    # hypermedia back to endpoint
+    return build_response(None, error='Method Not Allowed'), 405
+
+@app.errorhandler(500)
+def server_error(e):
+    # hypermedia back to index, endpoint
+    return build_response(None, error='Internal Server Error'), 500
+
+# define authorization check decorator
+def auth_check(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if DEBUG == True:
+            return f(*args, **kwargs)
+
+        # check if the endpoint is present in the authorized scopes
+        if not clienttoken or not 'scopes' in clienttoken:
+            # not yet authenticated
+            abort(401)
+        elif any(path.startswith(scope) for scope in clienttoken['scopes']):
+            return f(*args, **kwargs)
+        else:
+            # not authorized for this endpoint
+            abort(403)
+    return decorated_function
+
+
+# define login endpoint
+@app.route('/login', methods=['POST'])
+def login():
+    # check content type
+    try:
+        data = request.get_json()
+    except TypeError:
+        return build_response(None, error='The request was not valid JSON.'), 400
+    # check json content
+    if 'username' not in data or 'password' not in data:
+        return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+    # get username, password
+    username = data['username']
+    password = data['password']
+
+    # check if username and password exist in the database
+    # TODO
+
+    # check if admin, teacher or parent
+    # assign different scopes in each case
+    role = ''
+    if role == 'admin':
+        scopes = ['/admin', '/teacher/', '/parent/', '/student/', '/class/', '/notification/', '/payment/']
+    elif role == 'teacher':
+        # TODO select id from database
+        teacher_id = 1234
+        scopes = ['/teacher/{}/'.format(teacher_id)]
+    elif role == 'parent':
+        # TODO select id from database
+        parent_id = 5687
+        scopes = ['/parent/{}/'.format(parent_id)]
+
+    # save authorized endpoints in a cryptografically secure client side cookie
+    clienttoken['scopes'] = scopes
+
+    return build_response({'result': 'Login successful.', 'username': data['username']})
+
+# TODO add auth check to all endpoints (except /, /login)
+# copia e incolla
 
 
 @app.route('/')
@@ -45,6 +140,7 @@ def index():
 '''TEACHER'''
 
 @app.route('/teacher/', methods=['GET', 'POST'])
+@auth_check
 def teacher():
     '''admin endpoint'''
     if request.method == 'POST':
@@ -88,6 +184,7 @@ def teacher():
 
 
 @app.route('/teacher/<int:teacher_id>/')
+@auth_check
 def teacher_with_id(teacher_id):
     """teacher main index: show teacher info, hypermedia"""
     # create db session
@@ -110,6 +207,7 @@ def teacher_with_id(teacher_id):
 
 
 @app.route('/teacher/<int:teacher_id>/data/', methods=['GET', 'PUT'])
+@auth_check
 def teacher_data(teacher_id):
     if request.method == 'PUT':
         '''modify personal data'''
@@ -153,6 +251,7 @@ def teacher_data(teacher_id):
         return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/')
+@auth_check
 def teacher_class(teacher_id):
     '''show list of classes for the specific teacher'''
     session = create_session()
@@ -173,6 +272,7 @@ def teacher_class(teacher_id):
     return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/')
+@auth_check
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
     session = create_session()
@@ -196,6 +296,7 @@ def teacher_class_with_id(teacher_id, class_id):
     return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
+@auth_check
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
     session = create_session()
@@ -213,6 +314,7 @@ def teacher_subject(teacher_id, class_id):
     return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/')
+@auth_check
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
     session = create_session()
@@ -228,6 +330,7 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 
 # MA È UGUALE A CLASS DI TEACHER?
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/')
+@auth_check
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
     session = create_session()
@@ -255,6 +358,7 @@ def teacher_student(teacher_id, class_id, subject_id):
     return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
+@auth_check
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     session = create_session()
     if request.method == 'POST':
@@ -307,6 +411,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
 
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
+@auth_check
 def teacher_class_grades(teacher_id, class_id, subject_id):
     if request.method == 'POST':
         '''add new list of grades for the whole class'''
@@ -316,22 +421,26 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         pass
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/timetable/')
+@auth_check
 def teacher_class_timetable(teacher_id, class_id):
     '''show timetable for that class'''
     # FIXME serve? informazioni complete vengono date da /class/
     pass
 
 @app.route('/teacher/<int:teacher_id>/timetable/')
+@auth_check
 def teacher_timetable(teacher_id):
     '''show complete timetable for a teacher'''
     pass
 
 @app.route('/teacher/<int:teacher_id>/appointment/')
+@auth_check
 def teacher_appointment(teacher_id):
     '''show list of appointments for a teacher'''
     pass
 
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
+@auth_check
 def teacher_appointment_with_id(teacher_id, appointment_id):
     if request.method == 'PUT':
         '''edit appointment'''
@@ -341,6 +450,7 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         pass
 
 @app.route('/teacher/<int:teacher_id>/notifications/')
+@auth_check
 def teacher_notifications(teacher_id):
     '''show notifications for this teacher'''
     pass
@@ -349,6 +459,7 @@ def teacher_notifications(teacher_id):
 '''PARENT'''
 
 @app.route('/parent/', methods=['GET', 'POST'])
+@auth_check
 def parent():
     '''admin endpoint'''
     if request.method == 'POST':
@@ -390,6 +501,7 @@ def parent():
         return build_response(res)
 
 @app.route('/parent/<int:parent_id>/')
+@auth_check
 def parent_with_id(parent_id):
     '''parent main index: parent info, hypermedia'''
     session = create_session()
@@ -405,6 +517,7 @@ def parent_with_id(parent_id):
 
 # todo standardizzare
 @app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
+@auth_check
 def parent_data(parent_id):
     if request.method == 'PUT':
         '''edit parent personal data'''
@@ -432,16 +545,19 @@ def parent_data(parent_id):
         return jsonify(resp)
 
 @app.route('/parent/<int:parent_id>/child/')
+@auth_check
 def parent_child(parent_id):
     '''list children of parent'''
     pass
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/')
+@auth_check
 def parent_child_with_id(parent_id, student_id):
     '''show info of student?'''
     pass
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/data/', methods=['GET', 'PUT'])
+@auth_check
 def parent_child_data(parent_id, student_id):
     if request.method == 'PUT':
         '''edit child personal data'''
@@ -451,16 +567,19 @@ def parent_child_data(parent_id, student_id):
         pass
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/grades/')
+@auth_check
 def parent_child_grades(parent_id, student_id):
     '''show all grades of the student'''
     pass
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/teachers/')
+@auth_check
 def parent_child_teacher(parent_id, student_id):
     '''list all child's teachers'''
     pass
 
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
+@auth_check
 def parent_appointment(parent_id):
     if request.method == 'POST':
         '''create new appointment'''
@@ -471,6 +590,7 @@ def parent_appointment(parent_id):
 # TODO calendar-like support
 
 @app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
+@auth_check
 def parent_appointment_with_id(parent_id, appointment_id):
     if request.method == 'PUT':
         '''edit appointment'''
@@ -480,31 +600,37 @@ def parent_appointment_with_id(parent_id, appointment_id):
         pass
 
 @app.route('/parent/<int:parent_id>/payment/')
+@auth_check
 def parent_payment(parent_id):
     '''list all payments, paid or pending'''
     pass
 
 @app.route('/parent/<int:parent_id>/payment/paid/')
+@auth_check
 def parent_payment_paid(parent_id):
     '''list old paid payments'''
     pass
 
 @app.route('/parent/<int:parent_id>/payment/pending/')
+@auth_check
 def parent_payment_pending(parent_id):
     '''list pending payments'''
     pass
 
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/')
+@auth_check
 def parent_payment_with_id(parent_id, payment_id):
     '''show payment info'''
     pass
 
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['POST'])
+@auth_check
 def parent_pay(parent_id, payment_id):
     '''magic payment endpoint'''
     pass
 
 @app.route('/parent/<int:parent_id>/notifications/')
+@auth_check
 def parent_notifications(parent_id):
     '''show notifications for this parent'''
     pass
@@ -513,6 +639,7 @@ def parent_notifications(parent_id):
 '''ADMIN STUFF'''
 
 @app.route('/admin/', methods=['GET', 'POST'])
+@auth_check
 def admin():
     if request.method == 'POST':
         '''create new admin account'''
@@ -522,17 +649,20 @@ def admin():
         pass
 
 @app.route('/class/')
+@auth_check
 def classes():
     '''show list of classes'''
     '''POST create new classes non c'e' nelle specifiche'''
     pass
 
 @app.route('/class/<int:class_id>/')
+@auth_check
 def class_with_id(class_id):
     '''show class info? non nelle specifiche'''
     pass
 
 @app.route('/class/<int:class_id>/student/', methods=['GET', 'POST'])
+@auth_check
 def class_student(class_id):
     if request.method == 'POST':
         '''create new student'''
@@ -541,16 +671,19 @@ def class_student(class_id):
         '''show list of students in the class'''
 
 @app.route('/student/')
+@auth_check
 def student():
     '''show list of students (non nelle specifiche)'''
     pass
 
 @app.route('/student/<int:student_id>/')
+@auth_check
 def student_with_id(student_id):
     '''show student info (spostare in /class/student/?'''
     pass
 
 @app.route('/payment/', methods=['GET', 'POST'])
+@auth_check
 def payment():
     if request.method == 'POST':
         '''create new payment for the whole school'''
@@ -560,6 +693,7 @@ def payment():
         pass
 
 @app.route('/payment/parent/<int:parent_id>/', methods=['GET', 'POST'])
+@auth_check
 def payment_parent(parent_id):
     if request.method == 'POST':
         '''create new payment for a parent'''
@@ -569,6 +703,7 @@ def payment_parent(parent_id):
         pass
 
 @app.route('/payment/class/<int:class_id>/', methods=['GET', 'POST'])
+@auth_check
 def payment_class(class_id):
     if request.method == 'POST':
         '''create new payment for a class'''
@@ -578,6 +713,7 @@ def payment_class(class_id):
         pass
 
 @app.route('/notification/', methods=['GET', 'POST'])
+@auth_check
 def notification():
     #FIXME DELETE?
     if request.method == 'POST':
@@ -597,6 +733,7 @@ def notification_parents():
         pass
 
 @app.route('/notification/parent/<int:parent_id>/', methods=['GET', 'POST'])
+@auth_check
 def notification_parent_with_id(parent_id):
     if request.method == 'POST':
         '''create parent notification'''
@@ -606,6 +743,7 @@ def notification_parent_with_id(parent_id):
         pass
 
 @app.route('/notification/teacher/', methods=['GET', 'POST'])
+@auth_check
 def notification_teachers():
     if request.method == 'POST':
         '''create notification to all teachers'''
@@ -615,6 +753,7 @@ def notification_teachers():
         pass
 
 @app.route('/notification/teacher/<int:teacher_id>/', methods=['GET', 'POST'])
+@auth_check
 def notification_teacher_with_id(teacher_id):
     if request.method == 'POST':
         '''create notification for a teacher'''
@@ -624,6 +763,7 @@ def notification_teacher_with_id(teacher_id):
         pass
 
 @app.route('/notification/class/<int:class_id>/', methods=['GET', 'POST'])
+@auth_check
 def notification_class(class_id):
     if request.method == 'POST':
         '''create class-wide notification'''
@@ -633,6 +773,7 @@ def notification_class(class_id):
         pass
 
 @app.route('/notification/class/<int:class_id>/parents/', methods=['GET', 'POST'])
+@auth_check
 def notification_class_parents(class_id):
     if request.method == 'POST':
         '''create a notification for the parents in a class'''
@@ -642,6 +783,7 @@ def notification_class_parents(class_id):
         pass
 
 @app.route('/notification/class/<int:class_id>/teachers/', methods=['GET', 'POST'])
+@auth_check
 def notification_class_teachers(class_id):
     if request.method == 'POST':
         '''create a notification for the teachers in a class'''
