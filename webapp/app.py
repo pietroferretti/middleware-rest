@@ -163,8 +163,6 @@ def teacher():
         lastname = data['lastname']
         pwd = data['pwd']
         new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
-        # open db session
-        session = create_session()
         # insert new teacher in db
         session.add(new_teacher)
         session.commit()
@@ -174,8 +172,6 @@ def teacher():
 
     else:
         '''list of teachers'''
-        # open db session
-        session = create_session()
         # get list of teachers from db
         teachers = session.query(Teacher).all()
         res = []
@@ -189,8 +185,6 @@ def teacher():
 @auth_check
 def teacher_with_id(teacher_id):
     """teacher main index: show teacher info, hypermedia"""
-    # create db session
-    session = create_session()
     # get teacher with id
     teacher = session.query(Teacher).filter_by(id=teacher_id).first()
     # check if the teacher was found
@@ -229,7 +223,6 @@ def teacher_data(teacher_id):
 
         newname = data['name']
         newlastname = data['lastname']
-        session = create_session()
         teacher = session.query(Teacher).filter_by(id=teacher_id).first()
         if 'name' in data:
             teacher.name = data['name']
@@ -240,8 +233,6 @@ def teacher_data(teacher_id):
         # TODO ha senso 'message'?
     else:
         '''show personal data'''
-        # create session
-        session = create_session()
         # get data from teachers with id
         teacher = session.query(Teacher).filter_by(id=teacher_id).first()
         # check if the teacher was found
@@ -256,7 +247,6 @@ def teacher_data(teacher_id):
 @auth_check
 def teacher_class(teacher_id):
     '''show list of classes for the specific teacher'''
-    session = create_session()
     teacher = session.query(Teacher).filter_by(id=teacher_id).first()
     # check if the teacher was found
     if not teacher:
@@ -277,7 +267,6 @@ def teacher_class(teacher_id):
 @auth_check
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
-    session = create_session()
     c = session.query(Class).filter_by(id=class_id).first()
     subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
@@ -301,7 +290,6 @@ def teacher_class_with_id(teacher_id, class_id):
 @auth_check
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
-    session = create_session()
     subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
     if not subjects_list:
@@ -319,7 +307,6 @@ def teacher_subject(teacher_id, class_id):
 @auth_check
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
-    session = create_session()
     subject = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).filter_by(
         id=subject_id).first()
     if not subject:
@@ -335,7 +322,6 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 @auth_check
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
-    session = create_session()
     c = session.query(Class).filter_by(id=class_id).first()
     subject = session.query(Subject).filter_by(id=subject_id).filter_by(teacher_id=teacher_id).filter_by(
         class_id=class_id).first()
@@ -362,7 +348,6 @@ def teacher_student(teacher_id, class_id, subject_id):
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 @auth_check
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
-    session = create_session()
     if request.method == 'POST':
         '''add new grade'''
 
@@ -504,8 +489,6 @@ def parent():
         lastname = data['lastname']
         pwd = data['pwd']
         new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
-        # open db session
-        session = create_session()
         # insert new teacher in db
         session.add(new_parent)
         session.commit()
@@ -515,8 +498,6 @@ def parent():
 
     else:
         '''show list of parents'''
-        # open db session
-        session = create_session()
         parents = session.query(Parent).all()
         res = []
         for p in parents:
@@ -528,7 +509,6 @@ def parent():
 @auth_check
 def parent_with_id(parent_id):
     '''parent main index: parent info, hypermedia'''
-    session = create_session()
 
     parent = session.query(Parent).filter_by(id=parent_id).first()
 
@@ -551,7 +531,6 @@ def parent_data(parent_id):
         data = request.get_json()
         newname = data['name']
         newlastname = data['lastname']
-        session = create_session()
         parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
         parent.name = newname
         parent.lastname = newlastname
@@ -559,8 +538,6 @@ def parent_data(parent_id):
         return jsonify('ok')
     else:
         '''show parent personal data'''
-        # create session
-        session = create_session()
         # get data from teachers with id
         parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
         resp = {}
