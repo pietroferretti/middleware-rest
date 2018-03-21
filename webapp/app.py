@@ -168,9 +168,7 @@ def teacher_class(teacher_id):
     for c in classes:
         cl.append({'id': c.id, 'name': c.name, 'room': c.room})
 
-    res = {'name': teacher.name,
-           'lastname': teacher.lastname,
-           'class': cl}
+    res = {'class': cl}
 
     return build_response(res)
 
@@ -178,46 +176,83 @@ def teacher_class(teacher_id):
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
     session = create_session()
-    teacher = session.query(Teacher).filter_by(id=teacher_id).first()
-    # check if the teacher was found
-    if not teacher:
-        # OAuth should avoid this
-        return build_response(None, error='Teacher id not found.'), 404
+    c = session.query(Class).filter_by(id=class_id).first()
+    subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
-    for c in teacher.classes:
-        if (c.id == class_id):
-            cl = c
-            break
-
-    if not cl:
+    if not c:
         return build_response(None, error='Class id not found.'), 404
 
-    students = cl.students
+    students = c.students
     st = []
-
     for s in students:
         st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
 
-    res = {'name': teacher.name,
-           'lastname': teacher.lastname,
-           'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st}}
+    subjects = []
+    for s in subjects_list:
+        subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
 
     return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
-    pass
+    session = create_session()
+    subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
+
+    if not subjects_list:
+        return build_response(None, error='Subjects not found.'), 404
+
+    subjects = []
+    for s in subjects_list:
+        subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'subjects': subjects}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/')
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
-    pass
+    session = create_session()
+    subject = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).filter_by(
+        id=subject_id).first()
+    if not subject:
+        return build_response(None, error='Subject not found.'), 404
 
+    res = {'id': subject.id, 'name': subject.name}
+
+    return build_response(res)
+
+
+# MA È UGUALE A CLASS DI TEACHER?
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/')
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
-    pass
+    session = create_session()
+    c = session.query(Class).filter_by(id=class_id).first()
+    subject = session.query(Subject).filter_by(id=subject_id).filter_by(teacher_id=teacher_id).filter_by(
+        class_id=class_id).first()
+
+    if not c:
+        return build_response(None, error='Class id not found.'), 404
+
+    if not subject:
+        return build_response(None, error='Subject id not found.'), 404
+
+    students = c.students
+    st = []
+    for s in students:
+        st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
+
+    # subjects = []
+    # for s in subjects_list:
+    #     subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'students': st}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):

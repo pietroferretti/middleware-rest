@@ -90,10 +90,13 @@ class Teacher(Base):
 
 
 class Subject(Base):
+    # todo unire in qualche modo con class teacher table
     __tablename__ = 'subject'
     id = Column(Integer, primary_key=True)
+    name = Column(String(10), nullable=False)
     # timetable??
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    class_id = Column(Integer, ForeignKey('class_id'))
 
 
 class Parent(Base):
@@ -161,7 +164,7 @@ Base.metadata.bind = engine
 Base.metadata.create_all(engine)
 
 # session = create_session()
-
+# IPython.embed()
 
 # rs = session.query(Parent).first()
 # rs.name
@@ -190,7 +193,6 @@ Base.metadata.create_all(engine)
 # for parent in rs:
 #     print(parent.id, parent.name, parent.lastname, parent.pwd)
 
-# IPython.embed()
 
 # new_student = Student(name='Rosa', lastname='Monte', parent_id= 8)
 # session.add(new_student)
