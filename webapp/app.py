@@ -20,6 +20,7 @@ from functools import wraps
 from db.db_declarative import *
 from datetime import datetime
 
+import datetime
 import IPython
 
 DEBUG = True
@@ -32,7 +33,9 @@ def build_response(content, restype='json', error=None):
     # TODO add hypermedia as parameter
     if restype == 'json':
         resp_dict = {'content': content, 'error': error}
-        return jsonify(resp_dict)
+        resp = jsonify(resp_dict)
+        resp.mimetype = 'application/vnd.stocazzo+json'
+        return resp
     else:
         raise ValueError('Response type {} not recognized'.format(restype))
 
@@ -122,20 +125,18 @@ def login():
 
     # save authorized endpoints in a cryptografically secure client side cookie
     clienttoken['scopes'] = scopes
+    clienttoken.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(hours=1)
 
     return build_response({'result': 'Login successful.', 'username': data['username']})
-
-# TODO add auth check to all endpoints (except /, /login)
-# copia e incolla
 
 
 @app.route('/')
 def index():
     '''Root endpoint'''
-    # hypermedia qui?
-    d = {'data':2, 'error':None}
-    return jsonify(d)
-    #return 'Hello, World!'
+    # TODO redirect to /login
+    d = "Hello World"
+    return build_response(d)
 
 
 '''TEACHER'''
