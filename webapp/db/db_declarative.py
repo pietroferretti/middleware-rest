@@ -165,7 +165,7 @@ Base.metadata.bind = engine
 # The declarative Base is bound to the database engine.
 Base.metadata.create_all(engine)
 
-# session = create_session()
+session = create_session()
 # IPython.embed()
 
 # rs = session.query(Parent).first()

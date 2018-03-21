@@ -18,10 +18,11 @@ from flask import Flask, request, jsonify, abort
 from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
+from datetime import datetime
 
 import IPython
 
-DEBUG = False
+DEBUG = True
 
 app = Flask(__name__)
 app.secret_key = '\x8d)2m_\xa4\x8e\xe1\xaa\x8ca\xbd\xc6\xed@\xcbxw~\xe8x\xa2\xa2^'
@@ -221,7 +222,7 @@ def teacher_data(teacher_id):
         if 'name' not in data and 'lastname' not in data:
             return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
         # TODO check if type is str (sempre in validazione json?)
-        session 
+        # session
         if 'name' in data:
             newname = data['name']
 
@@ -372,7 +373,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         if 'date' not in data or 'value' not in data:
             return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
 
-        date = data['date']
+        date = datetime.strptime(data['date'], '%d %m %Y')
         value = data['value']
 
         new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
@@ -386,10 +387,32 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     elif request.method == 'PUT':
         '''edit old grade'''
         # FIXME aggiungere un /grade/<grade_id> ?
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'id' not in data:
+            return build_response(None, error='The JSON structure must contain the grade id.'), 400
+
+        grade = session.query(Grade).filter_by(id=int(data['id'])).filter_by(subject_id=subject_id).filter_by(
+            student_id=student_id).first()
+
+        if not grade:
+            return build_response(None, error='Grade not found.'), 404
+
+        if 'date' in data:
+            grade.date = datetime.strptime(data['date'], '%d %m %Y')
+
+        if 'value' in data:
+            grade.value = int(data['value'])
+
+        session.commit()
+        return build_response({'message': 'Update successful.'})
+        # TODO ha senso 'message'?
+
     else:
         '''show grades list'''
-        # TODO check mi da errore con student_id=1,2 ma non con 3
         grade_list = session.query(Grade).filter_by(subject_id=subject_id).filter_by(student_id=student_id).all()
 
         if not grade_list:
