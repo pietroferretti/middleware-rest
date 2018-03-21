@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
+import IPython
 
 
 def create_session():
@@ -34,7 +35,7 @@ event.listen(engine, 'connect', _fk_pragma_on_connect)
 # A declarative base class is created with the declarative_base() function.
 Base = declarative_base()
 
-teachers_classes_table = Table('teachers_clases', Base.metadata,
+teachers_classes_table = Table('teachers_classes', Base.metadata,
                                Column('teacher_id', Integer, ForeignKey('teacher.id')),
                                Column('class_id', Integer, ForeignKey('class.id'))
                                )
@@ -84,15 +85,18 @@ class Teacher(Base):
     lastname = Column(String(50), nullable=False)
     subjects = relationship("Subject")
     appointments = relationship("Appointment")
-    classes = relationship("Class", secondary=teachers_classes_table, backref="teachers")
+    classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
     notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
 
 
 class Subject(Base):
+    # todo unire in qualche modo con class teacher table
     __tablename__ = 'subject'
     id = Column(Integer, primary_key=True)
+    name = Column(String(10), nullable=False)
     # timetable??
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    class_id = Column(Integer, ForeignKey('class_id'))
 
 
 class Parent(Base):
@@ -147,9 +151,11 @@ class Payment(Base):
 # da rivedere, forse meglio un tabellozzo subject+class con tutti i grade?
 class Grade(Base):
     __tablename__ = 'grade'
-    date = Column(DateTime, primary_key=True)
-    subject_id = Column(Integer, primary_key=True)  # se ID che non esiste? controlliamo mo o poi?
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime, nullable=False)
+    subject_id = Column(Integer, ForeignKey('subject.id'))
     student_id = Column(Integer, ForeignKey('student.id'))
+    value = Column(Integer, nullable=False)
 
 
 # Bind the engine to the metadata of the Base class so that the
@@ -159,8 +165,21 @@ Base.metadata.bind = engine
 # The declarative Base is bound to the database engine.
 Base.metadata.create_all(engine)
 
-session = create_session()
+# session = create_session()
+# IPython.embed()
 
+# rs = session.query(Parent).first()
+# rs.name
+# rs.id
+# rs.children
+# rs.children.name
+# rs.children.first()
+# list = rs.children
+# for l in list:
+#     print l.name
+# for l in list:
+#     print (l.name)
+    
 
 
 # new_parent = Parent(name='Marco', lastname= 'Rossi', pwd='pwd')
@@ -176,7 +195,6 @@ session = create_session()
 # for parent in rs:
 #     print(parent.id, parent.name, parent.lastname, parent.pwd)
 
-# IPython.embed()
 
 # new_student = Student(name='Rosa', lastname='Monte', parent_id= 8)
 # session.add(new_student)

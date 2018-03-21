@@ -187,7 +187,7 @@ def teacher():
 @app.route('/teacher/<int:teacher_id>/')
 @auth_check
 def teacher_with_id(teacher_id):
-    '''teacher main index: show teacher info, hypermedia'''
+    """teacher main index: show teacher info, hypermedia"""
     # create db session
     session = create_session()
     # get teacher with id
@@ -202,7 +202,7 @@ def teacher_with_id(teacher_id):
     # TODO ritorna tutto cio' che puo' servire a un teacher?
     # numero di classi, subject, appointments?
     # e' ridondante con /data/, /class/, ecc.
-    # possiamo usarlo magari solo per l'hypermedia
+    # possiamo usarlo magari solo per l'hypermedia --> si meglio
 
     return build_response(res)
 
@@ -255,44 +255,161 @@ def teacher_data(teacher_id):
 @auth_check
 def teacher_class(teacher_id):
     '''show list of classes for the specific teacher'''
-    pass
+    session = create_session()
+    teacher = session.query(Teacher).filter_by(id=teacher_id).first()
+    # check if the teacher was found
+    if not teacher:
+        # OAuth should avoid this
+        return build_response(None, error='Teacher id not found.'), 404
+    # return response
+    classes = teacher.classes
+    cl = []
+
+    for c in classes:
+        cl.append({'id': c.id, 'name': c.name, 'room': c.room})
+
+    res = {'class': cl}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/')
 @auth_check
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
-    pass
+    session = create_session()
+    c = session.query(Class).filter_by(id=class_id).first()
+    subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
+
+    if not c:
+        return build_response(None, error='Class id not found.'), 404
+
+    students = c.students
+    st = []
+    for s in students:
+        st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
+
+    subjects = []
+    for s in subjects_list:
+        subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
 @auth_check
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
-    pass
+    session = create_session()
+    subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
+
+    if not subjects_list:
+        return build_response(None, error='Subjects not found.'), 404
+
+    subjects = []
+    for s in subjects_list:
+        subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'subjects': subjects}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/')
 @auth_check
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
-    pass
+    session = create_session()
+    subject = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).filter_by(
+        id=subject_id).first()
+    if not subject:
+        return build_response(None, error='Subject not found.'), 404
 
+    res = {'id': subject.id, 'name': subject.name}
+
+    return build_response(res)
+
+
+# MA È UGUALE A CLASS DI TEACHER?
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/')
 @auth_check
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
-    pass
+    session = create_session()
+    c = session.query(Class).filter_by(id=class_id).first()
+    subject = session.query(Subject).filter_by(id=subject_id).filter_by(teacher_id=teacher_id).filter_by(
+        class_id=class_id).first()
+
+    if not c:
+        return build_response(None, error='Class id not found.'), 404
+
+    if not subject:
+        return build_response(None, error='Subject id not found.'), 404
+
+    students = c.students
+    st = []
+    for s in students:
+        st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
+
+    # subjects = []
+    # for s in subjects_list:
+    #     subjects.append({'id': s.id, 'name': s.name})
+
+    res = {'students': st}
+
+    return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 @auth_check
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
+    session = create_session()
     if request.method == 'POST':
         '''add new grade'''
-        pass
+
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' not in data or 'value' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        date = data['date']
+        value = data['value']
+
+        new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
+
+        session.add(new_grade)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_grade.id
+        return build_response({'id': new_id}), 201
+
     elif request.method == 'PUT':
         '''edit old grade'''
         # FIXME aggiungere un /grade/<grade_id> ?
         pass
     else:
         '''show grades list'''
+        # TODO check mi da errore con student_id=1,2 ma non con 3
+        grade_list = session.query(Grade).filter_by(subject_id=subject_id).filter_by(student_id=student_id).all()
+
+        if not grade_list:
+            return build_response(None, error='Grade not found.'), 404
+
+        check_teacher_class_subj = session.query(Subject).filter_by(class_id=class_id).filter_by(
+            teacher_id=teacher_id).filter_by(id=subject_id).first()
+
+        if not check_teacher_class_subj:
+            return build_response(None, error='Data not found.'), 404
+
+        grades = []
+        for g in grade_list:
+            grades.append({'id': g.id, 'date': g.date, 'value': g.value})
+
+        res = {'grades': grades}
+
+        return build_response(res)
+
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
 @auth_check
@@ -348,16 +465,58 @@ def parent():
     '''admin endpoint'''
     if request.method == 'POST':
         '''create new parent account'''
-        pass
+        # validate json TODO
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        # create new object
+        name = data['name']
+        lastname = data['lastname']
+        pwd = data['pwd']
+        new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
+        # open db session
+        session = create_session()
+        # insert new teacher in db
+        session.add(new_parent)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_parent.id
+        return build_response({'id': new_id}), 201
+
     else:
         '''show list of parents'''
+        # open db session
+        session = create_session()
+        parents = session.query(Parent).all()
+        res = []
+        for p in parents:
+            res.append({'id': p.id, 'name': p.name, 'lastname': p.lastname})
+        # return structured list
+        return build_response(res)
 
 @app.route('/parent/<int:parent_id>/')
 @auth_check
 def parent_with_id(parent_id):
     '''parent main index: parent info, hypermedia'''
-    pass
+    session = create_session()
 
+    parent = session.query(Parent).filter_by(id=parent_id).first()
+
+    if not parent:
+        return build_response(None, error='Parent id not found'), 404
+    res = {'name': parent.name,
+           'lastname': parent.lastname}
+    return build_response(res)
+
+
+# todo standardizzare
 @app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def parent_data(parent_id):
