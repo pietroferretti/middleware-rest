@@ -151,9 +151,11 @@ class Payment(Base):
 # da rivedere, forse meglio un tabellozzo subject+class con tutti i grade?
 class Grade(Base):
     __tablename__ = 'grade'
-    date = Column(DateTime, primary_key=True)
-    subject_id = Column(Integer, primary_key=True)  # se ID che non esiste? controlliamo mo o poi?
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime, nullable=False)
+    subject_id = Column(Integer, ForeignKey('subject.id'))
     student_id = Column(Integer, ForeignKey('student.id'))
+    value = Column(Integer, nullable=False)
 
 
 # Bind the engine to the metadata of the Base class so that the

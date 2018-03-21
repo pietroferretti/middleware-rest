@@ -256,15 +256,55 @@ def teacher_student(teacher_id, class_id, subject_id):
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
+    session = create_session()
     if request.method == 'POST':
         '''add new grade'''
-        pass
+
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' not in data or 'value' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        date = data['date']
+        value = data['value']
+
+        new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
+
+        session.add(new_grade)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_grade.id
+        return build_response({'id': new_id}), 201
+
     elif request.method == 'PUT':
         '''edit old grade'''
         # FIXME aggiungere un /grade/<grade_id> ?
         pass
     else:
         '''show grades list'''
+        # TODO check mi da errore con student_id=1,2 ma non con 3
+        grade_list = session.query(Grade).filter_by(subject_id=subject_id).filter_by(student_id=student_id).all()
+
+        if not grade_list:
+            return build_response(None, error='Grade not found.'), 404
+
+        check_teacher_class_subj = session.query(Subject).filter_by(class_id=class_id).filter_by(
+            teacher_id=teacher_id).filter_by(id=subject_id).first()
+
+        if not check_teacher_class_subj:
+            return build_response(None, error='Data not found.'), 404
+
+        grades = []
+        for g in grade_list:
+            grades.append({'id': g.id, 'date': g.date, 'value': g.value})
+
+        res = {'grades': grades}
+
+        return build_response(res)
+
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
 def teacher_class_grades(teacher_id, class_id, subject_id):
