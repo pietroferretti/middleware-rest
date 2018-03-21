@@ -1,0 +1,43 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "HighSchool API response",
+    "description": "The body of a generic HTTP response from the HighSchool API",
+    "type": "object",
+    "properties": {
+        "result": {
+            "description": "Result of the HTTP request",
+            "type": "object"
+        },
+        "result-schema": {
+            "description": "URL of the schema used by the result field",
+            "type": "string"
+        },
+        "error": {
+            "description": "Short description of any errors that occurred",
+            "type": "string"
+        },
+        "links": {
+            "description": "List of hypermedia links to follow",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "link": {
+                        "description": "URL of an endpoint",
+                        "type": "string"
+                    }, 
+                    "rel": {
+                        "description": "Semantic relationship to the endpoint",
+                        "type": "string"
+                    },
+                    "schema": {
+                        "description": "Schema used by the endpoint",
+                        "type": "string"
+                    }
+                },
+                "required": ["link", "rel", "schema"]
+            }
+        }
+    },
+    "required": ["links"]
+}

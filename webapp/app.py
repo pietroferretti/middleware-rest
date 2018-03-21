@@ -14,30 +14,35 @@
 # aggiungere PUT dove ci sono POST?
 # aggiungere metodi DELETE dove servono (es notification)
 
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, url_for, send_from_directory
 from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
 
 import datetime
-import IPython
+
 
 DEBUG = False
+RESPONSE_SCHEMA = 'response-schema.json'
 
 app = Flask(__name__)
 app.secret_key = '\x8d)2m_\xa4\x8e\xe1\xaa\x8ca\xbd\xc6\xed@\xcbxw~\xe8x\xa2\xa2^'
 
-def build_response(content, restype='json', error=None):
-    '''Builds a HTTP response with the specified content in a JSON (TODO or xml) envelope'''
-    # TODO add hypermedia as parameter
-    if restype == 'json':
-        resp_dict = {'content': content, 'error': error}
-        resp = jsonify(resp_dict)
-        resp.mimetype = 'application/vnd.stocazzo+json'
-        return resp
-    else:
-        raise ValueError('Response type {} not recognized'.format(restype))
-
+def build_response(result=None, error=None, result_schema=None, links=[]):
+    '''Builds a HTTP response with the specified content in a JSON envelope'''
+    resp_dict = {}
+    resp_dict['links'] = links
+    if result:
+        resp_dict['result'] = result
+    if result_schema:
+        resp_dict['result-schema'] = result_schema
+    if error:
+        resp_dict['error'] = error
+    # create response object
+    resp = jsonify(resp_dict)
+    # add content type, response schema
+    resp.headers["Content-Type"] = 'application/vnd.stocazzo+json; schema="{}"'.format(request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
+    return resp
 
 # default error handlers
 # TODO add hypermedia to error handlers
@@ -88,6 +93,12 @@ def auth_check(f):
             # not authorized for this endpoint
             abort(403)
     return decorated_function
+
+
+@app.route('/schema/<path:path>')
+def schema(path):
+    '''Returns the schema with the given filename'''
+    return send_from_directory('schemas', path, mimetype='application/json')
 
 
 # define login endpoint
