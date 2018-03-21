@@ -14,63 +14,76 @@
 # aggiungere PUT dove ci sono POST?
 # aggiungere metodi DELETE dove servono (es notification)
 
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, url_for, send_from_directory
 from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
-from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
+from datetime import datetime, timedelta
 
 import IPython
 
 DEBUG = True
+RESPONSE_SCHEMA = 'response-schema.json'
 
 app = Flask(__name__)
 app.secret_key = '\x8d)2m_\xa4\x8e\xe1\xaa\x8ca\xbd\xc6\xed@\xcbxw~\xe8x\xa2\xa2^'
 
-def build_response(content, restype='json', error=None):
-    '''Builds a HTTP response with the specified content in a JSON (TODO or xml) envelope'''
-    # TODO add hypermedia as parameter
-    if restype == 'json':
-        resp_dict = {'content': content, 'error': error}
-        resp = jsonify(resp_dict)
-        resp.mimetype = 'application/vnd.stocazzo+json'
-        return resp
-    else:
-        raise ValueError('Response type {} not recognized'.format(restype))
-
+def build_response(result=None, error=None, result_schema=None, links=[]):
+    '''Builds a HTTP response with the specified content in a JSON envelope'''
+    resp_dict = {}
+    resp_dict['links'] = links
+    if result:
+        resp_dict['result'] = result
+    if result_schema:
+        resp_dict['result-schema'] = result_schema
+    if error:
+        resp_dict['error'] = error
+    # create response object
+    resp = jsonify(resp_dict)
+    # add content type, response schema
+    resp.headers["Content-Type"] = 'application/vnd.stocazzo+json; schema="{}"'.format(request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
+    return resp
 
 # default error handlers
 # TODO add hypermedia to error handlers
+
 @app.errorhandler(400)
 def bad_request(e):
     # hypermedia back to endpoint
-    return build_response(None, error='Bad Request'), 400
+    links = [{'link': request.url, 'rel': 'self'}]
+    return build_response(error=str(e), links=links), 400
 
 @app.errorhandler(401)
 def authorization_required(e):
-    # TODO add hypermedia redirecting to /login
-    return build_response(None, error='Authorization Required'), 401
+    # hypermedia to login
+    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    return build_response(error=str(e), links=links), 401
 
 @app.errorhandler(403)
 def forbidden(e):
     # hypermedia back to index
-    return build_response(None, error='Forbidden'), 403
+    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    return build_response(error=str(e), links=links), 403
 
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to index
-    return build_response(None, error='Page Not Found'), 404
+    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    return build_response(error=str(e), links=links), 404
 
 @app.errorhandler(405)
 def method_not_allowed(e):
     # hypermedia back to endpoint
-    return build_response(None, error='Method Not Allowed'), 405
+    links = [{'link': request.url, 'rel': 'self'}]
+    return build_response(error=str(e), links=links), 405
 
 @app.errorhandler(500)
 def server_error(e):
     # hypermedia back to index, endpoint
-    return build_response(None, error='Internal Server Error'), 500
+    links = [{'link': request.url, 'rel': 'self'}]
+    links += [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    return build_response(error=str(e), links=links), 500
 
 # define authorization check decorator
 def auth_check(f):
@@ -91,8 +104,22 @@ def auth_check(f):
     return decorated_function
 
 
-# define login endpoint
-@app.route('/login', methods=['POST'])
+
+@app.route('/')
+def index():
+    '''Root endpoint'''
+    # TODO redirect to /login
+    d = "Hello World"
+    return build_response(d)
+
+
+@app.route('/schema/<path:path>')
+def schema(path):
+    '''Returns the schema with the given filename'''
+    return send_from_directory('schemas', path, mimetype='application/json')
+
+
+@app.route('/login/', methods=['POST'])
 def login():
     # check content type
     try:
@@ -111,32 +138,32 @@ def login():
 
     # check if admin, teacher or parent
     # assign different scopes in each case
-    role = ''
+    role = 'teacher'
+    # TODO get role from database
     if role == 'admin':
-        scopes = ['/admin', '/teacher/', '/parent/', '/student/', '/class/', '/notification/', '/payment/']
+        scopes = ['/admin/', '/teacher/', '/parent/', '/student/', '/class/', '/notification/', '/payment/']
+        links = [] # FIXME TODO
     elif role == 'teacher':
         # TODO select id from database
         teacher_id = 1234
         scopes = ['/teacher/{}/'.format(teacher_id)]
+        links = [{'link': '{}teacher/{}/'.format(request.url_root, teacher_id),
+                  'rel': 'http://relations.highschool.com/teacherindex'}]
     elif role == 'parent':
         # TODO select id from database
         parent_id = 5687
         scopes = ['/parent/{}/'.format(parent_id)]
+        links = [{'link': '{}parent/{}/'.format(request.url_root, parent_id),
+                  'rel': 'http://relations.highschool.com/parentindex'}]
+    else:
+        raise ValueError('Role "{}" not recognized!'.format(role))
 
     # save authorized endpoints in a cryptografically secure client side cookie
     clienttoken['scopes'] = scopes
     clienttoken.permanent = True
-    app.permanent_session_lifetime = datetime.timedelta(hours=1)
+    app.permanent_session_lifetime = timedelta(hours=1)
 
-    return build_response({'result': 'Login successful.', 'username': data['username']})
-
-
-@app.route('/')
-def index():
-    '''Root endpoint'''
-    # TODO redirect to /login
-    d = "Hello World"
-    return build_response(d)
+    return build_response({'message': 'Login successful.', 'username': data['username']}, links=links)
 
 
 '''TEACHER'''
@@ -168,7 +195,12 @@ def teacher():
         session.commit()
         # return confirmation, new id
         new_id = new_teacher.id
-        return build_response({'id': new_id}), 201
+
+        links = []
+        link = {'link': 'http://asdfasdfdasf.com/teacher/id/data', 'rel': 'http://relations.highschool.com/data'}
+        links.append(link)
+
+        return build_response({'id': new_id}, links=links), 201
 
     else:
         '''list of teachers'''
