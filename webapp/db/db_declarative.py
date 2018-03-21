@@ -96,7 +96,7 @@ class Subject(Base):
     name = Column(String(10), nullable=False)
     # timetable??
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
-    class_id = Column(Integer, ForeignKey('class_id'))
+    class_id = Column(Integer, ForeignKey('class.id'))
 
 
 class Parent(Base):
@@ -120,6 +120,7 @@ class Class(Base):
     room = Column(String(5), nullable=False)
     notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
+    subjects = relationship("Subject")
 
 
 class Notification(Base):

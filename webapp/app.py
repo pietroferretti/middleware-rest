@@ -19,8 +19,8 @@ from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
 from datetime import datetime
+from sqlalchemy.orm.exc import NoResultFound
 
-import datetime
 import IPython
 
 DEBUG = True
@@ -350,7 +350,7 @@ def teacher_student(teacher_id, class_id, subject_id):
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     if request.method == 'POST':
         '''add new grade'''
-
+        # TODO student in class?
         try:
             data = request.get_json()
         except TypeError:
@@ -422,12 +422,57 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
 @auth_check
 def teacher_class_grades(teacher_id, class_id, subject_id):
+    check_teacher_class_subj = session.query(Subject).filter_by(class_id=class_id).filter_by(
+        teacher_id=teacher_id).filter_by(id=subject_id).one()
+
+    if not check_teacher_class_subj:
+        return build_response(None, error='Data not found.'), 404
+
     if request.method == 'POST':
         '''add new list of grades for the whole class'''
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        # if 'date' not in data or 'value' not in data:
+        #     return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        for grade in data['grades']:
+            date = datetime.strptime(grade['date'], '%d %m %Y')
+            value = grade['value']
+            student_id = grade['student_id']
+            try:
+                check_student_class = session.query(Student).filter_by(id=student_id).filter_by(class_id=class_id).one()
+            except NoResultFound:
+                session.rollback()
+                return build_response(grade, error='Student not in this class.'), 404
+
+            new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
+            session.add(new_grade)
+        session.commit()
+
+        # # return confirmation, new id
+        # new_id = new_grade.id
+        return build_response({'id': 'ok'}), 201
+
     else:
         '''show grades for the whole class for that subject'''
-        pass
+        student_list = session.query(Student).filter_by(class_id=class_id).all()
+
+        if not student_list:
+            return build_response(None, error='Students not found.'), 404
+
+        st = []
+        for s in student_list:
+            grades_list = []
+            for g in s.grades:
+                grades_list.append({'id': g.id, 'date': g.date, 'value': g.value})
+            st.append({'student': {'id': s.id, 'name': s.name, 'lastname': s.lastname, 'grades': grades_list}})
+
+        res = {'students': st}
+
+        return build_response(res)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/timetable/')
 @auth_check
