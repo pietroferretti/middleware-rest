@@ -52,38 +52,57 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
 def bad_request(e):
     # hypermedia back to endpoint
     links = [{'link': request.url, 'rel': 'self'}]
-    return build_response(error=str(e), links=links), 400
+    if DEBUG:
+        return build_response(error=str(e), links=links), 400
+    else:
+        return build_response(error='Error.', links=links), 400
 
 @app.errorhandler(401)
 def authorization_required(e):
     # hypermedia to login
     links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
-    return build_response(error=str(e), links=links), 401
+    if DEBUG:
+        return build_response(error=str(e), links=links), 401
+    else:
+        return build_response(error='Error.', links=links), 401
 
 @app.errorhandler(403)
 def forbidden(e):
     # hypermedia back to index
     links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
-    return build_response(error=str(e), links=links), 403
+    if DEBUG:
+        return build_response(error=str(e), links=links), 403
+    else:
+        return build_response(error='Error.', links=links), 403
 
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to index
     links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
-    return build_response(error=str(e), links=links), 404
+    if DEBUG:
+        return build_response(error=str(e), links=links), 404
+    else:
+        return build_response(error='Error.', links=links), 404
 
 @app.errorhandler(405)
 def method_not_allowed(e):
     # hypermedia back to endpoint
     links = [{'link': request.url, 'rel': 'self'}]
-    return build_response(error=str(e), links=links), 405
+    if DEBUG:
+        return build_response(error=str(e), links=links), 405
+    else:
+        return build_response(error='Error.', links=links), 405
+
 
 @app.errorhandler(500)
 def server_error(e):
     # hypermedia back to index, endpoint
     links = [{'link': request.url, 'rel': 'self'}]
     links += [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
-    return build_response(error=str(e), links=links), 500
+    if DEBUG:
+        return build_response(error=str(e), links=links), 500
+    else:
+        return build_response(error='Error.', links=links), 500
 
 # define authorization check decorator
 def auth_check(f):
@@ -541,6 +560,7 @@ def teacher_appointment(teacher_id):
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_appointment_with_id(teacher_id, appointment_id):
+
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
 
     if not appointment:
