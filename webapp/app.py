@@ -45,9 +45,13 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
     resp.headers["Content-Type"] = 'application/vnd.stocazzo+json; schema="{}"'.format(request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
     return resp
 
-# default error handlers
-# TODO add hypermedia to error handlers
+def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **kwargs):
+    # TODO get schema for endpoint
+    return [{'link': request.url_root.rstrip('/') + url_for(endpoint, **kwargs), 
+            'rel': rel}]
 
+
+# default error handlers
 @app.errorhandler(400)
 def bad_request(e):
     # hypermedia back to endpoint
@@ -57,19 +61,19 @@ def bad_request(e):
 @app.errorhandler(401)
 def authorization_required(e):
     # hypermedia to login
-    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    links = build_link('login', rel='http://relations.highschool.com/login')
     return build_response(error=str(e), links=links), 401
 
 @app.errorhandler(403)
 def forbidden(e):
     # hypermedia back to index
-    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    links = build_link('login', rel='http://relations.highschool.com/login')
     return build_response(error=str(e), links=links), 403
 
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to index
-    links = [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    links = build_link('login', rel='http://relations.highschool.com/login')
     return build_response(error=str(e), links=links), 404
 
 @app.errorhandler(405)
@@ -82,7 +86,7 @@ def method_not_allowed(e):
 def server_error(e):
     # hypermedia back to index, endpoint
     links = [{'link': request.url, 'rel': 'self'}]
-    links += [{'link': request.url_root.rstrip('/') + url_for('login'), 'rel': 'http://relations.highschool.com/login'}]
+    links += build_link('login', rel='http://relations.highschool.com/login')
     return build_response(error=str(e), links=links), 500
 
 # define authorization check decorator
@@ -125,10 +129,14 @@ def login():
     try:
         data = request.get_json()
     except TypeError:
-        return build_response(None, error='The request was not valid JSON.'), 400
+        links = build_link('login', rel='http://relations.highschool.com/login')
+        links += build_link('login', rel='self')
+        return build_response(None, error='The request was not valid JSON.', links=links), 400
     # check json content
     if 'username' not in data or 'password' not in data:
-        return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+        links = build_link('login', rel='http://relations.highschool.com/login')
+        links += build_link('login', rel='self')
+        return build_response(None, error='The JSON structure must contain all the requested parameters.', links=links), 400
     # get username, password
     username = data['username']
     password = data['password']
@@ -141,20 +149,29 @@ def login():
     role = 'teacher'
     # TODO get role from database
     if role == 'admin':
-        scopes = ['/admin/', '/teacher/', '/parent/', '/student/', '/class/', '/notification/', '/payment/']
-        links = [] # FIXME TODO
+        scopes = ['/admin/', '/teacher/', '/parent/']
+        #links = ['link': 'link': request.url_root.rstrip('/') + url_for('admin'),
+        #         'rel': 'http://relations.highschool.com/index']
+        links = build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('login', rel='self')
     elif role == 'teacher':
         # TODO select id from database
         teacher_id = 1234
         scopes = ['/teacher/{}/'.format(teacher_id)]
-        links = [{'link': '{}teacher/{}/'.format(request.url_root, teacher_id),
-                  'rel': 'http://relations.highschool.com/teacherindex'}]
+        #links = [{'link': request.url_root.rstrip('/') + url_for('teacher_with_id', teacher_id=teacher_id),
+        #          'rel': 'http://relations.highschool.com/index'}]
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                           rel='http://relations.highschool.com/index')
+        links += build_link('login', rel='self')
     elif role == 'parent':
         # TODO select id from database
         parent_id = 5687
         scopes = ['/parent/{}/'.format(parent_id)]
-        links = [{'link': '{}parent/{}/'.format(request.url_root, parent_id),
-                  'rel': 'http://relations.highschool.com/parentindex'}]
+        #links = [{'link': request.url_root.rstrip('/') + url_for('parent_with_id', parent_id=parent_id),
+        #          'rel': 'http://relations.highschool.com/index'}]
+        links = build_link('parent_with_id', parent_id=parent_id,
+                           rel='http://relations.highschool.com/index')
+        links += build_link('login', rel='self')
     else:
         raise ValueError('Role "{}" not recognized!'.format(role))
 
@@ -168,51 +185,6 @@ def login():
 
 '''TEACHER'''
 
-@app.route('/teacher/', methods=['GET', 'POST'])
-@auth_check
-def teacher():
-    '''admin endpoint'''
-    if request.method == 'POST':
-        '''create a new teacher'''
-        # validate json TODO
-
-        # check content type
-        try:
-            data = request.get_json()
-        except TypeError:
-            return build_response(None, error='The request was not valid JSON.'), 400
-        # check json content
-        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
-            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
-
-        # create new teacher object
-        name = data['name']
-        lastname = data['lastname']
-        pwd = data['pwd']
-        new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
-        # insert new teacher in db
-        session.add(new_teacher)
-        session.commit()
-        # return confirmation, new id
-        new_id = new_teacher.id
-
-        links = []
-        link = {'link': 'http://asdfasdfdasf.com/teacher/id/data', 'rel': 'http://relations.highschool.com/data'}
-        links.append(link)
-
-        return build_response({'id': new_id}, links=links), 201
-
-    else:
-        '''list of teachers'''
-        # get list of teachers from db
-        teachers = session.query(Teacher).all()
-        res = []
-        for t in teachers:
-            res.append({'id': t.id, 'name': t.name, 'lastname': t.lastname})
-        # return structured list
-        return build_response(res)
-
-
 @app.route('/teacher/<int:teacher_id>/')
 @auth_check
 def teacher_with_id(teacher_id):
@@ -221,34 +193,61 @@ def teacher_with_id(teacher_id):
     teacher = session.query(Teacher).filter_by(id=teacher_id).first()
     # check if the teacher was found
     if not teacher:
-        # OAuth should avoid this
-        return build_response(None, error='Teacher id not found.'), 404
+        # TODO check race condition and revoke cookie
+        links = build_link('login', rel='http://relations.highschool.com/login')
+        return build_response(None, error='Teacher id not found.', login=login), 404
     # return response
     res = {'name': teacher.name, 
            'lastname': teacher.lastname}
-    # TODO ritorna tutto cio' che puo' servire a un teacher?
-    # numero di classi, subject, appointments?
-    # e' ridondante con /data/, /class/, ecc.
-    # possiamo usarlo magari solo per l'hypermedia --> si meglio
 
-    return build_response(res)
+    # hypermedia links
+    #links = [{'link': request.url_root.rstrip('/') + url_for('teacher_with_id', teacher_id=teacher_id)}]
+    links = build_link('teacher_data', teacher_id=teacher_id,
+                       rel='http://relations.highschool.com/data')
+    links += build_link('teacher_data', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/updatedata')
+    links += build_link('teacher_class', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/classlist')
+    links += build_link('teacher_timetable', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/timetable')
+    links += build_link('teacher_notifications', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/notificationlist')
+    links += build_link('teacher_appointment', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+    links += build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='self')
+
+    return build_response(res, links=links)
 
 
 @app.route('/teacher/<int:teacher_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_data(teacher_id):
+    # hypermedia
+    links = build_link('teacher_data', teacher_id=teacher_id, 
+                   rel='http://relations.highschool.com/data')
+    links += build_link('teacher_data', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/updatedata')
+    links += build_link('teacher_data', teacher_id=teacher_id,
+                        rel='self')
+    links += build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+
     if request.method == 'PUT':
         '''modify personal data'''
+
         # check content type
         try:
             data = request.get_json()
         except TypeError:
-            return build_response(None, error='The request was not valid JSON.'), 400
+            return build_response(None, error='The request was not valid JSON.', links=links), 400
 
         # check json content
         if 'name' not in data and 'lastname' not in data:
-            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
-        # TODO check if type is str (sempre in validazione json?)
+            return build_response(None, error='The JSON structure must contain all the requested parameters.', links=links), 400
+
         # session
         if 'name' in data:
             newname = data['name']
@@ -261,7 +260,8 @@ def teacher_data(teacher_id):
         if 'lastname' in data:
             teacher.lastname = data['lastname']
         session.commit()
-        return build_response({'message':'Update successful.'})
+
+        return build_response({'message':'Update successful.'}, links=links)
         # TODO ha senso 'message'?
     else:
         '''show personal data'''
@@ -269,21 +269,39 @@ def teacher_data(teacher_id):
         teacher = session.query(Teacher).filter_by(id=teacher_id).first()
         # check if the teacher was found
         if not teacher:
-            # OAuth should avoid this
             return build_response(None, error='Teacher id not found.'), 404
         res = {'name': teacher.name, 
                'lastname': teacher.lastname}
-        return build_response(res)
+
+        # hypermedia
+        links = build_link('teacher_data', teacher_id=teacher_id, 
+                           rel='http://relations.highschool.com/data')
+        links += build_link('teacher_data', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/updatedata')
+        links += build_link('teacher_data', teacher_id=teacher_id,
+                            rel='self')
+        links += build_link('teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/index')
+
+        return build_response(res, links=links)
 
 @app.route('/teacher/<int:teacher_id>/class/')
 @auth_check
 def teacher_class(teacher_id):
+    # hypermedia
+    links = build_link('teacher_with_id', teacher_id=teacher_id, 
+                       rel='http://relations.highschool.com/index')
+    links += build_link('teacher_class', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/classlist')
+    links += build_link('teacher_class', teacher_id=teacher_id,
+                        rel='self')
+
     '''show list of classes for the specific teacher'''
     teacher = session.query(Teacher).filter_by(id=teacher_id).first()
     # check if the teacher was found
     if not teacher:
-        # OAuth should avoid this
-        return build_response(None, error='Teacher id not found.'), 404
+        links = build_link('login', rel='http://relations.highschool.com/login')
+        return build_response(None, error='Teacher id not found.', links=links), 404
     # return response
     classes = teacher.classes
     cl = []
@@ -293,17 +311,41 @@ def teacher_class(teacher_id):
 
     res = {'class': cl}
 
-    return build_response(res)
+    # more hypermedia
+    for i in range(min(10, len(cl))):
+        links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=cl[i]['c_id'],
+                            rel='http://relations.highschool.com/class')
+
+    return build_response(res, links=links)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/')
 @auth_check
 def teacher_class_with_id(teacher_id, class_id):
     '''show class info for that teacher (students, subjects, timetable)'''
+
+    # hypermedia
+    links = build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+    links += build_link('teacher_class', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/classlist')
+    links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/class')
+    links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
+                        rel='self')
+    links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/timetable')
+    links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/subjectlist')
+
     c = session.query(Class).filter_by(id=class_id).first()
     subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
     if not c:
-        return build_response(None, error='Class id not found.'), 404
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/index')
+        links += build_link('teacher_class', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/classlist')
+        return build_response(None, error='Class id not found.', links=links), 404
 
     students = c.students
     st = []
@@ -316,16 +358,29 @@ def teacher_class_with_id(teacher_id, class_id):
 
     res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
 
-    return build_response(res)
+    return build_response(res, links=links)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/')
 @auth_check
 def teacher_subject(teacher_id, class_id):
     '''show list of subject taught by a teacher in a class'''
+
+    # hypermedia
+    links = build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+    links += build_link('teacher_class', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/class')
+    links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/subjectlist')
+    links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
+                        rel='self')
+
     subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
     if not subjects_list:
-        return build_response(None, error='Subjects not found.'), 404
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/index')
+        return build_response(None, error='Subjects not found.', links=links), 404
 
     subjects = []
     for s in subjects_list:
@@ -333,20 +388,46 @@ def teacher_subject(teacher_id, class_id):
 
     res = {'subjects': subjects}
 
-    return build_response(res)
+    # more hypermedia
+    for i in range(min(10, len(subjects))):
+        links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[i]['id'],
+                            rel='http://relations.highschool.com/subject')
+
+    return build_response(res, links=links)
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/')
 @auth_check
 def teacher_subject_with_id(teacher_id, class_id, subject_id):
     '''show subject info taught by a teacher'''
+
+    # hypermedia
+    links = build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+    links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/subjectlist')
+    links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/subject')
+    links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='self')
+    links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/studentlist')
+    links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/grades')
+    links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/publishgrades')
+    links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/updategrades')
+
     subject = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).filter_by(
         id=subject_id).first()
     if not subject:
-        return build_response(None, error='Subject not found.'), 404
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                           rel='http://relations.highschool.com/index')
+        return build_response(None, error='Subject not found.', links=links), 404
 
     res = {'id': subject.id, 'name': subject.name}
 
-    return build_response(res)
+    return build_response(res, links=links)
 
 
 # MA È UGUALE A CLASS DI TEACHER?
@@ -354,15 +435,33 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 @auth_check
 def teacher_student(teacher_id, class_id, subject_id):
     '''show list of students for a subject taught by a teacher'''
+
+    links = build_link('teacher_with_id', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/index')
+    links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/subject')
+    links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/studentlist')
+    links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='self')
+
     c = session.query(Class).filter_by(id=class_id).first()
     subject = session.query(Subject).filter_by(id=subject_id).filter_by(teacher_id=teacher_id).filter_by(
         class_id=class_id).first()
 
     if not c:
-        return build_response(None, error='Class id not found.'), 404
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/index')
+        links += build_link('teacher_class', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/classlist')
+        return build_response(None, error='Class id not found.', links=links), 404
 
     if not subject:
-        return build_response(None, error='Subject id not found.'), 404
+        links = build_link('teacher_with_id', teacher_id=teacher_id,
+                           rel='http://relations.highschool.com/index')
+        links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
+                            rel='http://relations.highschool.com/subjectlist')
+        return build_response(None, error='Subject id not found.', links=links), 404
 
     students = c.students
     st = []
@@ -375,7 +474,18 @@ def teacher_student(teacher_id, class_id, subject_id):
 
     res = {'students': st}
 
+    # more hypermedia
+    for i in range(min(10, len(st))):
+        links += build_link('teacher_student_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            student_id=st[i]['id'], rel='http://relations.highschool.com/student')
+
     return build_response(res)
+
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/')
+@auth_check
+def teacher_student_with_id(teacher_id, class_id, student_id):
+    # TODO
+    pass
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST', 'PUT'])
 @auth_check
@@ -544,44 +654,6 @@ def teacher_notifications(teacher_id):
 
 '''PARENT'''
 
-@app.route('/parent/', methods=['GET', 'POST'])
-@auth_check
-def parent():
-    '''admin endpoint'''
-    if request.method == 'POST':
-        '''create new parent account'''
-        # validate json TODO
-
-        # check content type
-        try:
-            data = request.get_json()
-        except TypeError:
-            return build_response(None, error='The request was not valid JSON.'), 400
-        # check json content
-        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
-            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
-
-        # create new object
-        name = data['name']
-        lastname = data['lastname']
-        pwd = data['pwd']
-        new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
-        # insert new teacher in db
-        session.add(new_parent)
-        session.commit()
-        # return confirmation, new id
-        new_id = new_parent.id
-        return build_response({'id': new_id}), 201
-
-    else:
-        '''show list of parents'''
-        parents = session.query(Parent).all()
-        res = []
-        for p in parents:
-            res.append({'id': p.id, 'name': p.name, 'lastname': p.lastname})
-        # return structured list
-        return build_response(res)
-
 @app.route('/parent/<int:parent_id>/')
 @auth_check
 def parent_with_id(parent_id):
@@ -723,23 +795,106 @@ def admin():
         '''create new admin account'''
         pass
     else:
-        '''list admin accounts'''
+        '''list admin accounts?'''
         pass
 
-@app.route('/class/')
+
+@app.route('/admin/teacher/', methods=['GET', 'POST'])
+@auth_check
+def teacher():
+    '''admin endpoint'''
+    if request.method == 'POST':
+        '''create a new teacher'''
+        # validate json TODO
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        # create new teacher object
+        name = data['name']
+        lastname = data['lastname']
+        pwd = data['pwd']
+        new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
+        # insert new teacher in db
+        session.add(new_teacher)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_teacher.id
+
+        links = []
+        link = {'link': 'http://asdfasdfdasf.com/teacher/id/data', 'rel': 'http://relations.highschool.com/data'}
+        links.append(link)
+
+        return build_response({'id': new_id}, links=links), 201
+
+    else:
+        '''list of teachers'''
+        # get list of teachers from db
+        teachers = session.query(Teacher).all()
+        res = []
+        for t in teachers:
+            res.append({'id': t.id, 'name': t.name, 'lastname': t.lastname})
+        # return structured list
+        return build_response(res)
+
+@app.route('/admin/parent/', methods=['GET', 'POST'])
+@auth_check
+def parent():
+    '''admin endpoint'''
+    if request.method == 'POST':
+        '''create new parent account'''
+        # validate json TODO
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        # create new object
+        name = data['name']
+        lastname = data['lastname']
+        pwd = data['pwd']
+        new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
+        # insert new teacher in db
+        session.add(new_parent)
+        session.commit()
+        # return confirmation, new id
+        new_id = new_parent.id
+        return build_response({'id': new_id}), 201
+
+    else:
+        '''show list of parents'''
+        parents = session.query(Parent).all()
+        res = []
+        for p in parents:
+            res.append({'id': p.id, 'name': p.name, 'lastname': p.lastname})
+        # return structured list
+        return build_response(res)
+
+@app.route('/admin/class/')
 @auth_check
 def classes():
     '''show list of classes'''
     '''POST create new classes non c'e' nelle specifiche'''
     pass
 
-@app.route('/class/<int:class_id>/')
+@app.route('/admin/class/<int:class_id>/')
 @auth_check
 def class_with_id(class_id):
     '''show class info? non nelle specifiche'''
     pass
 
-@app.route('/class/<int:class_id>/student/', methods=['GET', 'POST'])
+@app.route('/admin/class/<int:class_id>/student/', methods=['GET', 'POST'])
 @auth_check
 def class_student(class_id):
     if request.method == 'POST':
@@ -748,19 +903,19 @@ def class_student(class_id):
     else:
         '''show list of students in the class'''
 
-@app.route('/student/')
+@app.route('/admin/student/')
 @auth_check
 def student():
     '''show list of students (non nelle specifiche)'''
     pass
 
-@app.route('/student/<int:student_id>/')
+@app.route('/admin/student/<int:student_id>/')
 @auth_check
 def student_with_id(student_id):
     '''show student info (spostare in /class/student/?'''
     pass
 
-@app.route('/payment/', methods=['GET', 'POST'])
+@app.route('/admin/payment/', methods=['GET', 'POST'])
 @auth_check
 def payment():
     if request.method == 'POST':
@@ -770,7 +925,7 @@ def payment():
         '''list school-wide payments'''
         pass
 
-@app.route('/payment/parent/<int:parent_id>/', methods=['GET', 'POST'])
+@app.route('/admin/payment/parent/<int:parent_id>/', methods=['GET', 'POST'])
 @auth_check
 def payment_parent(parent_id):
     if request.method == 'POST':
@@ -780,7 +935,7 @@ def payment_parent(parent_id):
         '''list payments for a parent'''
         pass
 
-@app.route('/payment/class/<int:class_id>/', methods=['GET', 'POST'])
+@app.route('/admin/payment/class/<int:class_id>/', methods=['GET', 'POST'])
 @auth_check
 def payment_class(class_id):
     if request.method == 'POST':
@@ -790,7 +945,7 @@ def payment_class(class_id):
         '''list payments for a class'''
         pass
 
-@app.route('/notification/', methods=['GET', 'POST'])
+@app.route('/admin/notification/', methods=['GET', 'POST'])
 @auth_check
 def notification():
     #FIXME DELETE?
@@ -801,7 +956,7 @@ def notification():
         '''list school-wide notifications'''
         pass
 
-@app.route('/notification/parent/', methods=['GET', 'POST'])
+@app.route('/admin/notification/parent/', methods=['GET', 'POST'])
 def notification_parents():
     if request.method == 'POST':
         '''create notification to all parents'''
@@ -810,7 +965,7 @@ def notification_parents():
         '''list notifications to all parents'''
         pass
 
-@app.route('/notification/parent/<int:parent_id>/', methods=['GET', 'POST'])
+@app.route('/admin/notification/parent/<int:parent_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_parent_with_id(parent_id):
     if request.method == 'POST':
@@ -820,7 +975,7 @@ def notification_parent_with_id(parent_id):
         '''list parent notifications'''
         pass
 
-@app.route('/notification/teacher/', methods=['GET', 'POST'])
+@app.route('/admin/notification/teacher/', methods=['GET', 'POST'])
 @auth_check
 def notification_teachers():
     if request.method == 'POST':
@@ -830,7 +985,7 @@ def notification_teachers():
         '''list notifications to all teachers'''
         pass
 
-@app.route('/notification/teacher/<int:teacher_id>/', methods=['GET', 'POST'])
+@app.route('/admin/notification/teacher/<int:teacher_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_teacher_with_id(teacher_id):
     if request.method == 'POST':
@@ -840,7 +995,7 @@ def notification_teacher_with_id(teacher_id):
         '''list a teacher's notifications'''
         pass
 
-@app.route('/notification/class/<int:class_id>/', methods=['GET', 'POST'])
+@app.route('/admin/notification/class/<int:class_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_class(class_id):
     if request.method == 'POST':
@@ -850,7 +1005,7 @@ def notification_class(class_id):
         '''list class-wide notifications'''
         pass
 
-@app.route('/notification/class/<int:class_id>/parents/', methods=['GET', 'POST'])
+@app.route('/admin/notification/class/<int:class_id>/parents/', methods=['GET', 'POST'])
 @auth_check
 def notification_class_parents(class_id):
     if request.method == 'POST':
@@ -860,7 +1015,7 @@ def notification_class_parents(class_id):
         '''list all notifications for the parents in a class'''
         pass
 
-@app.route('/notification/class/<int:class_id>/teachers/', methods=['GET', 'POST'])
+@app.route('/admin/notification/class/<int:class_id>/teachers/', methods=['GET', 'POST'])
 @auth_check
 def notification_class_teachers(class_id):
     if request.method == 'POST':
