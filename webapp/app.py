@@ -18,8 +18,8 @@ from flask import Flask, request, jsonify, abort, url_for, send_from_directory
 from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
-from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime, timedelta
+from sqlalchemy.orm.exc import NoResultFound
 
 import IPython
 
@@ -56,40 +56,59 @@ def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **k
 def bad_request(e):
     # hypermedia back to endpoint
     links = [{'link': request.url, 'rel': 'self'}]
-    return build_response(error=str(e), links=links), 400
+    if DEBUG:
+        return build_response(error=str(e), links=links), 400
+    else:
+        return build_response(error='Bad Request', links=links), 400
 
 @app.errorhandler(401)
 def authorization_required(e):
     # hypermedia to login
     links = build_link('login', rel='http://relations.highschool.com/login')
-    return build_response(error=str(e), links=links), 401
+    if DEBUG:
+        return build_response(error=str(e), links=links), 401
+    else:
+        return build_response(error='Authorization Required', links=links), 401
 
 @app.errorhandler(403)
 def forbidden(e):
     # hypermedia back to index
     links = build_link('login', rel='http://relations.highschool.com/login')
-    return build_response(error=str(e), links=links), 403
+    if DEBUG:
+        return build_response(error=str(e), links=links), 403
+    else:
+        return build_response(error='Forbidden', links=links), 403
 
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to index
     links = build_link('login', rel='http://relations.highschool.com/login')
-    return build_response(error=str(e), links=links), 404
+    if DEBUG:
+        return build_response(error=str(e), links=links), 404
+    else:
+        return build_response(error='Page Not Found', links=links), 404
 
 @app.errorhandler(405)
 def method_not_allowed(e):
     # hypermedia back to endpoint
     links = [{'link': request.url, 'rel': 'self'}]
-    return build_response(error=str(e), links=links), 405
+    if DEBUG:
+        return build_response(error=str(e), links=links), 405
+    else:
+        return build_response(error='Method Not Allowed', links=links), 405
+
 
 @app.errorhandler(500)
 def server_error(e):
     # hypermedia back to index, endpoint
     links = [{'link': request.url, 'rel': 'self'}]
     links += build_link('login', rel='http://relations.highschool.com/login')
-    return build_response(error=str(e), links=links), 500
+    if DEBUG:
+        return build_response(error=str(e), links=links), 500
+    else:
+        return build_response(error='Internal Server Error', links=links), 500
 
-# define authorization check decorator
+
 def auth_check(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -584,6 +603,7 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
             date = datetime.strptime(grade['date'], '%d %m %Y')
             value = grade['value']
             student_id = grade['student_id']
+
             try:
                 check_student_class = session.query(Student).filter_by(id=student_id).filter_by(class_id=class_id).one()
             except NoResultFound:
@@ -633,17 +653,55 @@ def teacher_timetable(teacher_id):
 @auth_check
 def teacher_appointment(teacher_id):
     '''show list of appointments for a teacher'''
-    pass
+    appointments_list = session.query(Appointment).filter_by(teacher_id=teacher_id).all()
+
+    if not appointments_list:
+        return build_response(None, error='Appointments not found.'), 404
+
+    appointments = []
+    for a in appointments_list:
+        parent = session.query(Parent).filter_by(id=a.parent_id).one()
+        appointments.append({'appointment': {'id': a.id, 'date': a.date, 'room': a.room, 'parent': {'name': parent.name,
+                                                                                                    'lastname': parent.lastname}}})
+
+    return build_response(appointments)
+
 
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_appointment_with_id(teacher_id, appointment_id):
+
+    appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
+
+    if not appointment:
+        return build_response(None, error='Appointment not found.'), 404
+
     if request.method == 'PUT':
         '''edit appointment'''
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' in data:
+            appointment.date = datetime.strptime(data['date'], '%d %m %Y')
+
+        if 'room' in data:
+            appointment.room = data['room']
+
+        if 'parent_id' in data:
+            appointment.parent_id = int(data['parent_id'])
+
+        session.commit()
+        return build_response({'message': 'Update successful.'})
+        
     else:
         '''show appointment info'''
-        pass
+        parent = session.query(Parent).filter_by(id=appointment.parent_id).one()
+
+        return build_response({'appointment': {'id': appointment.id, 'date': appointment.date, 'room': appointment.room,
+                                               'parent': {'name': parent.name,
+                                                          'lastname': parent.lastname}}})
 
 @app.route('/teacher/<int:teacher_id>/notifications/')
 @auth_check
