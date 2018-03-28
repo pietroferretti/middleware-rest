@@ -493,7 +493,7 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
             date = datetime.strptime(grade['date'], '%d %m %Y')
             value = grade['value']
             student_id = grade['student_id']
-
+            
             try:
                 check_student_class = session.query(Student).filter_by(id=student_id).filter_by(class_id=class_id).one()
             except NoResultFound:
@@ -544,15 +544,15 @@ def teacher_timetable(teacher_id):
 def teacher_appointment(teacher_id):
     '''show list of appointments for a teacher'''
     appointments_list = session.query(Appointment).filter_by(teacher_id=teacher_id).all()
-
+    
     if not appointments_list:
         return build_response(None, error='Appointments not found.'), 404
 
     appointments = []
     for a in appointments_list:
         parent = session.query(Parent).filter_by(id=a.parent_id).one()
-        appointments.append({'appointment': {'id': a.id, 'date': a.date, 'room': a.room, 'parent': {'name': parent.name,
-                                                                                                    'lastname': parent.lastname}}})
+        appointments.append({'appointment': {'id':a.id, 'date': a.date, 'room': a.room, 'parent': {'name': parent.name,
+           'lastname': parent.lastname}}})
 
     return build_response(appointments)
 
@@ -562,7 +562,7 @@ def teacher_appointment(teacher_id):
 def teacher_appointment_with_id(teacher_id, appointment_id):
 
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
-
+    
     if not appointment:
         return build_response(None, error='Appointment not found.'), 404
 
@@ -589,16 +589,23 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         '''show appointment info'''
         parent = session.query(Parent).filter_by(id=appointment.parent_id).one()
 
-        return build_response({'appointment': {'id': appointment.id, 'date': appointment.date, 'room': appointment.room,
-                                               'parent': {'name': parent.name,
-                                                          'lastname': parent.lastname}}})
+        return build_response({'appointment': {'id':appointment.id, 'date': appointment.date, 'room': appointment.room, 'parent': {'name': parent.name,
+               'lastname': parent.lastname}}})
 
 @app.route('/teacher/<int:teacher_id>/notifications/')
 @auth_check
 def teacher_notifications(teacher_id):
     '''show notifications for this teacher'''
-    pass
+    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
 
+    if not teacher:
+        return build_response(None, error='Teacher not found.')
+
+    notifications = []
+    for n in teacher.notifications:
+        notifications.append({'notification':{'id':n.id, 'date': n.date, 'text': n.text}})
+
+    return build_response(notifications)
 
 '''PARENT'''
 
@@ -636,8 +643,8 @@ def parent():
         parents = session.query(Parent).all()
         res = []
         for p in parents:
-            res.append({'id': p.id, 'name': p.name, 'lastname': p.lastname})
-        # return structured list
+            res.append({'parent': {'id': p.id, 'name': p.name, 'lastname': p.lastname}})
+        
         return build_response(res)
 
 @app.route('/parent/<int:parent_id>/')
@@ -654,53 +661,120 @@ def parent_with_id(parent_id):
     return build_response(res)
 
 
-# todo standardizzare
 @app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def parent_data(parent_id):
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    if not parent:
+        return build_response(None, error='Parent not found.'), 404
+
     if request.method == 'PUT':
         '''edit parent personal data'''
-        # check content type
-        # if == json
-        # parse json
-        data = request.get_json()
-        newname = data['name']
-        newlastname = data['lastname']
-        parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
-        parent.name = newname
-        parent.lastname = newlastname
+
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+      
+        if 'name' in data:
+            parent.name = data['name']
+
+        if 'lastname' in data:
+            parent.lastname = data['lastname']
+
         session.commit()
-        return jsonify('ok')
+        return build_response({'message': 'Update successful.'})
+
     else:
         '''show parent personal data'''
-        # get data from teachers with id
-        parent = session.query(Parent).filter(Parent.id == int(parent_id)).first()
-        resp = {}
-        resp['name'] = parent.name
-        resp['lastname'] = parent.lastname
-        return jsonify(resp)
+
+        return build_response({'data':{'name':parent.name, 'lastname': parent.lastname, 'id':parent.id}})
 
 @app.route('/parent/<int:parent_id>/child/')
 @auth_check
 def parent_child(parent_id):
     '''list children of parent'''
-    pass
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    if not parent:
+        return build_response(None, 'Parent not found.')
+
+    if not parent.children:
+        return build_response(None, 'Student not found.')
+
+    children = []
+    for c in parent.children:
+        children.append({'student':{'name': c.name, 'lastname': c.lastname, 'id': c.id}})
+
+    return build_response(children)
+
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/')
 @auth_check
 def parent_child_with_id(parent_id, student_id):
-    '''show info of student?'''
-    pass
+    '''show info of student'''
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    if not parent:
+        return build_response(None, 'Parent not found.')
+
+
+    student = session.query(Student).filter_by(parent_id=parent_id).filter_by(id=student_id).one()
+
+    if not student:
+        return build_response(None, 'Student not found.')
+
+    c = session.query(Class).filter_by(id=student.class_id).first()
+
+    if not c:
+        res = 'Not enrolled.'
+    else:
+        subjects = []
+        for s in c.subjects:
+            subjects.append({'id': s.id, 'name': s.name})
+
+        res = {'id': c.id, 'name': c.name, 'room': c.room, 'subjects': subjects}
+
+    return build_response({'student': {'name': student.name, 'lastname': student.lastname, 'id': student.id, 'class': res}})
+    
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def parent_child_data(parent_id, student_id):
+
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    if not parent:
+        return build_response(None, 'Parent not found.')
+
+
+    student = session.query(Student).filter_by(parent_id=parent_id).filter_by(id=student_id).one()
+
+    if not student:
+        return build_response(None, 'Student not found.')
+
     if request.method == 'PUT':
         '''edit child personal data'''
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'name' in data:
+            student.name = data['name']
+
+        if 'lastname' in data:
+            student.lastname = data['lastname']
+
+        session.commit()
+
+        return build_response({'message': 'Update successful.'})
+
+
     else:
         '''show child personal data'''
-        pass
+        return build_response({'data': {'name': student.name, 'lastname': student.lastname, 'id': student.id}})
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/grades/')
 @auth_check

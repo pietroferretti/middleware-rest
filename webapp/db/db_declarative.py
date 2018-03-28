@@ -127,6 +127,7 @@ class Notification(Base):
     __tablename__ = 'notification'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
+    text = Column(String(200), nullable=False)
     # scope =
 
 

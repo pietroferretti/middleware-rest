@@ -1,1 +1,6 @@
 curl -H "Content-Type: application/json" -X PUT -d '{"name":"Carlo", "lastname":"Fumagalli"}' http://127.0.0.1:5000/parent/1/data/
+
+curl -H "Content-Type: application/json" -X PUT -d '{"room":"A12", "parent_id": 1}' http://127.0.0.1:5000/teacher/1/appointment/1/
+
+
+curl -H "Content-Type: application/json" -X PUT -d '{"lastname":"Pallini"}' http://127.0.0.1:5000/parent/1/child/4/data/
