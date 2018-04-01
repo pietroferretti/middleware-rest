@@ -42,7 +42,7 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
     # create response object
     resp = jsonify(resp_dict)
     # add content type, response schema
-    resp.headers["Content-Type"] = 'application/vnd.stocazzo+json; schema="{}"'.format(request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
+    resp.headers["Content-Type"] = 'application/vnd.highschool+json; schema="{}"'.format(request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
     return resp
 
 def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **kwargs):
@@ -50,12 +50,31 @@ def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **k
     return [{'link': request.url_root.rstrip('/') + url_for(endpoint, **kwargs), 
             'rel': rel}]
 
+def get_index(url):
+    if url.startswith('/admin'):
+        return 'admin', {}
+    elif url.startswith('/teacher/'):
+        try:
+            teacher_id = int(url.split('/')[1])
+            return 'teacher_with_id', {'teacher_id': teacher_id}
+        except ValueError, IndexError:
+            return 'login', {}
+    elif url.startswith('/parent'):
+        try:
+            parent_id = int(url.split('/')[1])
+            return 'parent_with_id', {'parent_id': parent_id}
+        except ValueError, IndexError:
+            return 'login', {}
+    return 'login', {}
+
 
 # default error handlers
 @app.errorhandler(400)
 def bad_request(e):
-    # hypermedia back to endpoint
+    # hypermedia back to endpoint, index
     links = [{'link': request.url, 'rel': 'self'}]
+    index, kwargs = get_index(request.path)
+    links += build_link(index, **kwargs, rel='http://www.highschool.com/index')
     if DEBUG:
         return build_response(error=str(e), links=links), 400
     else:
@@ -72,7 +91,7 @@ def authorization_required(e):
 
 @app.errorhandler(403)
 def forbidden(e):
-    # hypermedia back to index
+    # hypermedia back to login
     links = build_link('login', rel='http://relations.highschool.com/login')
     if DEBUG:
         return build_response(error=str(e), links=links), 403
@@ -81,7 +100,7 @@ def forbidden(e):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    # hypermedia back to index
+    # hypermedia back to login
     links = build_link('login', rel='http://relations.highschool.com/login')
     if DEBUG:
         return build_response(error=str(e), links=links), 404
@@ -90,8 +109,10 @@ def page_not_found(e):
 
 @app.errorhandler(405)
 def method_not_allowed(e):
-    # hypermedia back to endpoint
+    # hypermedia back to endpoint, index
     links = [{'link': request.url, 'rel': 'self'}]
+    index, kwargs = get_index(request.path)
+    links += build_link(index, **kwargs, rel='http://www.highschool.com/index')
     if DEBUG:
         return build_response(error=str(e), links=links), 405
     else:
@@ -100,9 +121,10 @@ def method_not_allowed(e):
 
 @app.errorhandler(500)
 def server_error(e):
-    # hypermedia back to index, endpoint
+    # hypermedia back to endpoint, index
     links = [{'link': request.url, 'rel': 'self'}]
-    links += build_link('login', rel='http://relations.highschool.com/login')
+    index, kwargs = get_index(request.path)
+    links += build_link(index, **kwargs, rel='http://www.highschool.com/index')
     if DEBUG:
         return build_response(error=str(e), links=links), 500
     else:
@@ -133,6 +155,7 @@ def index():
     '''Root endpoint'''
     # TODO redirect to /login
     d = "Hello World"
+    IPython.embed()
     return build_response(d)
 
 
@@ -332,7 +355,7 @@ def teacher_class(teacher_id):
 
     # more hypermedia
     for i in range(min(10, len(cl))):
-        links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=cl[i]['c_id'],
+        links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=cl[i]['id'],
                             rel='http://relations.highschool.com/class')
 
     return build_response(res, links=links)
@@ -851,9 +874,30 @@ def parent_notifications(parent_id):
 def admin():
     if request.method == 'POST':
         '''create new admin account'''
+        # TODO dobbiamo anche definire il database per il login
+
+        # get input
+
+        # check content type
+
+        # check json content
+
+        # query
+
+        # handle query errors
+
+        # hypermedia
+
+        # return response
+
         pass
     else:
-        '''list admin accounts?'''
+        '''admin index'''
+
+        # hypermedia
+
+        # return 
+
         pass
 
 
@@ -870,6 +914,7 @@ def teacher():
             data = request.get_json()
         except TypeError:
             return build_response(None, error='The request was not valid JSON.'), 400
+
         # check json content
         if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
             return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
@@ -879,17 +924,26 @@ def teacher():
         lastname = data['lastname']
         pwd = data['pwd']
         new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
+
         # insert new teacher in db
         session.add(new_teacher)
         session.commit()
-        # return confirmation, new id
+
+        # handle query errors
+        # TODO
+
+        # return new object
         new_id = new_teacher.id
+        t_obj = {'id': new_id, 'name': name, 'lastname': lastname}
+        res = {'teacher': t_obj}
 
-        links = []
-        link = {'link': 'http://asdfasdfdasf.com/teacher/id/data', 'rel': 'http://relations.highschool.com/data'}
-        links.append(link)
+        # hypermedia
+        links = build_link('teacher', rel='self')
+        links += build_link('teacher', rel='http://relations.highschool.com/teacherlist')
+        links += build_link('teacher', rel='http://relations.highschool.com/createteacher')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
 
-        return build_response({'id': new_id}, links=links), 201
+        return build_response(res, links=links), 201
 
     else:
         '''list of teachers'''
@@ -939,18 +993,65 @@ def parent():
         # return structured list
         return build_response(res)
 
+
 @app.route('/admin/class/')
 @auth_check
 def classes():
     '''show list of classes'''
-    '''POST create new classes non c'e' nelle specifiche'''
-    pass
+
+    # hypermedia
+    links = build_link('classes', rel='self')
+    links += build_link('classes', rel='http://relations.highschool.com/classlist')
+    links += build_link('admin', rel='http://relations.highschool.com/index')
+
+    # query
+    classes = session.query(Class).all()
+
+    # check query result
+    if not classes:
+        return build_response(error='No classes found.', links=links), 404
+
+    # response
+    c_list = []
+    for c in classes:
+        c_list.append({'id': c.id, 'room': c.room, 'name': c.name})
+    res = {'classes': c_list}
+
+    # more hypermedia
+    for i in range(min(10, len(classes))):
+        links += build_link('class_with_id', class_id=classes[i].id,
+                            rel='http://relations.highschool.com/class')
+    
+    return build_response(res, links=links)
+
 
 @app.route('/admin/class/<int:class_id>/')
 @auth_check
 def class_with_id(class_id):
-    '''show class info? non nelle specifiche'''
-    pass
+    '''show class info'''
+
+    # hypermedia
+    links = build_link('class_with_id', class_id=class_id, rel='self')
+    links += build_link('class_with_id', class_id=class_id, rel='http://relations.highschool.com/class')
+    links += build_link('class', rel='http://relations.highschool.com/classlist')
+    links += build_link('admin', rel='http://relations.highschool.com/index')
+
+    # query
+    c = session.query(Class).filter_by(id=class_id).first()
+
+    # check query result
+    if not c:
+        return build_response(error='Class not found.', links=links), 404
+
+    # response
+    classobj = {'id': c.id, 'room': c.room, 'name': c.name}
+    res = {'class': classobj}
+
+    # more hypermedia
+    #links +=
+
+
+
 
 @app.route('/admin/class/<int:class_id>/student/', methods=['GET', 'POST'])
 @auth_check

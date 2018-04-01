@@ -1,0 +1,66 @@
+cose nel database:
+- students
+- parents
+- teachers
+- admins
+- classes
+- subjects
+- grades
+- appointments
+- notifications
+- payments
+- timetables TODO -> per ogni teacher, teacher + subject + data, query in più per avere anche la classe
+(- accounts TODO -> una tabella con username e password, + id teacher/parent/admin con check constraint
+usata in login e aggiunte account da admin)
+
+# cosa si può leggere
+- students (admin, teacher per la classe)
+- parents (admin, teacher per uno studente)
+- teachers (admin, parents per la classe)
+- classes (admin, teacher alcune)
+- subjects (parent, teacher per la classe)
+- grades (parent, teacher)
+- appointments (parent, teacher)
+- notifications
+- payments
+- timetables
+
+# cosa non si può leggere
+- admins
+- accounts
+
+# cosa si può creare
+- students
+- parents
+- teachers
+- admins
+- accounts
+- grades
+- appointments
+- notifications
+- payments
+
+# cosa non si può creare
+- classes
+- subjects
+- timetables
+
+# cosa si può modificare
+- students
+- parents
+- teachers
+- grades
+- appointments
+- payments
+
+# cosa non si può modificare
+- admins
+- notifications
+- timetables
+- accounts
+
+# cosa si può cancellare
+niente
+
+# cosa non si può cancellare
+tutto

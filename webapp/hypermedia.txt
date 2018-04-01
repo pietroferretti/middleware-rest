@@ -13,3 +13,5 @@ http://relations.highschool.com/student
 http://relations.highschool.com/grades
 http://relations.highschool.com/publishgrades
 http://relations.highschool.com/updategrades
+http://relations.highschool.com/teacherlist
+http://relations.highschool.com/createteacher
