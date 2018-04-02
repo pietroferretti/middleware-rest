@@ -47,8 +47,8 @@ usata in login e aggiunte account da admin)
 
 # cosa si può modificare
 - students
-- parents
-- teachers
+- parents (solo data)
+- teachers (solo data)
 - grades
 - appointments
 - payments
