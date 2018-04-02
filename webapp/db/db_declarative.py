@@ -81,7 +81,6 @@ class Teacher(Base):
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    pwd = Column(String(16), nullable=False)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     subjects = relationship("Subject")
@@ -105,7 +104,6 @@ class Parent(Base):
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    pwd = Column(String(16), nullable=False)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     children = relationship("Student")

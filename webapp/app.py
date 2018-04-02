@@ -21,6 +21,9 @@ from db.db_declarative import *
 from datetime import datetime, timedelta
 from sqlalchemy.orm.exc import NoResultFound
 
+import os
+import hashlib
+
 import IPython
 
 DEBUG = True
@@ -138,7 +141,7 @@ def auth_check(f):
             return f(*args, **kwargs)
 
         # check if the endpoint is present in the authorized scopes
-        if not clienttoken or not 'scopes' in clienttoken:
+        if not clienttoken or 'scopes' not in clienttoken:
             # not yet authenticated
             abort(401)
         elif any(path.startswith(scope) for scope in clienttoken['scopes']):
@@ -167,57 +170,55 @@ def schema(path):
 
 @app.route('/login/', methods=['POST'])
 def login():
+    
+    # TODO hypermedia
+
     # check content type
     try:
         data = request.get_json()
     except TypeError:
-        links = build_link('login', rel='http://relations.highschool.com/login')
-        links += build_link('login', rel='self')
-        return build_response(None, error='The request was not valid JSON.', links=links), 400
+        return build_response(error='The request was not valid JSON.', links=links), 400
+
     # check json content
     if 'username' not in data or 'password' not in data:
-        links = build_link('login', rel='http://relations.highschool.com/login')
-        links += build_link('login', rel='self')
-        return build_response(None, error='The JSON structure must contain all the requested parameters.', links=links), 400
+        return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+
     # get username, password
     username = data['username']
-    password = data['password']
+    user_password = data['password']
 
-    # check if username and password exist in the database
-    # TODO
+    # check if the account exists in the database
+    account = session.query(Account).filter_by(username=username).one()
+    if not account:
+        return build_response(error='Incorrect username or password.', links=links), 400
+
+    salt, hash = account.password.split(':')
+    salt = bytes.fromhex(salt)
+    hash = bytes.fromhex(hash)
+    user_hash = hashlib.pbkdf2_hmac('sha256', user_password.encode(), salt, 100000)
+    if not user_hash == hash:
+        return build_response(error='Incorrect username or password', links=links), 400
 
     # check if admin, teacher or parent
     # assign different scopes in each case
-    role = 'teacher'
-    # TODO get role from database
+    role = account.type
     if role == 'admin':
         scopes = ['/admin/', '/teacher/', '/parent/']
-        #links = ['link': 'link': request.url_root.rstrip('/') + url_for('admin'),
-        #         'rel': 'http://relations.highschool.com/index']
-        links = build_link('admin', rel='http://relations.highschool.com/index')
-        links += build_link('login', rel='self')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
     elif role == 'teacher':
-        # TODO select id from database
-        teacher_id = 1234
+        teacher_id = account.teacher_id
         scopes = ['/teacher/{}/'.format(teacher_id)]
-        #links = [{'link': request.url_root.rstrip('/') + url_for('teacher_with_id', teacher_id=teacher_id),
-        #          'rel': 'http://relations.highschool.com/index'}]
-        links = build_link('teacher_with_id', teacher_id=teacher_id,
+        links += build_link('teacher_with_id', teacher_id=teacher_id,
                            rel='http://relations.highschool.com/index')
-        links += build_link('login', rel='self')
     elif role == 'parent':
-        # TODO select id from database
-        parent_id = 5687
+        parent_id = account.parent_id
         scopes = ['/parent/{}/'.format(parent_id)]
-        #links = [{'link': request.url_root.rstrip('/') + url_for('parent_with_id', parent_id=parent_id),
-        #          'rel': 'http://relations.highschool.com/index'}]
-        links = build_link('parent_with_id', parent_id=parent_id,
+        links += build_link('parent_with_id', parent_id=parent_id,
                            rel='http://relations.highschool.com/index')
-        links += build_link('login', rel='self')
     else:
         raise ValueError('Role "{}" not recognized!'.format(role))
 
-    # save authorized endpoints in a cryptografically secure client side cookie
+    # save authorized endpoints in a cryptographically secure client side cookie
     clienttoken['scopes'] = scopes
     clienttoken.permanent = True
     app.permanent_session_lifetime = timedelta(hours=1)
@@ -873,26 +874,45 @@ def parent_notifications(parent_id):
 @auth_check
 def admin():
     if request.method == 'POST':
-        '''create new admin account'''
-        # TODO fixare con il database per il login
-
-        # get input
-
-        # check content type
-
-        # check json content
-
-        # query
-
-        # handle query errors
+        '''Create new admin account'''
 
         # hypermedia
+        links = build_link('admin', rel='self')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('admin', rel='http://relations.highschool.com/createadmin')
 
-        # return response
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.'), 400
 
-        pass
+        # check json content
+        if 'username' not in data or 'password' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        existing = session.query(Account).filter_by(username=data['username']).all()
+        if existing:
+            return build_response(error='The username is already in use.', links=links), 400
+
+        # create account object
+        salt = os.urandom(16)
+        hash = hashlib.pbkdf2_hmac('sha256', data['password'].encode(), salt.encode(), 100000)
+        saved_password = salt.hex() + ':' + hash.hex()
+        account = Account(username=data['username'], password=saved_password, type='admin')
+
+        # insert account in database
+        session.add(account)
+        session.commit()
+
+        # build response object
+        a_obj = {'username': data['username'], 'type': 'admin'}
+        res = {'account': a_obj}
+
+        return build_response(res, links=links), 201
+
     else:
-        '''admin index'''
+        '''Admin index'''
 
         # hypermedia
         links = build_link('admin', rel='self')
@@ -919,38 +939,53 @@ def admin_teacher():
     if request.method == 'POST':
         '''Create a new teacher account'''
 
-        # TODO fixare con il database per il login!
-
-        # check content type
-        try:
-            data = request.get_json()
-        except TypeError:
-            return build_response(None, error='The request was not valid JSON.'), 400
-
-        # check json content
-        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
-            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
-
-        # create new teacher object
-        name = data['name']
-        lastname = data['lastname']
-        pwd = data['pwd']
-        new_teacher = Teacher(name=name, lastname=lastname, pwd=pwd)
-
-        # insert new teacher in db
-        session.add(new_teacher)
-        session.commit()
-
-        # return new object
-        new_id = new_teacher.id
-        t_obj = {'id': new_id, 'name': name, 'lastname': lastname}
-        res = {'teacher': t_obj}
-
         # hypermedia
         links = build_link('admin_teacher', rel='self')
         links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
         links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
         links += build_link('admin', rel='http://relations.highschool.com/index')
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'username' not in data or 'password' not in data:
+            return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+
+        existing = session.query(Account).filter_by(username=data['username'])
+        if existing:
+            return build_response(error='The username is already in use.', links=links), 400
+
+        # create new teacher object
+        name = data['name']
+        lastname = data['lastname']
+        new_teacher = Teacher(name=name, lastname=lastname)
+
+        # insert new teacher in db
+        session.add(new_teacher)
+        session.commit()
+
+        # create new account object
+        username = data['username']
+        password = data['password']
+        salt = os.urandom(16)
+        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+        saved_password = salt.hex() + ':' + hash.hex()
+        account = Account(username=username, password=saved_password, type='teacher', teacher_id=new_teacher.id)
+
+        # add to database
+        session.add(account)
+        session.commit()
+
+        # return teacher, account objects
+        t_obj = {'id': new_teacher.id, 'name': name, 'lastname': lastname}
+        a_obj = {'username': username, 'type': 'teacher', 'teacher_id': new_teacher.id}
+        res = {'teacher': t_obj, 'account': a_obj}
+
+        # more hypermedia
         links += build_link('admin_teacher_with_id', teacher_id=new_id, rel='http://relations.highschool.com/teacher')
 
         return build_response(res, links=links), 201
@@ -958,15 +993,17 @@ def admin_teacher():
     else:
         '''List of teachers'''
 
+        # hypermedia
+        links = build_link('admin_teacher', rel='self')
+        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
+        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
+
         # get list of teachers from db
         teachers = session.query(Teacher).all()
 
         # check query result
         if not teachers:
-            links = build_link('admin_teacher', rel='self')
-            links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-            links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-            links += build_link('admin', rel='http://relations.highschool.com/index')
             return build_response(error='No teachers found.', links=links), 404
 
         # build response
@@ -975,11 +1012,7 @@ def admin_teacher():
             t_list.append({'id': t.id, 'name': t.name, 'lastname': t.lastname})
         res = {'teachers': t_list}
 
-        # hypermedia
-        links = build_link('admin_teacher', rel='self')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        # more hypermedia
         for i in range(min(10, len(teachers))):
             links += build_link('admin_teacher_with_id', teacher_id=teachers[i].id,
                                 rel='http://relations.highschool.com/teacher')
@@ -992,30 +1025,29 @@ def admin_teacher():
 def admin_teacher_with_id(teacher_id):
     '''Info and index for this teacher'''
 
-    # query info
-    t = session.query(Teacher).get(teacher_id)
-    
-    # check query result
-    if not t:
-        links = build_link('admin_teacher_with_id', teacher_id=teacher_id, rel='self')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
-        return build_response(error='Teacher not found.', links=links)
-
-    # build response
-    t_obj = {'id': t.id, 'name': t.name, 'lastname': t.lastname}
-    res = {'teacher': t_obj}
-
     # hypermedia
     links = build_link('admin_teacher_with_id', teacher_id=teacher_id, rel='self')
     links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
     links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
     links += build_link('admin', rel='http://relations.highschool.com/index')
+
+    # query info
+    t = session.query(Teacher).get(teacher_id)
+    
+    # check query result
+    if not t:
+        return build_response(error='Teacher not found.', links=links), 404
+
+    # build response
+    t_obj = {'id': t.id, 'name': t.name, 'lastname': t.lastname}
+    res = {'teacher': t_obj}
+
+    # more hypermedia
     links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/notificationlist')
     links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/createnotification')
+
     build_response(res, links=links)
 
 
@@ -1025,40 +1057,49 @@ def admin_parent():
     if request.method == 'POST':
         '''Create new parent account'''
 
-        # TODO fixare con il nuovo database per il login!
-
-        # check content type
-        try:
-            data = request.get_json()
-        except TypeError:
-            # TODO hypermedia
-            return build_response(None, error='The request was not valid JSON.'), 400
-
-        # check json content
-        if 'name' not in data or 'lastname' not in data or 'pwd' not in data:
-            # TODO hypermedia
-            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
-
-        # create new object
-        name = data['name']
-        lastname = data['lastname']
-        pwd = data['pwd']
-        new_parent = Parent(name=name, lastname=lastname, pwd=pwd)
-
-        # insert new teacher in db
-        session.add(new_parent)
-        session.commit()
-
-        # return new object
-        new_id = new_parent.id
-        p_obj = {'id': new_id, 'name': name, 'lastname': lastname}
-        res = {'parent': p_obj}
-
         # hypermedia
         links = build_link('admin_parent', rel='self')
         links += build_link('admin_parent', rel='http://relations.highschool.com/parentlist')
         links += build_link('admin_parent', rel='http://relations.highschool.com/createparent')
         links += build_link('admin', rel='http://relations.highschool.com/index')
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        # check json content
+        if 'name' not in data or 'lastname' not in data or 'username' not in data or 'password' not in data:
+            return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
+
+        existing = session.query(Account).filter_by(username=data['username'])
+        if existing:
+            return build_response(error='The username is already in use.', links=links), 400
+
+        # create new object
+        name = data['name']
+        lastname = data['lastname']
+        new_parent = Parent(name=name, lastname=lastname)
+
+        # insert new parent in db
+        session.add(new_parent)
+        session.commit()
+
+        # create new account object
+        username = data['username']
+        password = data['password']
+        salt = os.urandom(16)
+        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+        saved_password = salt.hex() + ':' + hash.hex()
+        account = Account(username=username, password=saved_password, type='parent', parent_id=new_parent.id)
+
+        # return parent, account objects
+        p_obj = {'id': new_parent.id, 'name': name, 'lastname': lastname}
+        a_obj = {'username': username, 'type': 'parent', 'parent_id': new_parent.id}
+        res = {'parent': p_obj, 'account': a_obj}
+
+        # more hypermedia
         links += build_link('admin_parent_with_id', parent_id=new_id, rel='http://relations.highschool.com/parent')
 
         return build_response(res, links=links), 201
@@ -1344,7 +1385,7 @@ def student_with_id(student_id):
         if not st:
             return build_response(error='Student not found.', links=links), 404
 
-        if not 'name' in data and not 'lastname' in data and not 'parent_id' in data and not 'class_id' in data:
+        if 'name' not in data and 'lastname' not in data and 'parent_id' not in data and 'class_id' not in data:
             return build_response(error='No parameters valid for update were provided.', links=links), 400
 
         if 'parent_id' in data:
@@ -1435,7 +1476,7 @@ def payment():
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         # check input
-        if not 'amount' in data or not 'date' in data or not 'reason' in data:
+        if 'amount' not in data or 'date' not in data or 'reason' not in data:
             return build_response(error='The request must contain all the required parameters', links=links), 400
 
         # create new objects
@@ -1537,7 +1578,7 @@ def payment_parent(parent_id):
         if not parent:
             return build_response(error='Parent not found.', links=links), 404
 
-        if not 'amount' in data or not 'date' in data or not 'reason' in data:
+        if 'amount' not in data or 'date' not in data or 'reason' not  in data:
             return build_response(error='The request must contain all the required parameters', links=links), 400
 
         # create new objects
@@ -1621,7 +1662,7 @@ def payment_class(class_id):
         if not c:
             return build_response(error='Class not found.', links=links), 404
 
-        if not 'amount' in data or not 'date' in data or not 'reason' in data:
+        if 'amount' not in data or 'date' not in data or 'reason' not in data:
             return build_response(error='The request must contain all the required parameters', links=links), 400
 
         parents = session.query(Parent).join(Student.parent_id).filter(Student.class_id == class_id).all()
