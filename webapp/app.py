@@ -544,7 +544,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         if 'date' not in data or 'value' not in data:
             return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
 
-        date = datetime.strptime(data['date'], '%d %m %Y')
+        date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
         value = data['value']
 
         new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
@@ -573,7 +573,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
             return build_response(None, error='Grade not found.'), 404
 
         if 'date' in data:
-            grade.date = datetime.strptime(data['date'], '%d %m %Y')
+            grade.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
 
         if 'value' in data:
             grade.value = int(data['value'])
@@ -624,7 +624,7 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         #     return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
 
         for grade in data['grades']:
-            date = datetime.strptime(grade['date'], '%d %m %Y')
+            date = datetime.strptime(grade['date'], '%Y-%m-%d %H:%M:%S')
             value = grade['value']
             student_id = grade['student_id']
 
@@ -708,7 +708,7 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             return build_response(None, error='The request was not valid JSON.'), 400
 
         if 'date' in data:
-            appointment.date = datetime.strptime(data['date'], '%d %m %Y')
+            appointment.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
 
         if 'room' in data:
             appointment.room = data['room']
@@ -830,6 +830,19 @@ def parent_appointment_with_id(parent_id, appointment_id):
     else:
         '''show appointment info'''
         pass
+
+@app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
+@auth_check
+def parent_appointment_month(parent_id, teacher_id, year, month):
+    '''Show which days have appointments and free slots for the month'''
+    pass
+
+@app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/day/<int:day>/')
+@auth_check
+def parent_appointment_day(parent_id, teacher_id, year, month, day):
+    '''Show appointments, free slots for the day'''
+    pass
+
 
 @app.route('/parent/<int:parent_id>/payment/')
 @auth_check
