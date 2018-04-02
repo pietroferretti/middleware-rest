@@ -1,5 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
-from sqlalchemy import create_engine, Table
+from sqlalchemy import Table, Column, ForeignKey, CheckConstraint
+from sqlalchemy import Integer, String, DateTime, Boolean
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -127,7 +128,23 @@ class Notification(Base):
     __tablename__ = 'notification'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
-    # scope =
+    text = Column(String(10000))
+    scope = Column(String(20), nullable=False)
+    teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    parent_id = Column(Integer, ForeignKey('parent.id'))
+    class_id = Column(Integer, ForeignKey('class.id'))
+    # constraints
+    scopes_list = "('all', 'teachers', 'parents', 'one_teacher', 'one_parent', 'class', 'class_teachers', 'class_parents')"
+    __table_args__ = (
+        # possible scopes
+        CheckConstraint("scope IN " + scopes_list),
+        # one_teacher => teacher_id is set
+        CheckConstraint("NOT (scope == 'one_teacher') OR teacher_id IS NOT NULL"),
+        # one_parent => parent_id is set
+        CheckConstraint("NOT (scope == 'one_parent') OR parent_id IS NOT NULL"),
+        # class, class_teachers, class_parents => class_id is set
+        CheckConstraint("NOT (scope == 'class' OR scope == 'class_teachers' OR scope == 'class_parents') OR teacher_id IS NOT NULL")
+    )
 
 
 class Appointment(Base):
