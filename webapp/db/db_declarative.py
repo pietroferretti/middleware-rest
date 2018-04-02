@@ -152,6 +152,8 @@ class Appointment(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
     room = Column(String(5), nullable=False)
+    teacher_accepted = Column(Boolean, nullable=False)
+    parent_accepted = Column(Boolean, nullable=False)
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
     parent_id = Column(Integer, ForeignKey('parent.id'))
 
@@ -175,6 +177,25 @@ class Grade(Base):
     student_id = Column(Integer, ForeignKey('student.id'))
     value = Column(Integer, nullable=False)
 
+
+class Account(Base):
+    __tablename__ = 'account'
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    parent_id = Column(Integer, ForeignKey('parent.id'))
+    # constraints
+    types_list = "('admin', 'teacher', 'parent')"
+    __table_args__ = (
+        # possible types
+        CheckConstraint("type IN " + types_list),
+        # teacher => teacher_id is set
+        CheckConstraint("NOT (type == 'teacher') OR teacher_id IS NOT NULL"),
+        # parent => parent_id is set
+        CheckConstraint("NOT (type == 'parent') OR parent_id IS NOT NULL"),
+    )
 
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
