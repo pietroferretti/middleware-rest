@@ -1740,77 +1740,502 @@ def payment_class(class_id):
 @auth_check
 def notification():
     if request.method == 'POST':
-        '''create school-wide notification'''
-        pass
+        '''Create a school-wide notification'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='all')
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'], 'scope': 'all'}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+
     else:
-        '''list school-wide notifications'''
-        pass
+        '''List school-wide notifications'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='all').all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/parent/', methods=['GET', 'POST'])
 def notification_parents():
     if request.method == 'POST':
-        '''create notification to all parents'''
-        pass
+        '''Create a notification for all parents'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='parents')
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'], 'scope': 'parents'}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+
     else:
-        '''list notifications to all parents'''
-        pass
+        '''List notifications for all parents'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='parents').all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/parent/<int:parent_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_parent_with_id(parent_id):
     if request.method == 'POST':
-        '''create parent notification'''
-        pass
+        '''Create a notification for a single parent'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        parent = session.query(Parent).get(parent_id)
+        if not parent:
+            return build_response(error='Parent not found.', links=links), 404
+
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='one_parent', parent_id=parent_id)
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'],
+                 'scope': 'one_parent', 'parent_id': parent_id}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list parent notifications'''
-        pass
+        '''List notifications for this parent'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='one_parent').filter_by(parent_id=parent_id).all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'parent_id': parent_id})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/teacher/', methods=['GET', 'POST'])
 @auth_check
 def notification_teachers():
     if request.method == 'POST':
-        '''create notification to all teachers'''
-        pass
+        '''Create a notification for all teachers'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='teachers')
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'], 'scope': 'teachers'}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list notifications to all teachers'''
-        pass
+        '''List notifications for all teachers'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='teachers').all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/teacher/<int:teacher_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_teacher_with_id(teacher_id):
     if request.method == 'POST':
-        '''create notification for a teacher'''
-        pass
+        '''Create a notification for a single teacher'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        teacher = session.query(Teacher).get(teacher_id)
+        if not teacher:
+            return build_response(error='Teacher not found.', links=links), 404
+
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='one_teacher', teacher_id=teacher_id)
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'],
+                 'scope': 'one_teacher', 'teacher_id': teacher_id}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list a teacher's notifications'''
-        pass
+        '''List notifications for a single teacher'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='one_teacher').filter_by(teacher_id=teacher_id).all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'teacher_id': teacher_id})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/class/<int:class_id>/', methods=['GET', 'POST'])
 @auth_check
 def notification_class(class_id):
     if request.method == 'POST':
-        '''create class-wide notification'''
-        pass
+        '''Create a class-wide notification'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        c = session.query(Class).get(class_id)
+        if not c:
+            return build_response(error='Class not found.', links=links), 404
+
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class', class_id=class_id)
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'],
+                 'scope': 'class', 'class_id': class_id}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list class-wide notifications'''
-        pass
+        '''List class-wide notifications'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='class').filter_by(class_id=class_id).all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'class_id': class_id})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/class/<int:class_id>/parents/', methods=['GET', 'POST'])
 @auth_check
 def notification_class_parents(class_id):
     if request.method == 'POST':
-        '''create a notification for the parents in a class'''
-        pass
+        '''Create a notification for the parents in a class'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        c = session.query(Class).get(class_id)
+        if not c:
+            return build_response(error='Class not found.', links=links), 404
+
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class_parents', class_id=class_id)
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'],
+                 'scope': 'class_parents', 'class_id': class_id}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list all notifications for the parents in a class'''
-        pass
+        '''List all notifications for the parents in a class'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='class_parents').filter_by(class_id=class_id).all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'class_id': class_id})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+
 
 @app.route('/admin/notification/class/<int:class_id>/teachers/', methods=['GET', 'POST'])
 @auth_check
 def notification_class_teachers(class_id):
     if request.method == 'POST':
-        '''create a notification for the teachers in a class'''
-        pass
+        '''Create a notification for the teachers in a class'''
+        
+        # hypermedia
+        # TODO
+        links = []
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        c = session.query(Class).get(class_id)
+        if not c:
+            return build_response(error='Class not found.', links=links), 404
+
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # create new object
+        new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class_teachers', class_id=class_id)
+
+        # insert object in database
+        session.add(new_notification)
+        session.commit()
+
+        # build response object
+        n_obj = {'id': new_notification.id, 'date': str(new_notification.date), 'text': data['text'],
+                 'scope': 'class_teachers', 'class_id': class_id}
+        res = {'notification': n_obj}
+
+        # more hypermedia
+
+        return build_response(res, links=links), 201
+        
     else:
-        '''list all notifications for the teachers in a class'''
-        pass
+        '''List all notifications for the teachers in a class'''
+
+        # hypermedia
+        # TODO
+        links = []
+
+        # query
+        nots = session.query(Notification).filter_by(scope='class_teachers').filter_by(class_id=class_id).all()
+
+        # check query results
+        if not nots:
+            return build_response(error='No notifications found for this scope.', links=links), 404
+
+        # build response object
+        n_list = []
+        for n in nots:
+            n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'class_id': class_id})
+        res = {'notifications': n_list}
+
+        # more hypermedia
+
+        return build_response(res, links=links)
+

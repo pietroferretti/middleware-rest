@@ -42,25 +42,25 @@ teachers_classes_table = Table('teachers_classes', Base.metadata,
                                )
 
 # probabilmente non è il modo migliore di gestire le notification
-teachers_notifications_table = Table('teachers_notifications', Base.metadata,
-                                     Column('teacher_id', Integer, ForeignKey('teacher.id')),
-                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-                                     )
+# teachers_notifications_table = Table('teachers_notifications', Base.metadata,
+#                                      Column('teacher_id', Integer, ForeignKey('teacher.id')),
+#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                      )
 
-parents_notifications_table = Table('parents_notifications', Base.metadata,
-                                    Column('parent_id', Integer, ForeignKey('parent.id')),
-                                    Column('notification_id', Integer, ForeignKey('notification.id'))
-                                    )
+# parents_notifications_table = Table('parents_notifications', Base.metadata,
+#                                     Column('parent_id', Integer, ForeignKey('parent.id')),
+#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                     )
 
-classes_notifications_table = Table('classes_notifications', Base.metadata,
-                                    Column('class_id', Integer, ForeignKey('class.id')),
-                                    Column('notification_id', Integer, ForeignKey('notification.id'))
-                                    )
+# classes_notifications_table = Table('classes_notifications', Base.metadata,
+#                                     Column('class_id', Integer, ForeignKey('class.id')),
+#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                     )
 
-students_notifications_table = Table('students_notifications', Base.metadata,
-                                     Column('student_id', Integer, ForeignKey('student.id')),
-                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-                                     )
+# students_notifications_table = Table('students_notifications', Base.metadata,
+#                                      Column('student_id', Integer, ForeignKey('student.id')),
+#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                      )
 
 
 class Student(Base):
@@ -71,7 +71,7 @@ class Student(Base):
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     parent_id = Column(Integer, ForeignKey('parent.id'))
-    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
+#    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
     class_id = Column(Integer, ForeignKey('class.id'))
     grades = relationship("Grade")
 
@@ -86,7 +86,8 @@ class Teacher(Base):
     subjects = relationship("Subject")
     appointments = relationship("Appointment")
     classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
-    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
+#    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
+
 
 
 class Subject(Base):
@@ -108,7 +109,7 @@ class Parent(Base):
     lastname = Column(String(50), nullable=False)
     children = relationship("Student")
     appointments = relationship("Appointment")
-    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
+#    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
     payments = relationship("Payment")
 
 
@@ -117,7 +118,7 @@ class Class(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(2), nullable=False, unique=True)
     room = Column(String(5), nullable=False)
-    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
+#    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
     subjects = relationship("Subject")
 
@@ -138,10 +139,16 @@ class Notification(Base):
         CheckConstraint("scope IN " + scopes_list),
         # one_teacher => teacher_id is set
         CheckConstraint("NOT (scope == 'one_teacher') OR teacher_id IS NOT NULL"),
+        # teacher_id is set => one_teacher
+        CheckConstraint("teacher_id IS NULL OR scope == 'one_teacher'"),
         # one_parent => parent_id is set
         CheckConstraint("NOT (scope == 'one_parent') OR parent_id IS NOT NULL"),
+        # parent_id is set => one_parent
+        CheckConstraint("parent_id IS NULL OR scope == 'one_parent'"),
         # class, class_teachers, class_parents => class_id is set
-        CheckConstraint("NOT (scope == 'class' OR scope == 'class_teachers' OR scope == 'class_parents') OR teacher_id IS NOT NULL")
+        CheckConstraint("NOT scope IN ('class', 'class_teachers', 'class_parents') OR teacher_id IS NOT NULL"),
+        # class_id is set => class, class_teachers, class_parents
+        CheckConstraint("teacher_id IS NULL OR scope IN ('class', 'class_teachers', 'class_parents')")
     )
 
 
@@ -191,8 +198,12 @@ class Account(Base):
         CheckConstraint("type IN " + types_list),
         # teacher => teacher_id is set
         CheckConstraint("NOT (type == 'teacher') OR teacher_id IS NOT NULL"),
+        # teacher_id is set => teacher
+        CheckConstraint("teacher_id IS NULL OR type == 'teacher'"),
         # parent => parent_id is set
         CheckConstraint("NOT (type == 'parent') OR parent_id IS NOT NULL"),
+        # parent_id is set => parent
+        CheckConstraint("parent_id IS NULL OR type == 'parent'")
     )
 
 # Bind the engine to the metadata of the Base class so that the
