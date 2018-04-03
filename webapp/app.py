@@ -800,14 +800,15 @@ def parent_child_with_id(parent_id, student_id):
 
     c = session.query(Class).filter_by(id=student.class_id).first()
 
-    if not c:
-        res = 'Not enrolled.'
-    else:
-        subjects = []
-        for s in c.subjects:
-            subjects.append({'id': s.id, 'name': s.name})
+    # if not c:
+    #     res = 'Not enrolled.'
+    # else:
+    # ASSUMPTION: every student has a class associated
+    subjects = []
+    for s in c.subjects:
+        subjects.append({'id': s.id, 'name': s.name})
 
-        res = {'id': c.id, 'name': c.name, 'room': c.room, 'subjects': subjects}
+    res = {'id': c.id, 'name': c.name, 'room': c.room, 'subjects': subjects}
 
     return build_response(
         {'student': {'name': student.name, 'lastname': student.lastname, 'id': student.id, 'class': res}})
@@ -843,7 +844,6 @@ def parent_child_data(parent_id, student_id):
 
         return build_response({'message': 'Update successful.'})
 
-
     else:
         '''show child personal data'''
         return build_response({'data': {'name': student.name, 'lastname': student.lastname, 'id': student.id}})
@@ -870,7 +870,21 @@ def parent_child_grades(parent_id, student_id):
 @auth_check
 def parent_child_teacher(parent_id, student_id):
     '''list all child's teachers'''
-    pass
+
+    if not parent:
+        return build_response(None, 'Parent not found.')
+
+    student = session.query(Student).filter_by(parent_id=parent_id).filter_by(id=student_id).one()
+
+    if not student:
+        return build_response(None, 'Student not found.')
+
+    c = session.query(Class).filter_by(id=student.class_id).first()
+
+    if not c:
+        res = 'Not enrolled.'
+    
+
 
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check

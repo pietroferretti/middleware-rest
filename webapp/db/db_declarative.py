@@ -69,9 +69,9 @@ class Student(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
-    parent_id = Column(Integer, ForeignKey('parent.id'))
+    parent_id = Column(Integer, ForeignKey('parent.id'), nullable=False)
     notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
-    class_id = Column(Integer, ForeignKey('class.id'))
+    class_id = Column(Integer, ForeignKey('class.id'), nullable=True)
     grades = relationship("Grade")
 
 
