@@ -1,5 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
-from sqlalchemy import create_engine, Table
+from sqlalchemy import Table, Column, ForeignKey, CheckConstraint
+from sqlalchemy import Integer, String, DateTime, Boolean
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -41,25 +42,25 @@ teachers_classes_table = Table('teachers_classes', Base.metadata,
                                )
 
 # probabilmente non è il modo migliore di gestire le notification
-teachers_notifications_table = Table('teachers_notifications', Base.metadata,
-                                     Column('teacher_id', Integer, ForeignKey('teacher.id')),
-                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-                                     )
+# teachers_notifications_table = Table('teachers_notifications', Base.metadata,
+#                                      Column('teacher_id', Integer, ForeignKey('teacher.id')),
+#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                      )
 
-parents_notifications_table = Table('parents_notifications', Base.metadata,
-                                    Column('parent_id', Integer, ForeignKey('parent.id')),
-                                    Column('notification_id', Integer, ForeignKey('notification.id'))
-                                    )
+# parents_notifications_table = Table('parents_notifications', Base.metadata,
+#                                     Column('parent_id', Integer, ForeignKey('parent.id')),
+#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                     )
 
-classes_notifications_table = Table('classes_notifications', Base.metadata,
-                                    Column('class_id', Integer, ForeignKey('class.id')),
-                                    Column('notification_id', Integer, ForeignKey('notification.id'))
-                                    )
+# classes_notifications_table = Table('classes_notifications', Base.metadata,
+#                                     Column('class_id', Integer, ForeignKey('class.id')),
+#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                     )
 
-students_notifications_table = Table('students_notifications', Base.metadata,
-                                     Column('student_id', Integer, ForeignKey('student.id')),
-                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-                                     )
+# students_notifications_table = Table('students_notifications', Base.metadata,
+#                                      Column('student_id', Integer, ForeignKey('student.id')),
+#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
+#                                      )
 
 
 class Student(Base):
@@ -69,9 +70,9 @@ class Student(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
-    parent_id = Column(Integer, ForeignKey('parent.id'), nullable=False)
-    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
-    class_id = Column(Integer, ForeignKey('class.id'), nullable=True)
+    parent_id = Column(Integer, ForeignKey('parent.id'))
+#    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
+    class_id = Column(Integer, ForeignKey('class.id'))
     grades = relationship("Grade")
 
 
@@ -80,13 +81,13 @@ class Teacher(Base):
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    pwd = Column(String(16), nullable=False)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     subjects = relationship("Subject")
     appointments = relationship("Appointment")
     classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
-    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
+#    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
+
 
 
 class Subject(Base):
@@ -104,12 +105,11 @@ class Parent(Base):
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    pwd = Column(String(16), nullable=False)
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     children = relationship("Student")
     appointments = relationship("Appointment")
-    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
+#    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
     payments = relationship("Payment")
 
 
@@ -118,7 +118,7 @@ class Class(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(2), nullable=False, unique=True)
     room = Column(String(5), nullable=False)
-    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
+#    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
     subjects = relationship("Subject")
 
@@ -127,8 +127,29 @@ class Notification(Base):
     __tablename__ = 'notification'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
-    text = Column(String(200), nullable=False)
-    # scope =
+    text = Column(String(10000))
+    scope = Column(String(20), nullable=False)
+    teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    parent_id = Column(Integer, ForeignKey('parent.id'))
+    class_id = Column(Integer, ForeignKey('class.id'))
+    # constraints
+    scopes_list = "('all', 'teachers', 'parents', 'one_teacher', 'one_parent', 'class', 'class_teachers', 'class_parents')"
+    __table_args__ = (
+        # possible scopes
+        CheckConstraint("scope IN " + scopes_list),
+        # one_teacher => teacher_id is set
+        CheckConstraint("NOT (scope == 'one_teacher') OR teacher_id IS NOT NULL"),
+        # teacher_id is set => one_teacher
+        CheckConstraint("teacher_id IS NULL OR scope == 'one_teacher'"),
+        # one_parent => parent_id is set
+        CheckConstraint("NOT (scope == 'one_parent') OR parent_id IS NOT NULL"),
+        # parent_id is set => one_parent
+        CheckConstraint("parent_id IS NULL OR scope == 'one_parent'"),
+        # class, class_teachers, class_parents => class_id is set
+        CheckConstraint("NOT scope IN ('class', 'class_teachers', 'class_parents') OR teacher_id IS NOT NULL"),
+        # class_id is set => class, class_teachers, class_parents
+        CheckConstraint("teacher_id IS NULL OR scope IN ('class', 'class_teachers', 'class_parents')")
+    )
 
 
 class Appointment(Base):
@@ -136,6 +157,8 @@ class Appointment(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
     room = Column(String(5), nullable=False)
+    teacher_accepted = Column(Boolean, nullable=False)
+    parent_accepted = Column(Boolean, nullable=False)
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
     parent_id = Column(Integer, ForeignKey('parent.id'))
 
@@ -159,6 +182,29 @@ class Grade(Base):
     student_id = Column(Integer, ForeignKey('student.id'))
     value = Column(Integer, nullable=False)
 
+
+class Account(Base):
+    __tablename__ = 'account'
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    teacher_id = Column(Integer, ForeignKey('teacher.id'))
+    parent_id = Column(Integer, ForeignKey('parent.id'))
+    # constraints
+    types_list = "('admin', 'teacher', 'parent')"
+    __table_args__ = (
+        # possible types
+        CheckConstraint("type IN " + types_list),
+        # teacher => teacher_id is set
+        CheckConstraint("NOT (type == 'teacher') OR teacher_id IS NOT NULL"),
+        # teacher_id is set => teacher
+        CheckConstraint("teacher_id IS NULL OR type == 'teacher'"),
+        # parent => parent_id is set
+        CheckConstraint("NOT (type == 'parent') OR parent_id IS NOT NULL"),
+        # parent_id is set => parent
+        CheckConstraint("parent_id IS NULL OR type == 'parent'")
+    )
 
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
