@@ -915,18 +915,50 @@ def parent_child_teacher(parent_id, student_id):
 
     if not c:
         res = 'Not enrolled.'
-    
 
 
+# todo capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def parent_appointment(parent_id):
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    if not parent:
+        return build_response(None, 'Parent not found.')
+
     if request.method == 'POST':
         '''create new appointment'''
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' not in data or 'room' not in data or 'teacher_id' not in data:
+            return build_response(error='The JSON structure must contain all the requested parameters.',
+                                  links=links), 400
+
+        new_appointment = Appointment(date=datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S'), room=data['room'],
+                                      teacher_accepted=0, parent_accepted=1, teacher_id=data['teacher_id'],
+                                      parent_id=parent_id)
+
+        session.add(new_appointment)
+        session.commit()
+
+        new_id = new_appointment.id
+        return build_response({'id': new_id}), 201
+
+
     else:
         '''show all appointments'''
-        pass
+        appointments = []
+        for a in parent.appointments:
+            teacher = session.query(Teacher).filter_by(id=a.teacher_id).one()
+            appointments.append({'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
+                                 'parent_accepted': a.parent_accepted,
+                                 'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}})
+
+        return build_response(appointments)
+
 # TODO calendar-like support
 
 @app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
@@ -1031,6 +1063,13 @@ def parent_pay(parent_id, payment_id):
 @auth_check
 def parent_notifications(parent_id):
     '''show notifications for this parent'''
+    # notifications = session.query(Notification).filter_by(parent_id=parent_id).all()
+
+    # if not notifications:
+    #     return build_response(None, 'Data not found.')
+
+    # notifications_list = []
+    # for n in notifications
     pass
 
 
