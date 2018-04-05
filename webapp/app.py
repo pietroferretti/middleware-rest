@@ -1146,14 +1146,49 @@ def parent_pay(parent_id, payment_id):
 @auth_check
 def parent_notifications(parent_id):
     '''show notifications for this parent'''
-    # notifications = session.query(Notification).filter_by(parent_id=parent_id).all()
+    parent = session.query(Parent).filter_by(id=parent_id).one()
+    if not parent:
+        return build_response(None, 'Parent not found.')
+    # fixme cos'è class in scope?
 
-    # if not notifications:
-    #     return build_response(None, 'Data not found.')
+    notifications_all = session.query(Notification).filter_by(scope='all').all()
+    notifications_parents = session.query(Notification).filter_by(scope='parents').all()
+    notifications_one_parent = session.query(Notification).filter_by(scope='one_parent').filter_by(
+        parent_id=parent_id).all()
 
-    # notifications_list = []
-    # for n in notifications
-    pass
+    children_not_list = []
+
+    for c in parent.children:
+        notifications_class_parent = session.query(Notification).filter_by(class_id=c.class_id).filter_by(
+            scope='class_parent').all()
+
+        child_not_list = []
+        for n in notifications_class_parent:
+            child_not_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+        children_not_list.append(
+            {'student': {'id': c.id, 'name': c.name, 'lastname': c.lastname}, 'notifications': child_not_list})
+
+    if not notifications_all or not notifications_parents or not notifications_one_parent or not children_not_list:
+        return build_response(None, 'Data not found.')
+
+    notifications_parents_list = []
+    for n in notifications_parents:
+        notifications_parents_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    notifications_all_list = []
+    for n in notifications_all:
+        notifications_all_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    notifications_one_parent_list = []
+    for n in notifications_one_parent:
+        notifications_one_parent_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    build_response([{'scope': 'class_parent', 'scope_notifications': children_not_list},
+                    {'scope': 'parents', 'scope_notifications': notifications_parents_list},
+                    {'scope': 'all', 'scope_notifications': notifications_all_list},
+                    {'scope': 'one_parent', 'scope_notifications': notifications_one_parent_list}])
+    
 
 
 '''ADMIN STUFF'''
