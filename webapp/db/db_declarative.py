@@ -160,7 +160,7 @@ class Appointment(Base):
     __tablename__ = 'appointment'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
-    room = Column(String(5), nullable=False)
+    room = Column(String(5), nullable=True)
     teacher_accepted = Column(Boolean, nullable=False)
     parent_accepted = Column(Boolean, nullable=False)
     teacher_id = Column(Integer, ForeignKey('teacher.id'))

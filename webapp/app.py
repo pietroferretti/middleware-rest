@@ -56,6 +56,9 @@ def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **k
             'rel': rel}]
 
 
+def check_appointment_time_constraint(date):
+    return (date.minute == 30 or date.minute == 00) and (date.hour > 7 and date.hour < 13)
+
 def get_index(url):
     if url.startswith('/admin'):
         return 'admin', {}
@@ -315,6 +318,7 @@ def teacher_data(teacher_id):
         # check if the teacher was found
         if not teacher:
             return build_response(None, error='Teacher id not found.'), 404
+
         res = {'name': teacher.name, 
                'lastname': teacher.lastname}
 
@@ -546,7 +550,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         if 'date' not in data or 'value' not in data:
             return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
 
-        date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+        date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
         value = data['value']
 
         new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
@@ -575,7 +579,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
             return build_response(None, error='Grade not found.'), 404
 
         if 'date' in data:
-            grade.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            grade.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
 
         if 'value' in data:
             grade.value = int(data['value'])
@@ -626,7 +630,7 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         #     return build_response(None, error='The JSON structure must contain all the requested parameters.'), 400
 
         for grade in data['grades']:
-            date = datetime.strptime(grade['date'], '%Y-%m-%d %H:%M:%S')
+            date = datetime.strptime(grade['date'], '%Y-%m-%d %H:%M')
             value = grade['value']
             student_id = grade['student_id']
 
@@ -676,11 +680,37 @@ def teacher_timetable(teacher_id):
     pass
 
 
+
 # fixme cambiare risultati appointment
-@app.route('/teacher/<int:teacher_id>/appointment/')
+@app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
+    if request.method == 'POST':
+        '''create new appointment'''
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' not in data or 'parent_id' not in data or 'room' not in data:
+            return build_response(error='The JSON structure must contain all the requested parameters.',
+                                  links=links), 400
+
+        new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+
+        if (check_appointment_time_constraint(new_date)):
+            new_appointment = Appointment(date=new_date, teacher_accepted=1, parent_accepted=0, teacher_id=teacher_id,
+                                          room=data['room'], parent_id=data['parent_id'])
+            session.add(new_appointment)
+            session.commit()
+            new_id = new_appointment.id
+            return build_response({'id': new_id}), 201
+
+        else:
+            return build_response(None, error='Wrong date/time.'), 400
+
     '''show list of appointments for a teacher'''
+
     appointments_list = session.query(Appointment).filter_by(teacher_id=teacher_id).all()
 
     if not appointments_list:
@@ -714,13 +744,23 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             return build_response(None, error='The request was not valid JSON.'), 400
 
         if 'date' in data:
-            appointment.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+
+            if (check_appointment_time_constraint(new_date)):
+                appointment.date = new_date
+                appointment.parent_accepted = 0
+            else:
+                return build_response(None, error='Wrong date/time.'), 400
+
 
         if 'room' in data:
             appointment.room = data['room']
 
         if 'parent_id' in data:
+            if int(data['parent_id']) != appointment.parent_id:
+                appointment.parent_accepted = 0
             appointment.parent_id = int(data['parent_id'])
+
 
         if 'teacher_accepted' in data:
             appointment.teacher_accepted = int(data['teacher_accepted'])
@@ -735,7 +775,8 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
                                                'teacher_accepted': appointment.teacher_accepted,
                                                'parent_accepted': appointment.parent_accepted,
-                                               'parent': {'name': parent.name, 'lastname': parent.lastname}}})
+                                               'parent': {'id': parent.id, 'name': parent.name,
+                                                          'lastname': parent.lastname}}})
 
 @app.route('/teacher/<int:teacher_id>/notifications/')
 @auth_check
@@ -937,19 +978,22 @@ def parent_appointment(parent_id):
         except TypeError:
             return build_response(None, error='The request was not valid JSON.'), 400
 
-        if 'date' not in data or 'room' not in data or 'teacher_id' not in data:
+        if 'date' not in data or 'teacher_id' not in data:
             return build_response(error='The JSON structure must contain all the requested parameters.',
                                   links=links), 400
 
-        new_appointment = Appointment(date=datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S'), room=data['room'],
-                                      teacher_accepted=0, parent_accepted=1, teacher_id=data['teacher_id'],
-                                      parent_id=parent_id)
+        new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
 
-        session.add(new_appointment)
-        session.commit()
+        if (check_appointment_time_constraint(new_date)):
+            new_appointment = Appointment(date=new_date, teacher_accepted=0, parent_accepted=1,
+                                          teacher_id=data['teacher_id'], parent_id=parent_id)
+            session.add(new_appointment)
+            session.commit()
+            new_id = new_appointment.id
+            return build_response({'id': new_id}), 201
 
-        new_id = new_appointment.id
-        return build_response({'id': new_id}), 201
+        else:
+            return build_response(None, error='Wrong date/time.'), 400
 
 
     else:
@@ -982,12 +1026,17 @@ def parent_appointment_with_id(parent_id, appointment_id):
             return build_response(None, error='The request was not valid JSON.'), 400
 
         if 'date' in data:
-            appointment.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
 
-        if 'room' in data:
-            appointment.room = data['room']
+            if (check_appointment_time_constraint(new_date)):
+                appointment.date = new_date
+                appointment.parent_accepted = 0
+            else:
+                return build_response(None, error='Wrong date/time.'), 400
 
         if 'teacher_id' in data:
+            if int(data['teacher_id']) != appointment.teacher_id:
+                appointment.teacher_accepted = 0
             appointment.teacher_id = int(data['teacher_id'])
 
         if 'parent_accepted' in data:
@@ -1733,7 +1782,7 @@ def payment():
         amount = data['amount']
         reason = data['reason']
         try:
-            date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
         except (ValueError, TypeError):
             return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
                                   links=links), 400
@@ -1840,7 +1889,7 @@ def payment_parent(parent_id):
         amount = data['amount']
         reason = data['reason']
         try:
-            date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
         except (ValueError, TypeError):
             return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
                                   links=links), 400
