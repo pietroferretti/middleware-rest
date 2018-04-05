@@ -690,12 +690,12 @@ def teacher_appointment(teacher_id):
     for a in appointments_list:
         parent = session.query(Parent).filter_by(id=a.parent_id).one()
         appointments.append({'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
+                                             'parent_accepted': a.parent_accepted,
+                                             'teacher_accepted': a.teacher_accepted,
                                              'parent': {'name': parent.name, 'lastname': parent.lastname}}})
 
     return build_response(appointments)
 
-
-# fixme cambiare risultati appointment
 
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
@@ -722,6 +722,9 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         if 'parent_id' in data:
             appointment.parent_id = int(data['parent_id'])
 
+        if 'teacher_accepted' in data:
+            appointment.teacher_accepted = int(data['teacher_accepted'])
+
         session.commit()
         return build_response({'message': 'Update successful.'})
         
@@ -729,9 +732,10 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         '''show appointment info'''
         parent = session.query(Parent).filter_by(id=appointment.parent_id).one()
 
-        return build_response({'appointment': {'id': appointment.id, 'date': appointment.date, 'room': appointment.room,
-                                               'parent': {'name': parent.name,
-                                                          'lastname': parent.lastname}}})
+        return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
+                                               'teacher_accepted': appointment.teacher_accepted,
+                                               'parent_accepted': appointment.parent_accepted,
+                                               'parent': {'name': parent.name, 'lastname': parent.lastname}}})
 
 @app.route('/teacher/<int:teacher_id>/notifications/')
 @auth_check
@@ -964,12 +968,42 @@ def parent_appointment(parent_id):
 @app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def parent_appointment_with_id(parent_id, appointment_id):
+    appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(parent_id=parent_id).one()
+
+    if not appointment:
+        return build_response(None, 'Appointment not found.')
+
+
     if request.method == 'PUT':
         '''edit appointment'''
-        pass
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(None, error='The request was not valid JSON.'), 400
+
+        if 'date' in data:
+            appointment.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+
+        if 'room' in data:
+            appointment.room = data['room']
+
+        if 'teacher_id' in data:
+            appointment.teacher_id = int(data['teacher_id'])
+
+        if 'parent_accepted' in data:
+            appointment.parent_accepted = int(data['parent_accepted'])
+
+        session.commit()
+
+        return build_response({'message': 'Update successful.'})
     else:
         '''show appointment info'''
-        pass
+        teacher = session.query(Teacher).filter_by(id=appointment.teacher_id).one()
+
+        return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
+                                               'teacher_accepted': appointment.teacher_accepted,
+                                               'parent_accepted': appointment.parent_accepted,
+                                               'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}})
 
 
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
