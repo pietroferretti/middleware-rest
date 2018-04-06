@@ -1159,18 +1159,16 @@ def parent_notifications(parent_id):
     children_not_list = []
 
     for c in parent.children:
-        notifications_class_parent = session.query(Notification).filter_by(class_id=c.class_id).filter_by(
-            scope='class_parent').all()
+        notifications_class_parent = session.query(Notification).filter_by(class_id=c.class_id).all()
 
         child_not_list = []
         for n in notifications_class_parent:
-            child_not_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+            child_not_list.append(
+                {'notification': {'id': n.id, 'date': n.date, 'text': n.text, 'class_notification_scope': n.scope}})
 
         children_not_list.append(
             {'student': {'id': c.id, 'name': c.name, 'lastname': c.lastname}, 'notifications': child_not_list})
 
-    if not notifications_all or not notifications_parents or not notifications_one_parent or not children_not_list:
-        return build_response(None, 'Data not found.')
 
     notifications_parents_list = []
     for n in notifications_parents:
@@ -1184,13 +1182,13 @@ def parent_notifications(parent_id):
     for n in notifications_one_parent:
         notifications_one_parent_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
 
-    build_response([{'scope': 'class_parent', 'scope_notifications': children_not_list},
-                    {'scope': 'parents', 'scope_notifications': notifications_parents_list},
-                    {'scope': 'all', 'scope_notifications': notifications_all_list},
-                    {'scope': 'one_parent', 'scope_notifications': notifications_one_parent_list}])
-    
+    return build_response([{'scope': 'class', 'scope_notifications': children_not_list},
+                           {'scope': 'parents', 'scope_notifications': notifications_parents_list},
+                           {'scope': 'all', 'scope_notifications': notifications_all_list},
+                           {'scope': 'one_parent', 'scope_notifications': notifications_one_parent_list}])
 
 
+z
 '''ADMIN STUFF'''
 
 @app.route('/admin/', methods=['GET', 'POST'])

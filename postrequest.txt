@@ -6,3 +6,7 @@ curl -H "Content-Type: application/json"  -X POST -d '{"grades":[{"student_id":3
 
 
 curl -H "Content-Type: application/json"  -X POST -d '{"grades":[{"student_id":2, "value":1, "date":"21 7 2018"},{"student_id":2, "value":5, "date":"21 7 2018"}]}' http://127.0.0.1:5000/teacher/1/class/1/subject/1/grade/
+
+curl -H "Content-Type: application/json"  -X POST -d '{"date":"2018-4-25 11:30", "room":"A", "parent_id":3}' http://127.0.0.1:5000/teacher/2 /appointment/
+
+

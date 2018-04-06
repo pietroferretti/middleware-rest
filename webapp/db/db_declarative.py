@@ -150,10 +150,11 @@ class Notification(Base):
         # parent_id is set => one_parent
         CheckConstraint("parent_id IS NULL OR scope == 'one_parent'"),
         # class, class_teachers, class_parents => class_id is set
-        CheckConstraint("NOT scope IN ('class', 'class_teachers', 'class_parents') OR teacher_id IS NOT NULL"),
+        CheckConstraint("NOT scope IN ('class', 'class_teachers', 'class_parents') OR class_id IS NOT NULL"),
         # class_id is set => class, class_teachers, class_parents
-        CheckConstraint("teacher_id IS NULL OR scope IN ('class', 'class_teachers', 'class_parents')")
+        CheckConstraint("class_id IS NULL OR scope IN ('class', 'class_teachers', 'class_parents')")
     )
+
 
 
 class Appointment(Base):
@@ -261,4 +262,8 @@ session = create_session()
 
 # new_payment = Payment(date=datetime.strptime('2017-5-3 14:30:00', '%Y-%m-%d %H:%M:%S'), amount=500,reason='enrollment taxes', is_pending=0,parent_id=1)
 # session.add(new_payment)
+# session.commit()
+
+# new_notification = Notification(date=datetime.strptime('2018-4-6', '%Y-%m-%d'), text='prova per class_parents', scope='class_parents', parent_id=1)
+# session.add(new_notification)
 # session.commit()
