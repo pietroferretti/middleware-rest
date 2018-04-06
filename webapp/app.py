@@ -919,7 +919,7 @@ def admin():
         session.commit()
 
         # build response object
-        a_obj = {'username': data['username'], 'type': 'admin'}
+        a_obj = {'username': data['username'], 'role': 'admin'}
         res = {'account': a_obj}
 
         return build_response(res, links=links), 201
@@ -995,7 +995,7 @@ def admin_teacher():
 
         # return teacher, account objects
         t_obj = {'id': new_teacher.id, 'name': name, 'lastname': lastname}
-        a_obj = {'username': username, 'type': 'teacher', 'teacher_id': new_teacher.id}
+        a_obj = {'username': username, 'role': 'teacher', 'teacher_id': new_teacher.id}
         res = {'teacher': t_obj, 'account': a_obj}
 
         # more hypermedia
@@ -1109,7 +1109,7 @@ def admin_parent():
 
         # return parent, account objects
         p_obj = {'id': new_parent.id, 'name': name, 'lastname': lastname}
-        a_obj = {'username': username, 'type': 'parent', 'parent_id': new_parent.id}
+        a_obj = {'username': username, 'role': 'parent', 'parent_id': new_parent.id}
         res = {'parent': p_obj, 'account': a_obj}
 
         # more hypermedia
