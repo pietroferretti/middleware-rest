@@ -1,0 +1,57 @@
+{
+    "url_template": "/endpoint/{id}/other/{stuff}",
+    "template_parameters": [
+        {
+            "id": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/myid"
+            },
+            "stuff": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/stuff"
+            }
+        }
+    ],
+    "actions": [
+        {
+            "method": "GET",
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "entity": "http://entities.highschool.com/parent_id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/name"
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "inputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "newdata": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/data"
+                    }
+                }
+            },
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/text"
+                    }
+                }
+            }
+        }
+    ]
+}
