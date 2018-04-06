@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 import IPython
+from datetime import datetime, timedelta
+
 
 
 def create_session():
@@ -71,7 +73,7 @@ class Student(Base):
     name = Column(String(50), nullable=False)
     lastname = Column(String(50), nullable=False)
     parent_id = Column(Integer, ForeignKey('parent.id'))
-#    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
+    #    notifications = relationship("Notification", secondary=students_notifications_table, backref='students')
     class_id = Column(Integer, ForeignKey('class.id'))
     grades = relationship("Grade")
 
@@ -86,6 +88,8 @@ class Teacher(Base):
     subjects = relationship("Subject")
     appointments = relationship("Appointment")
     classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
+
+
 #    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
 
 
@@ -109,7 +113,7 @@ class Parent(Base):
     lastname = Column(String(50), nullable=False)
     children = relationship("Student")
     appointments = relationship("Appointment")
-#    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
+    #    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
     payments = relationship("Payment")
 
 
@@ -118,7 +122,7 @@ class Class(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(2), nullable=False, unique=True)
     room = Column(String(5), nullable=False)
-#    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
+    #    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
     subjects = relationship("Subject")
 
@@ -156,11 +160,12 @@ class Appointment(Base):
     __tablename__ = 'appointment'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
-    room = Column(String(5), nullable=False)
+    room = Column(String(5), nullable=True)
     teacher_accepted = Column(Boolean, nullable=False)
     parent_accepted = Column(Boolean, nullable=False)
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
     parent_id = Column(Integer, ForeignKey('parent.id'))
+
 
 
 class Payment(Base):
@@ -216,6 +221,7 @@ Base.metadata.create_all(engine)
 session = create_session()
 # IPython.embed()
 
+
 # rs = session.query(Parent).first()
 # rs.name
 # rs.id
@@ -246,4 +252,13 @@ session = create_session()
 
 # new_student = Student(name='Rosa', lastname='Monte', parent_id= 8)
 # session.add(new_student)
+# session.commit()
+
+# new_appointment = Appointment(date=datetime.strptime('2018-5-3 14:30:00', '%Y-%m-%d %H:%M:%S'), room='A', teacher_accepted=0,parent_accepted=1, teacher_id=2, parent_id=1)
+# session.add(new_appointment)
+# session.commit()
+
+
+# new_payment = Payment(date=datetime.strptime('2017-5-3 14:30:00', '%Y-%m-%d %H:%M:%S'), amount=500,reason='enrollment taxes', is_pending=0,parent_id=1)
+# session.add(new_payment)
 # session.commit()
