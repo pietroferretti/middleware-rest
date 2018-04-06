@@ -99,7 +99,7 @@ class Subject(Base):
     __tablename__ = 'subject'
     id = Column(Integer, primary_key=True)
     name = Column(String(10), nullable=False)
-    # timetable??
+    timetable = Column(String(500), nullable=False)
     teacher_id = Column(Integer, ForeignKey('teacher.id'))
     class_id = Column(Integer, ForeignKey('class.id'))
 

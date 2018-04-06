@@ -671,13 +671,36 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 def teacher_class_timetable(teacher_id, class_id):
     '''show timetable for that class'''
     # FIXME serve? informazioni complete vengono date da /class/
-    pass
+    subjects = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
+
+    if not subjects:
+        return build_response(None, 'Data not found.')
+
+    timetable = []
+
+    for s in subjects:
+        c = session.query(Class).filter_by(id=s.class_id).one()
+        timetable.append({'subjects_name': s.name, 'schedule': s.timetable})
+
+    return build_response(timetable)
 
 @app.route('/teacher/<int:teacher_id>/timetable/')
 @auth_check
 def teacher_timetable(teacher_id):
     '''show complete timetable for a teacher'''
-    pass
+    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+
+    if not teacher:
+        return build_response(None, 'Teacher not found.')
+
+    timetable = []
+
+    for s in teacher.subjects:
+        c = session.query(Class).filter_by(id=s.class_id).one()
+        timetable.append(
+            {'subjects_name': s.name, 'schedule': s.timetable, 'class': {'name': c.name, 'id': c.id, 'room': c.room}})
+
+    return build_response(timetable)
 
 
 
