@@ -787,11 +787,40 @@ def teacher_notifications(teacher_id):
     if not teacher:
         return build_response(None, error='Teacher not found.')
 
-    notifications = []
-    for n in teacher.notifications:
-        notifications.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+    notifications_all = session.query(Notification).filter_by(scope='all').all()
+    notifications_teachers = session.query(Notification).filter_by(scope='teachers').all()
+    notifications_one_teacher = session.query(Notification).filter_by(scope='one_teacher').filter_by(
+        teacher_id=teacher_id).all()
 
-    return build_response(notifications)
+    classes_not_list = []
+    for c in teacher.classes:
+
+        notifications_class = session.query(Notification).filter_by(class_id=c.id).all()
+
+        class_not_list = []
+        for n in notifications_class:
+            class_not_list.append(
+                {'notification': {'id': n.id, 'date': n.date, 'text': n.text, 'class_notification_scope': n.scope}})
+
+        classes_not_list.append(
+            {'class': {'id': c.id, 'name': c.name}, 'notifications': class_not_list})
+
+    notifications_teachers_list = []
+    for n in notifications_teachers:
+        notifications_teachers_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    notifications_all_list = []
+    for n in notifications_all:
+        notifications_all_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    notifications_one_teacher_list = []
+    for n in notifications_one_teacher:
+        notifications_one_teacher_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+
+    return build_response([{'scope': 'class', 'scope_notifications': classes_not_list},
+                           {'scope': 'teachers', 'scope_notifications': notifications_teachers_list},
+                           {'scope': 'all', 'scope_notifications': notifications_all_list},
+                           {'scope': 'one_teacher', 'scope_notifications': notifications_one_teacher_list}])
 
 '''PARENT'''
 
@@ -1149,10 +1178,9 @@ def parent_notifications(parent_id):
     parent = session.query(Parent).filter_by(id=parent_id).one()
     if not parent:
         return build_response(None, 'Parent not found.')
-    # fixme cos'è class in scope?
 
     notifications_all = session.query(Notification).filter_by(scope='all').all()
-    notifications_parents = session.query(Notification).filter_by(scope='parents').all()
+    notifications_teachers = session.query(Notification).filter_by(scope='parents').all()
     notifications_one_parent = session.query(Notification).filter_by(scope='one_parent').filter_by(
         parent_id=parent_id).all()
 
@@ -1169,10 +1197,9 @@ def parent_notifications(parent_id):
         children_not_list.append(
             {'student': {'id': c.id, 'name': c.name, 'lastname': c.lastname}, 'notifications': child_not_list})
 
-
-    notifications_parents_list = []
-    for n in notifications_parents:
-        notifications_parents_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
+    notifications_teachers_list = []
+    for n in notifications_teachers:
+        notifications_teachers_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
 
     notifications_all_list = []
     for n in notifications_all:
@@ -1183,12 +1210,10 @@ def parent_notifications(parent_id):
         notifications_one_parent_list.append({'notification': {'id': n.id, 'date': n.date, 'text': n.text}})
 
     return build_response([{'scope': 'class', 'scope_notifications': children_not_list},
-                           {'scope': 'parents', 'scope_notifications': notifications_parents_list},
+                           {'scope': 'parents', 'scope_notifications': notifications_teachers_list},
                            {'scope': 'all', 'scope_notifications': notifications_all_list},
                            {'scope': 'one_parent', 'scope_notifications': notifications_one_parent_list}])
 
-
-z
 '''ADMIN STUFF'''
 
 @app.route('/admin/', methods=['GET', 'POST'])
