@@ -1352,7 +1352,7 @@ def admin():
         links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
         links += build_link('notification', rel='http://relations.highschool.com/createnotification')
 
-        build_response(links=links)
+        return build_response(links=links)
 
 
 # DONE
@@ -1473,7 +1473,7 @@ def admin_teacher_with_id(teacher_id):
     links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/createnotification')
 
-    build_response(res, links=links)
+    return build_response(res, links=links)
 
 
 # DONE
@@ -1595,7 +1595,7 @@ def admin_parent_with_id(parent_id):
     links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
     links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/createpayment')
 
-    build_response(res, links=links)
+    return build_response(res, links=links)
 
 
 # DONE
