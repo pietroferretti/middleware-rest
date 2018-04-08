@@ -1,18 +1,3 @@
-# get list of endpoints
-
-# for every endpoint create a schema
-## url template -> str(rule)
-## parameters-> rule.arguments, sempre integers
-## methods -> rule.methods, togliere HEAD e OPTIONS
-### roba nel json, input (A MANO...)
-### roba nel json, output (A MANO...)
-
-# salva lo schema
-## filename -> rule.endpoint
-
-# aggiungi lo schema in un dizionario (salvare in un file?)
-## -> rule.endpoint
-
 from app import *
 
 folder = 'webapp/schema_test/'

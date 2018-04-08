@@ -10,6 +10,13 @@
     ],
     "actions": [
         {
+            "method": "GET",
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "null"
+            }
+        },
+        {
             "method": "PUT",
             "inputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
@@ -26,13 +33,6 @@
                 },
                 "required": ["username", "password"]
             },
-            "outputschema": {
-                "$schema": "http://json-schema.org/draft-06/schema#",
-                "type": "null"
-            }
-        },
-        {
-            "method": "GET",
             "outputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
                 "type": "null"

@@ -2,13 +2,13 @@
     "url_template": "/parent/{parent_id}/child/{student_id}/",
     "template_parameters": [
         {
-            "parent_id": {
+            "student_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }
         },
         {
-            "student_id": {
+            "parent_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }

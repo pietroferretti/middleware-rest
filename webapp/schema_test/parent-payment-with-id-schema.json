@@ -2,13 +2,13 @@
     "url_template": "/parent/{parent_id}/payment/{payment_id}/",
     "template_parameters": [
         {
-            "parent_id": {
+            "payment_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }
         },
         {
-            "payment_id": {
+            "parent_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }

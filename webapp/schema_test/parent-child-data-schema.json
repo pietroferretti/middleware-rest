@@ -2,19 +2,26 @@
     "url_template": "/parent/{parent_id}/child/{student_id}/data/",
     "template_parameters": [
         {
-            "parent_id": {
+            "student_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }
         },
         {
-            "student_id": {
+            "parent_id": {
                 "type": "integer",
                 "entity": "http://entities.highschool.com/someid"
             }
         }
     ],
     "actions": [
+        {
+            "method": "GET",
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "null"
+            }
+        },
         {
             "method": "PUT",
             "inputschema": {
@@ -32,13 +39,6 @@
                 },
                 "required": ["username", "password"]
             },
-            "outputschema": {
-                "$schema": "http://json-schema.org/draft-06/schema#",
-                "type": "null"
-            }
-        },
-        {
-            "method": "GET",
             "outputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
                 "type": "null"
