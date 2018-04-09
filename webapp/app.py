@@ -21,7 +21,6 @@ from db.db_declarative import *
 import datetime
 import calendar
 
-
 from sqlalchemy.orm.exc import NoResultFound
 
 import os
@@ -31,11 +30,12 @@ import IPython
 
 DEBUG = True
 RESPONSE_SCHEMA = 'response-schema.json'
-#SCHEMA_FOLDER = 'schemas'
+# SCHEMA_FOLDER = 'schemas'
 SCHEMA_FOLDER = 'schema_test'
 
 app = Flask(__name__)
 app.secret_key = '\x8d)2m_\xa4\x8e\xe1\xaa\x8ca\xbd\xc6\xed@\xcbxw~\xe8x\xa2\xa2^'
+
 
 def build_response(result=None, error=None, result_schema=None, links=[]):
     '''Builds a HTTP response with the specified content in a JSON envelope'''
@@ -54,6 +54,7 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
         request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
     return resp
 
+
 def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **kwargs):
     filename = endpoint.replace('_', '-') + '-schema.json'
     schema = request.url_root.rstrip('/') + url_for('schema', path=filename)
@@ -65,6 +66,7 @@ def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **k
 
 def check_appointment_time_constraint(date):
     return (date.minute == 30 or date.minute == 00) and (date.hour > 7 and date.hour < 13)
+
 
 def get_index(url):
     if url.startswith('/admin'):
@@ -96,6 +98,7 @@ def bad_request(e):
     else:
         return build_response(error='Bad Request', links=links), 400
 
+
 @app.errorhandler(401)
 def authorization_required(e):
     # hypermedia to login
@@ -104,6 +107,7 @@ def authorization_required(e):
         return build_response(error=str(e), links=links), 401
     else:
         return build_response(error='Authorization Required', links=links), 401
+
 
 @app.errorhandler(403)
 def forbidden(e):
@@ -114,6 +118,7 @@ def forbidden(e):
     else:
         return build_response(error='Forbidden', links=links), 403
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to login
@@ -122,6 +127,7 @@ def page_not_found(e):
         return build_response(error=str(e), links=links), 404
     else:
         return build_response(error='Page Not Found', links=links), 404
+
 
 @app.errorhandler(405)
 def method_not_allowed(e):
@@ -164,6 +170,7 @@ def auth_check(f):
         else:
             # not authorized for this endpoint
             abort(403)
+
     return decorated_function
 
 
@@ -248,6 +255,7 @@ def login():
 
 '''TEACHER'''
 
+
 # DONE
 @app.route('/teacher/<int:teacher_id>/')
 @auth_check
@@ -256,7 +264,7 @@ def teacher_with_id(teacher_id):
 
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='self')
+                       rel='self')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/index')
 
@@ -272,7 +280,7 @@ def teacher_with_id(teacher_id):
 
     # more hypermedia
     links += build_link('teacher_data', teacher_id=teacher_id,
-                       rel='http://relations.highschool.com/data')
+                        rel='http://relations.highschool.com/data')
     links += build_link('teacher_data', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/updatedata')
     links += build_link('teacher_class', teacher_id=teacher_id,
@@ -291,12 +299,11 @@ def teacher_with_id(teacher_id):
 @app.route('/teacher/<int:teacher_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_data(teacher_id):
-
     # hypermedia
     links = build_link('teacher_data', teacher_id=teacher_id,
-                        rel='self')
+                       rel='self')
     links += build_link('teacher_data', teacher_id=teacher_id,
-                   rel='http://relations.highschool.com/data')
+                        rel='http://relations.highschool.com/data')
     links += build_link('teacher_data', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/updatedata')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
@@ -313,7 +320,8 @@ def teacher_data(teacher_id):
 
         # check json content
         if 'name' not in data and 'lastname' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+            return build_response(error='The JSON structure must contain all the requested parameters.',
+                                  links=links), 400
 
         # update teacher with query
         teacher = session.query(Teacher).get(teacher_id)
@@ -326,7 +334,7 @@ def teacher_data(teacher_id):
             teacher.lastname = data['lastname']
         session.commit()
 
-        return build_response({'message':'Update successful.'}, links=links)
+        return build_response({'message': 'Update successful.'}, links=links)
 
     else:
         '''Show teacher personal data'''
@@ -336,7 +344,7 @@ def teacher_data(teacher_id):
         if not teacher:
             return build_response(error='Teacher not found.'), 404
 
-        res = {'name': teacher.name, 
+        res = {'name': teacher.name,
                'lastname': teacher.lastname}
 
         return build_response(res, links=links)
@@ -350,11 +358,11 @@ def teacher_class(teacher_id):
 
     # hypermedia
     links = build_link('teacher_class', teacher_id=teacher_id,
-                        rel='self')
+                       rel='self')
     links += build_link('teacher_class', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/classlist')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                       rel='http://relations.highschool.com/index')
+                        rel='http://relations.highschool.com/index')
 
     teacher = session.query(Teacher).get(teacher_id)
 
@@ -385,7 +393,7 @@ def teacher_class_with_id(teacher_id, class_id):
 
     # hypermedia
     links = build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
-                        rel='self')
+                       rel='self')
     links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/class')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
@@ -413,7 +421,7 @@ def teacher_class_with_id(teacher_id, class_id):
     # for s in subjects_list:
     #     subjects.append({'id': s.id, 'name': s.name})
 
-    #res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
+    # res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
     res = {'class': {'id': class_id, 'name': c.name, 'room': c.room}}
 
     # more hypermedia
@@ -435,7 +443,7 @@ def teacher_student(teacher_id, class_id):
 
     # hypermedia
     links = build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
-                        rel='self')
+                       rel='self')
     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/studentlist')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
@@ -459,7 +467,7 @@ def teacher_student(teacher_id, class_id):
 
     st = []
     for s in students:
-       st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
+        st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
 
     # response object
     res = {'students': st}
@@ -482,7 +490,7 @@ def teacher_subject(teacher_id, class_id):
 
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                       rel='http://relations.highschool.com/index')
     links += build_link('teacher_class', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/class')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
@@ -510,7 +518,8 @@ def teacher_subject(teacher_id, class_id):
 
     # more hypermedia
     for i in range(min(10, len(subjects))):
-        links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[i]['id'],
+        links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id,
+                            subject_id=subjects[i]['id'],
                             rel='http://relations.highschool.com/subject')
 
     return build_response(res, links=links)
@@ -524,7 +533,7 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                       rel='http://relations.highschool.com/index')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/subjectlist')
     links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
@@ -618,17 +627,17 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 
 
 # DONE
-@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/', methods=['GET', 'POST'])
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/',
+           methods=['GET', 'POST'])
 @auth_check
 def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
-
     # hypermedia
     links = build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        student_id=student_id, rel='self')
     links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       student_id=student_id, rel='http://relations.highschool.com/gradelist')
+                        student_id=student_id, rel='http://relations.highschool.com/gradelist')
     links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       student_id=student_id, rel='http://relations.highschool.com/publishgrade')
+                        student_id=student_id, rel='http://relations.highschool.com/publishgrade')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
 
     if request.method == 'POST':
@@ -691,7 +700,8 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         if 'date' not in data or 'value' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+            return build_response(error='The JSON structure must contain all the requested parameters.',
+                                  links=links), 400
 
         teacher = session.query(Teacher).get(teacher_id)
         if not teacher:
@@ -794,7 +804,8 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 
             new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
             session.add(new_grade)
-            g_list.append({'id': new_grade.id, 'date': str(date), 'subject_id': subject_id, 'student_id': student_id, 'value': value})
+            g_list.append({'id': new_grade.id, 'date': str(date), 'subject_id': subject_id, 'student_id': student_id,
+                           'value': value})
 
         session.commit()
 
@@ -852,11 +863,12 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 
         return build_response(res, links=links)
 
+
 # DONE
-@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<int:subject_id>/grade/<int:grade_id>/', methods=['GET', 'PUT'])
+@app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<int:subject_id>/grade/<int:grade_id>/',
+           methods=['GET', 'PUT'])
 @auth_check
 def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
-
     # hypermedia
     links = build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        grade_id=grade_id, rel='self')
@@ -928,7 +940,8 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         if not grade:
             return build_response(error='Grade not found.'), 404
 
-        g_obj = {'id': grade.id, 'date': str(grade.date), 'value': value, 'student_id': student_id, 'subject_id': subject_id}
+        g_obj = {'id': grade.id, 'date': str(grade.date), 'value': value, 'student_id': student_id,
+                 'subject_id': subject_id}
         res = {'grade': g_obj}
 
         return build_response(res, links=links)
@@ -987,22 +1000,20 @@ def teacher_timetable(teacher_id):
     # response
     return build_response(timetable)
 
-
     # more hypermedia
     # query classes -> hypermedia to class timetable
-
-
 
 
 # fixme cambiare risultati appointment
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
-
     # hypermedia
     links = build_link('teacher_appointment', teacher_id=teacher_id, rel='self')
-    links += build_link('teacher_appointment', teacher_id=teacher_id, rel='http://relations.highschool.com/appointmentlist')
-    links += build_link('teacher_appointment', teacher_id=teacher_id, rel='http://relations.highschool.com/createappointment')
+    links += build_link('teacher_appointment', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('teacher_appointment', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/createappointment')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
 
     # more hypermedia
@@ -1053,7 +1064,6 @@ def teacher_appointment(teacher_id):
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_appointment_with_id(teacher_id, appointment_id):
-
     # hypermedia
     links = build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id, rel='self')
     links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id,
@@ -1061,7 +1071,8 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
     links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id,
                         rel='http://relations.highschool.com/updateappointment')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
-    links += build_link('teacher_appointment', teacher_id=teacher_id, rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('teacher_appointment', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/appointmentlist')
 
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
 
@@ -1084,7 +1095,6 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             else:
                 return build_response(error='Wrong date/time.'), 400
 
-
         if 'room' in data:
             appointment.room = data['room']
 
@@ -1098,7 +1108,7 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
 
         session.commit()
         return build_response({'message': 'Update successful.'})
-        
+
     else:
         '''show appointment info'''
         parent = session.query(Parent).filter_by(id=appointment.parent_id).one()
@@ -1167,6 +1177,7 @@ def teacher_notifications(teacher_id):
 
 '''PARENT'''
 
+
 # DONE
 @app.route('/parent/<int:parent_id>/')
 @auth_check
@@ -1175,7 +1186,7 @@ def parent_with_id(parent_id):
 
     # hypermedia
     links = build_link('parent_with_id', parent_id=parent_id,
-                        rel='self')
+                       rel='self')
     links += build_link('parent_with_id', parent_id=parent_id,
                         rel='http://relations.highschool.com/index')
 
@@ -1189,10 +1200,13 @@ def parent_with_id(parent_id):
     # more hypermedia
     links += build_link('parent_data', parent_id=parent_id, rel='http://relations.highschool.com/data')
     links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
-    links += build_link('parent_appointment', parent_id=parent_id, rel='http://relations.highschool.com/appointmentlist')
-    links += build_link('parent_appointment', parent_id=parent_id, rel='http://relations.highschool.com/createappointment')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
     links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_notifications', parent_id=parent_id, rel='http://relations.highschool.com/notificationlist')
+    links += build_link('parent_notifications', parent_id=parent_id,
+                        rel='http://relations.highschool.com/notificationlist')
 
     return build_response(res, links=links)
 
@@ -1201,7 +1215,6 @@ def parent_with_id(parent_id):
 @app.route('/parent/<int:parent_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def parent_data(parent_id):
-
     # hypermedia
     links = build_link('parent_data', parent_id=parent_id, rel='self')
     links += build_link('parent_data', parent_id=parent_id, rel='http://relations.highschool.com/data')
@@ -1232,7 +1245,8 @@ def parent_data(parent_id):
 
     else:
         '''Show parent personal data'''
-        return build_response({'data': {'name': parent.name, 'lastname': parent.lastname, 'id': parent.id}}, links=links)
+        return build_response({'data': {'name': parent.name, 'lastname': parent.lastname, 'id': parent.id}},
+                              links=links)
 
 
 # DONE
@@ -1317,10 +1331,9 @@ def parent_child_with_id(parent_id, student_id):
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/data/', methods=['GET', 'PUT'])
 @auth_check
 def parent_child_data(parent_id, student_id):
-
     # hypermedia
     links = build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
-                        rel='self')
+                       rel='self')
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
                         rel='http://relations.highschool.com/data')
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
@@ -1369,7 +1382,7 @@ def parent_child_grades(parent_id, student_id):
 
     # hypermedia
     links = build_link('parent_child_grades', parent_id=parent_id, student_id=student_id,
-                        rel='self')
+                       rel='self')
     links += build_link('parent_child_grades', parent_id=parent_id, student_id=student_id,
                         rel='http://relations.highschool.com/gradelist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
@@ -1393,7 +1406,8 @@ def parent_child_grades(parent_id, student_id):
     # query grades
     grades = []
     for g in student.grades:
-        grades.append({'grade': {'id': g.id, 'date': g.date, 'value': g.value, 'subject': subjects_names[g.subject_id]}})
+        grades.append(
+            {'grade': {'id': g.id, 'date': g.date, 'value': g.value, 'subject': subjects_names[g.subject_id]}})
     res = {'grades': grades}
 
     return build_response(res, links=links)
@@ -1407,7 +1421,7 @@ def parent_child_teacher(parent_id, student_id):
 
     # hypermedia
     links = build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
-                        rel='self')
+                       rel='self')
     links += build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
                         rel='http://relations.highschool.com/teacgherlist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
@@ -1439,11 +1453,12 @@ def parent_child_teacher(parent_id, student_id):
     res = {'teachers': t_list}
 
     # more hypermedia
-    links += build_link('parent_appointment', parent_id=parent_id, rel='http://relations.highschool.com/appointmentlist')
-    links += build_link('parent_appointment', parent_id=parent_id, rel='http://relations.highschool.com/createappointment')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
 
     return build_response(res, links=links)
-
 
 
 # todo capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
@@ -1491,6 +1506,7 @@ def parent_appointment(parent_id):
 
         return build_response(appointments)
 
+
 # TODO calendar-like support
 
 @app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
@@ -1500,7 +1516,6 @@ def parent_appointment_with_id(parent_id, appointment_id):
 
     if not appointment:
         return build_response('Appointment not found.')
-
 
     if request.method == 'PUT':
         '''edit appointment'''
@@ -1568,7 +1583,7 @@ def available_slot_in_day(day_to_check, appointments, subjects):
             for t in schedule:
                 if t['day'] == day_to_check.weekday():
                     check_appointment = False
-                    if t['start_hour'] != i:
+                    if t['start_hour'] < i or t['end_hour'] >= i:
                         for a in app:
                             if ((a.date.hour != i) or (a.date.hour == i and a.date.minute == 30)):
                                 return True
@@ -1581,7 +1596,6 @@ def available_slot_in_day(day_to_check, appointments, subjects):
                             return True
 
     return False
-
 
 
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
@@ -1605,9 +1619,6 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
 
     return build_response({'available_days': res})
-    
-    
-   
 
 
 @app.route(
@@ -1651,10 +1662,6 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     return build_response(res)
 
 
-
-
-
-
 @app.route('/parent/<int:parent_id>/payment/')
 @auth_check
 def parent_payment(parent_id):
@@ -1670,7 +1677,7 @@ def parent_payment(parent_id):
         payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason, 'pending': p.is_pending})
 
     return build_response({'payments': payments})
-    
+
 
 @app.route('/parent/<int:parent_id>/payment/paid/')
 @auth_check
@@ -1689,6 +1696,7 @@ def parent_payment_paid(parent_id):
 
     return build_response({'payments': payments})
 
+
 @app.route('/parent/<int:parent_id>/payment/pending/')
 @auth_check
 def parent_payment_pending(parent_id):
@@ -1706,6 +1714,7 @@ def parent_payment_pending(parent_id):
 
     return build_response({'payments': payments})
 
+
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/')
 @auth_check
 def parent_payment_with_id(parent_id, payment_id):
@@ -1720,6 +1729,7 @@ def parent_payment_with_id(parent_id, payment_id):
 
     return build_response({'payment': {'id': payment.id, 'amount': payment.amount, 'date': payment.date,
                                        'reason': payment.reason, 'pending': payment.is_pending}})
+
 
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['POST'])
 @auth_check
@@ -1737,7 +1747,8 @@ def parent_notifications(parent_id):
 
     # hypermedia
     links = build_link('parent_notifications', parent_id=parent_id, rel='self')
-    links += build_link('parent_notifications', parent_id=parent_id, rel='http://relations.highschool.com/notificationlist')
+    links += build_link('parent_notifications', parent_id=parent_id,
+                        rel='http://relations.highschool.com/notificationlist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
 
     # checks
@@ -1782,6 +1793,7 @@ def parent_notifications(parent_id):
 
 
 '''ADMIN STUFF'''
+
 
 # DONE
 @app.route('/admin/', methods=['GET', 'POST'])
@@ -1989,7 +2001,8 @@ def admin_parent():
 
         # check json content
         if 'name' not in data or 'lastname' not in data or 'username' not in data or 'password' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+            return build_response(error='The JSON structure must contain all the requested parameters.',
+                                  links=links), 400
 
         existing = session.query(Account).filter_by(username=data['username'])
         if existing:
@@ -2096,7 +2109,6 @@ def classes():
 
     # check query result
     if not classes:
-
         return build_response(error='No classes found.', links=links), 404
 
     # response
@@ -2339,7 +2351,7 @@ def student_with_id(student_id):
         if st.class_id:
             links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.highschool.com/class')
 
-        return build_response({'message':'Update successful.'}, links=links)
+        return build_response({'message': 'Update successful.'}, links=links)
 
 
     else:
@@ -2692,8 +2704,10 @@ def notification():
         links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
         classes = session.query(Class).limit(3).all()
         for i in range(min(3, len(classes))):
-            links += build_link('notification_class', class_id=classes[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_class', class_id=classes[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_class', class_id=classes[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_class', class_id=classes[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links), 201
 
@@ -2726,8 +2740,10 @@ def notification():
         links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
         classes = session.query(Class).limit(3).all()
         for i in range(min(3, len(classes))):
-            links += build_link('notification_class', class_id=classes[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_class', class_id=classes[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_class', class_id=classes[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_class', class_id=classes[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links)
 
@@ -2769,8 +2785,10 @@ def notification_parents():
         # more hypermedia
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
-            links += build_link('notification_parent_with_id', parent_id=parents[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_parent_with_id', parent_id=parents[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_parent_with_id', parent_id=parents[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_parent_with_id', parent_id=parents[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links), 201
 
@@ -2799,8 +2817,10 @@ def notification_parents():
         # more hypermedia
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
-            links += build_link('notification_parent_with_id', parent_id=parents[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_parent_with_id', parent_id=parents[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_parent_with_id', parent_id=parents[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_parent_with_id', parent_id=parents[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links)
 
@@ -2814,8 +2834,10 @@ def notification_parent_with_id(parent_id):
 
         # hypermedia
         links = build_link('notification_parent_with_id', parent_id=parent_id, rel='self')
-        links += build_link('notification_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_parent_with_id', parent_id=parent_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_parent_with_id', parent_id=parent_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # check content type
@@ -2846,14 +2868,16 @@ def notification_parent_with_id(parent_id):
         res = {'notification': n_obj}
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List notifications for this parent'''
 
         # hypermedia
         links = build_link('notification_parent_with_id', parent_id=parent_id, rel='self')
-        links += build_link('notification_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_parent_with_id', parent_id=parent_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_parent_with_id', parent_id=parent_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # query
@@ -2909,11 +2933,13 @@ def notification_teachers():
         # more hypermedia
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(parents))):
-            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List notifications for all teachers'''
 
@@ -2939,8 +2965,10 @@ def notification_teachers():
         # more hypermedia
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(parents))):
-            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id, rel='http://relations.highschool.com/notificationlist')
-            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id, rel='http://relations.highschool.com/createnotification')
+            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id,
+                                rel='http://relations.highschool.com/notificationlist')
+            links += build_link('notification_teacher_with_id', teacher_id=teacher[i].id,
+                                rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links)
 
@@ -2954,8 +2982,10 @@ def notification_teacher_with_id(teacher_id):
 
         # hypermedia
         links = build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='self')
-        links += build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # check content type
@@ -2986,14 +3016,16 @@ def notification_teacher_with_id(teacher_id):
         res = {'notification': n_obj}
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List notifications for a single teacher'''
 
         # hypermedia
         links = build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='self')
-        links += build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # query
@@ -3021,8 +3053,10 @@ def notification_class(class_id):
 
         # hypermedia
         links = build_link('notification_class', class_id=class_id, rel='self')
-        links += build_link('notification_class', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # check content type
@@ -3053,20 +3087,26 @@ def notification_class(class_id):
         res = {'notification': n_obj}
 
         # more hypermedia
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List class-wide notifications'''
 
         # hypermedia
         links = build_link('notification_class', class_id=class_id, rel='self')
-        links += build_link('notification_class', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # query
@@ -3083,10 +3123,14 @@ def notification_class(class_id):
         res = {'notifications': n_list}
 
         # more hypermedia
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links)
 
@@ -3100,8 +3144,10 @@ def notification_class_parents(class_id):
 
         # hypermedia
         links = build_link('notification_class_parents', class_id=class_id, rel='self')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # check content type
@@ -3132,14 +3178,16 @@ def notification_class_parents(class_id):
         res = {'notification': n_obj}
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List all notifications for the parents in a class'''
 
         # hypermedia
         links = build_link('notification_class_parents', class_id=class_id, rel='self')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # query
@@ -3167,8 +3215,10 @@ def notification_class_teachers(class_id):
 
         # hypermedia
         links = build_link('notification_class_teachers', class_id=class_id, rel='self')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # check content type
@@ -3199,14 +3249,16 @@ def notification_class_teachers(class_id):
         res = {'notification': n_obj}
 
         return build_response(res, links=links), 201
-        
+
     else:
         '''List all notifications for the teachers in a class'''
 
         # hypermedia
         links = build_link('notification_class_teachers', class_id=class_id, rel='self')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id, rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
 
         # query
