@@ -5,7 +5,7 @@
 # from parent import *
 # from admin import *
 
-# import json
+import json
 
 # TODO
 # definire tutte le funzioni per ogni endpoint
@@ -19,7 +19,8 @@ from flask import Flask, request, jsonify, abort, url_for, send_from_directory
 from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
-from datetime import datetime, timedelta
+import datetime
+
 from sqlalchemy.orm.exc import NoResultFound
 
 import os
@@ -680,7 +681,8 @@ def teacher_class_timetable(teacher_id, class_id):
 
     for s in subjects:
         c = session.query(Class).filter_by(id=s.class_id).one()
-        timetable.append({'subjects_name': s.name, 'schedule': s.timetable})
+
+        timetable.append({'subjects_name': s.name, 'schedule': json.loads(s.timetable)})
 
     return build_response(timetable)
 
@@ -698,7 +700,8 @@ def teacher_timetable(teacher_id):
     for s in teacher.subjects:
         c = session.query(Class).filter_by(id=s.class_id).one()
         timetable.append(
-            {'subjects_name': s.name, 'schedule': s.timetable, 'class': {'name': c.name, 'id': c.id, 'room': c.room}})
+            {'subjects_name': s.name, 'schedule': json.loads(s.timetable),
+             'class': {'name': c.name, 'id': c.id, 'room': c.room}})
 
     return build_response(timetable)
 
@@ -1107,10 +1110,36 @@ def parent_appointment_with_id(parent_id, appointment_id):
                                                'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}})
 
 
+# @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
+# @auth_check
+# def parent_appointment_month(parent_id, teacher_id, year, month):
+#     '''Show which days have appointments and free slots for the month'''
+#     pass
+
+
+# @app.route(
+#     '/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/day/<int:day>/')
+# @auth_check
+# def parent_appointment_day(parent_id, teacher_id, year, month, day):
+#     '''Show appointments, free slots for the day'''
+#     pass
+
+
+
+
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
 @auth_check
 def parent_appointment_month(parent_id, teacher_id, year, month):
     '''Show which days have appointments and free slots for the month'''
+    # teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+
+    # if not teacher:
+    #     return build_response(None, 'Teacher not found.')
+
+    # slots = []
+
+    # for a in teacher.appointment:
+    #     if a.date.month == month:
     pass
 
 
@@ -1119,7 +1148,44 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
 @auth_check
 def parent_appointment_day(parent_id, teacher_id, year, month, day):
     '''Show appointments, free slots for the day'''
-    pass
+    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+
+    if not teacher:
+        return build_response(None, 'Teacher not found.')
+
+    # setto tutti gli slot a 1=libero
+    daily_slots = {}
+    for i in range(8, 13):
+        daily_slots[str(i) + '00'] = 1
+        daily_slots[str(i) + '30'] = 1
+
+    for a in teacher.appointments:
+        if (a.date.year == year and a.date.month == month and a.date.day == day and a.teacher_accepted == 1):
+            daily_slots[str(a.date.hour) + str(a.date.minute)] = 0
+
+    w_day = datetime.datetime(year, month, day).weekday()
+
+    for s in teacher.subjects:
+        schedule = json.loads(s.timetable)
+        for t in schedule:
+            if t['day'] == w_day:
+                for x in range(t['start_hour'], t['end_hour']):
+                    # setto 2 slot come occupati -> lezioni vanno di ora in ora
+                    daily_slots[str(x) + '00'] = 0
+                    daily_slots[str(x) + '30'] = 0
+
+    free = []
+    for key, value in daily_slots.items():
+        if value == 1:
+            free.append(key)
+
+    res = {'date': datetime.datetime(year, month, day), 'free_slots': free}
+
+    return build_response(res)
+
+            
+
+
 
 
 @app.route('/parent/<int:parent_id>/payment/')
