@@ -1,0 +1,41 @@
+{
+    "url_template": "/parent/{parent_id}/payment/{payment_id}/pay/",
+    "template_parameters": [
+        {
+            "payment_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/someid"
+            }
+        },
+        {
+            "parent_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/someid"
+            }
+        }
+    ],
+    "actions": [
+        {
+            "method": "POST",
+            "inputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/password"
+                    }
+                },
+                "required": ["username", "password"]
+            },
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "null"
+            }
+        }
+    ]
+}
