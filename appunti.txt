@@ -5,13 +5,12 @@ cose nel database:
 - admins
 - classes
 - subjects
+        - timetables
 - grades
 - appointments
 - notifications
 - payments
-- timetables TODO -> per ogni teacher, teacher + subject + data, query in più per avere anche la classe
-(- accounts TODO -> una tabella con username e password, + id teacher/parent/admin con check constraint
-usata in login e aggiunte account da admin)
+- accounts -> una tabella con username e password, + id teacher/parent/admin con check constraint usata in login e aggiunte account da admin)
 
 # cosa si può leggere
 - students (admin, teacher per la classe)
@@ -53,7 +52,7 @@ usata in login e aggiunte account da admin)
 - appointments
 - payments
 
-# cosa non si può modificare
+# cosa non si può modificare (ma nemmeno gli admin? nella consegna non c'è però avrebbe senso)
 - admins
 - notifications
 - timetables

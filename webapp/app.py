@@ -1004,7 +1004,7 @@ def teacher_timetable(teacher_id):
     # query classes -> hypermedia to class timetable
 
 
-# fixme cambiare risultati appointment
+# FIXME cambiare risultati appointment
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
@@ -1461,14 +1461,30 @@ def parent_child_teacher(parent_id, student_id):
     return build_response(res, links=links)
 
 
-# todo capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
+def teacher_available(datetime_to_check, appointments, subjects):
+    check_appointment = True
+
+    app = [a for a in appointments if (a.date == datetime_to_check and a.teacher_accepted == 1)]
+    if not app:
+        i = datetime_to_check.hour
+        for s in subjects:
+            schedule = json.loads(s.timetable)
+            for t in schedule:
+                if t['day'] == datetime_to_check.weekday():
+                    if t['start_hour'] <= i and t['end_hour'] > i:
+                        return False
+    return True
+
+
+# TODO capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
+# TODO provare le post durante orario di lezione
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def parent_appointment(parent_id):
     parent = session.query(Parent).filter_by(id=parent_id).one()
 
     if not parent:
-        return build_response('Parent not found.')
+        return build_response(error='Parent not found.')
 
     if request.method == 'POST':
         '''create new appointment'''
@@ -1481,18 +1497,30 @@ def parent_appointment(parent_id):
             return build_response(error='The JSON structure must contain all the requested parameters.',
                                   links=links), 400
 
+        teacher = session.query(Teacher).filter_by(id=data['teacher_id']).one()
+
+        if not teacher:
+            return build_response(error='Teacher not found.')
+
         new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
 
+        # check if teacher available
+
+
         if (check_appointment_time_constraint(new_date)):
-            new_appointment = Appointment(date=new_date, teacher_accepted=0, parent_accepted=1,
-                                          teacher_id=data['teacher_id'], parent_id=parent_id)
-            session.add(new_appointment)
-            session.commit()
-            new_id = new_appointment.id
-            return build_response({'id': new_id}), 201
+
+            if (teacher_available(new_date, teacher.appointments, teacher.subjects)):
+                new_appointment = Appointment(date=new_date, teacher_accepted=0, parent_accepted=1,
+                                              teacher_id=data['teacher_id'], parent_id=parent_id)
+                session.add(new_appointment)
+                session.commit()
+                new_id = new_appointment.id
+                return build_response({'id': new_id}), 201
+            else:
+                return build_response(error='Choose a free slot.')
 
         else:
-            return build_response(error='Wrong date/time.'), 400
+            return build_response(error='Wrong date/time format.'), 400
 
 
     else:
@@ -1571,7 +1599,7 @@ def parent_appointment_with_id(parent_id, appointment_id):
 # day è tipo datetime
 
 
-# todo check caso falso
+# TODO check caso falso
 def available_slot_in_day(day_to_check, appointments, subjects):
     check_appointment = True
 
@@ -1666,6 +1694,18 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
 @auth_check
 def parent_payment(parent_id):
     '''list all payments, paid or pending'''
+
+    # hypermedia
+    links = build_link('parent_payment', parent_id=parent_id, rel='self')
+    links += build_link('parent_payment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/paymentlist')
+    # FIXME peter :D
+    # links += build_link('parent_payment_paid', parent_id=parent_id, rel=)
+    # links += build_link('parent_payment_pending', parent_id=parent_id, rel=)
+
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
+    # checks
     parent = session.query(Parent).filter_by(id=parent_id).one()
 
     if not parent:
@@ -1676,13 +1716,16 @@ def parent_payment(parent_id):
     for p in parent.payments:
         payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason, 'pending': p.is_pending})
 
-    return build_response({'payments': payments})
+    return build_response({'payments': payments}, links=links)
 
 
 @app.route('/parent/<int:parent_id>/payment/paid/')
 @auth_check
 def parent_payment_paid(parent_id):
     '''list old paid payments'''
+    # TODO LINKS
+
+    # checks
     parent = session.query(Parent).filter_by(id=parent_id).one()
 
     if not parent:
@@ -1701,6 +1744,7 @@ def parent_payment_paid(parent_id):
 @auth_check
 def parent_payment_pending(parent_id):
     '''list pending payments'''
+    # TODO LINKS
     parent = session.query(Parent).filter_by(id=parent_id).one()
 
     if not parent:
@@ -1719,7 +1763,18 @@ def parent_payment_pending(parent_id):
 @auth_check
 def parent_payment_with_id(parent_id, payment_id):
     '''show payment info'''
-    payment = session.query(Payment).filter_by(id=payment_id).one()
+
+    # hypermedia
+    links = build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payment_id, rel='self')
+    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
+
+    links += build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
+                        rel='http://relations.highschool.com/completepayment')
+
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
+    # checks
+    payment = session.query(Payment).get(payment_id)
 
     if not payment:
         return build_response('Payment not found.')
@@ -1727,16 +1782,39 @@ def parent_payment_with_id(parent_id, payment_id):
     if (payment.parent_id != parent_id):
         return build_response('Data not found.')
 
-    return build_response({'payment': {'id': payment.id, 'amount': payment.amount, 'date': payment.date,
-                                       'reason': payment.reason, 'pending': payment.is_pending}})
+    # query
+    return build_response(
+        {'amount': payment.amount, 'date': payment.date, 'reason': payment.reason, 'pending': payment.is_pending},
+        links=links)
 
 
+# FIXME non è una put? si paga con le post?
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['POST'])
 @auth_check
 def parent_pay(parent_id, payment_id):
     '''magic payment endpoint'''
-    # TODO cambia solo il payment da pending a paid
-    pass
+    # TODO test
+
+    # hypermedia
+    links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id, rel='self')
+    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
+    # checks
+    parent = session.query(Parent).get(parent_id)
+    if not parent:
+        return build_response(error='Parent not found.', links=links), 404
+
+    payment = session.query(Payment).filter_by(id=payment_id).filter_by(parent_id=parent_id).one()
+
+    if payment.is_pending:
+        # MAGIC HAPPENS!
+        payment.is_pending = False
+        session.commit()
+        return build_response('Payment confirmed.', links=links)
+
+    else:
+        return build_response(error='Already paid.', links=links)
 
 
 # DONE
