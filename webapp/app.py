@@ -19,6 +19,8 @@ from flask import session as clienttoken
 from functools import wraps
 from db.db_declarative import *
 import datetime
+import calendar
+
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -935,21 +937,19 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/timetable/')
 @auth_check
 def teacher_class_timetable(teacher_id, class_id):
-    '''Show timetable for this class'''
-    # TODO
-
+    '''show timetable for that class'''
     # hypermedia
     links = build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id, rel='self')
-    links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id, rel='http://relations.highschool.com/timetable')
+    links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id,
+                        rel='http://relations.highschool.com/timetable')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
     links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.highschool.com/timetable')
 
-    # checks
     subjects = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
     if not subjects:
         return build_response(None, 'Data not found.')
-    # query
+
     timetable = []
 
     for s in subjects:
@@ -957,27 +957,24 @@ def teacher_class_timetable(teacher_id, class_id):
 
         timetable.append({'subjects_name': s.name, 'schedule': json.loads(s.timetable)})
 
-    # response
-
     return build_response(timetable)
 
 
 @app.route('/teacher/<int:teacher_id>/timetable/')
 @auth_check
 def teacher_timetable(teacher_id):
-    '''Show complete timetable for this teacher'''
-    # TODO
-
+    '''show complete timetable for a teacher'''
     # hypermedia
     links = build_link('teacher_timetable', teacher_id=teacher_id, rel='self')
     links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.highschool.com/timetable')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
 
-    # checks
     teacher = session.query(Teacher).filter_by(id=teacher_id).one()
 
     if not teacher:
         return build_response(None, 'Teacher not found.')
+
+    # checks
 
     # query
     timetable = []
@@ -987,9 +984,9 @@ def teacher_timetable(teacher_id):
         timetable.append(
             {'subjects_name': s.name, 'schedule': json.loads(s.timetable),
              'class': {'name': c.name, 'id': c.id, 'room': c.room}})
-
     # response
     return build_response(timetable)
+
 
     # more hypermedia
     # query classes -> hypermedia to class timetable
@@ -1556,6 +1553,34 @@ def parent_appointment_with_id(parent_id, appointment_id):
 #     '''Show appointments, free slots for the day'''
 #     pass
 
+# day è tipo datetime
+
+
+# todo check caso falso
+def available_slot_in_day(day_to_check, appointments, subjects):
+    check_appointment = True
+
+    app = [a for a in appointments if (
+                a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
+    for i in range(8, 13):
+        for s in subjects:
+            schedule = json.loads(s.timetable)
+            for t in schedule:
+                if t['day'] == day_to_check.weekday():
+                    check_appointment = False
+                    if t['start_hour'] != i:
+                        for a in app:
+                            if ((a.date.hour != i) or (a.date.hour == i and a.date.minute == 30)):
+                                return True
+            if check_appointment:
+                if not app:
+                    return True
+                else:
+                    for a in app:
+                        if ((a.date.hour != i) or (a.date.hour == i and a.date.minute == 30)):
+                            return True
+
+    return False
 
 
 
@@ -1563,16 +1588,26 @@ def parent_appointment_with_id(parent_id, appointment_id):
 @auth_check
 def parent_appointment_month(parent_id, teacher_id, year, month):
     '''Show which days have appointments and free slots for the month'''
-    # teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
 
-    # if not teacher:
-    #     return build_response(None, 'Teacher not found.')
+    if not teacher:
+        return build_response(None, 'Teacher not found.')
 
-    # slots = []
+    res = []
+    for d in calendar.Calendar().itermonthdays(year, month):
+        if d >= datetime.date.today().day and available_slot_in_day(datetime.datetime(year, month, d),
+                                                                    teacher.appointments, teacher.subjects):
+            res.append({'date': datetime.datetime(year, month, d)})
+    if not res:
+        return build_response(None, 'No available appointments for this month.')
 
-    # for a in teacher.appointment:
-    #     if a.date.month == month:
-    pass
+    # day_to_check = datetime.datetime(year,month,3)
+    # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
+
+    return build_response({'available_days': res})
+    
+    
+   
 
 
 @app.route(
