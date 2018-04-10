@@ -291,6 +291,8 @@ def teacher_with_id(teacher_id):
                         rel='http://relations.highschool.com/notificationlist')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('teacher_appointment', teacher_id=teacher_id,
+                        rel='http://relations.highschool.com/createappointment')
 
     return build_response(res, links=links)
 
@@ -344,8 +346,8 @@ def teacher_data(teacher_id):
         if not teacher:
             return build_response(error='Teacher not found.'), 404
 
-        res = {'name': teacher.name,
-               'lastname': teacher.lastname}
+        res = {'data': {'name': teacher.name,
+               'lastname': teacher.lastname}}
 
         return build_response(res, links=links)
 
@@ -849,7 +851,7 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
             for g in s.grades:
                 if g.subject_id == subject_id:
                     grades_list.append({'id': g.id, 'date': g.date, 'value': g.value, 'subject_id': g.subject_id})
-            st.append({'student': {'id': s.id, 'name': s.name, 'lastname': s.lastname, 'grades': grades_list}})
+            st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname, 'grades': grades_list})
             all_grades += grades_list
 
         res = {'students': st}
@@ -887,9 +889,6 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.'), 400
 
-        if 'id' not in data:
-            return build_response(error='The JSON structure must contain the grade id.'), 400
-
         teacher = session.query(Teacher).get(teacher_id)
         if not teacher:
             return build_response(error='Teacher not found.', links=links), 404
@@ -902,11 +901,10 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         if not subject or teacher_id != subject.teacher_id or class_id != subject.class_id:
             return build_response(error='Subject not found.', links=links), 404
 
-        grade = session.query(Grade).filter_by(id=int(data['id'])).filter_by(subject_id=subject_id).filter_by(
-            student_id=student_id).first()
+        grade = session.query(Grade).get(grade_id)
 
         if not grade:
-            return build_response(error='Grade not found.'), 404
+            return build_response(error='Grade not found.', links=links), 404
 
         # update
         if 'date' in data:
@@ -916,7 +914,13 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
             grade.value = int(data['value'])
 
         session.commit()
-        return build_response({'message': 'Update successful.'}, links=links)
+
+        # response
+        g_obj = {'id': grade.id, 'date': str(grade.date), 'value': grade.value, 'student_id': grade.student_id,
+                 'subject_id': grade.subject_id}
+        res = {'grade': g_obj}
+
+        return build_response(res, links=links)
 
     else:
         '''Show grade'''
@@ -934,23 +938,24 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         if not subject or teacher_id != subject.teacher_id or class_id != subject.class_id:
             return build_response(error='Subject not found.', links=links), 404
 
-        grade = session.query(Grade).filter_by(id=int(data['id'])).filter_by(subject_id=subject_id).filter_by(
-            student_id=student_id).first()
+        grade = session.query(Grade).get(grade_id)
 
         if not grade:
-            return build_response(error='Grade not found.'), 404
+            return build_response(error='Grade not found.', links=links), 404
 
-        g_obj = {'id': grade.id, 'date': str(grade.date), 'value': value, 'student_id': student_id,
-                 'subject_id': subject_id}
+        g_obj = {'id': grade.id, 'date': str(grade.date), 'value': grade.value, 'student_id': grade.student_id,
+                 'subject_id': grade.subject_id}
         res = {'grade': g_obj}
 
         return build_response(res, links=links)
 
 
+# DONE
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/timetable/')
 @auth_check
 def teacher_class_timetable(teacher_id, class_id):
-    '''show timetable for that class'''
+    '''Show timetable for that class'''
+
     # hypermedia
     links = build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id, rel='self')
     links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id,
@@ -961,47 +966,48 @@ def teacher_class_timetable(teacher_id, class_id):
     subjects = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
     if not subjects:
-        return build_response(None, 'Data not found.')
+        return build_response('Data not found.', links=links), 404
 
     timetable = []
-
     for s in subjects:
-        c = session.query(Class).filter_by(id=s.class_id).one()
-
+        c = session.query(Class).get(s.class_id)
         timetable.append({'subjects_name': s.name, 'schedule': json.loads(s.timetable)})
 
-    return build_response(timetable)
+    return build_response(timetable, links=links)
 
 
+# DONE
 @app.route('/teacher/<int:teacher_id>/timetable/')
 @auth_check
 def teacher_timetable(teacher_id):
-    '''show complete timetable for a teacher'''
+    '''Show complete timetable for a teacher'''
+
     # hypermedia
     links = build_link('teacher_timetable', teacher_id=teacher_id, rel='self')
     links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.highschool.com/timetable')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
 
-    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+    teacher = session.query(Teacher).get(teacher_id)
 
     if not teacher:
-        return build_response(None, 'Teacher not found.')
-
-    # checks
+        return build_response('Teacher not found.', links=links), 404
 
     # query
     timetable = []
 
     for s in teacher.subjects:
-        c = session.query(Class).filter_by(id=s.class_id).one()
+        c = session.query(Class).get(s.class_id)
         timetable.append(
             {'subjects_name': s.name, 'schedule': json.loads(s.timetable),
              'class': {'name': c.name, 'id': c.id, 'room': c.room}})
-    # response
-    return build_response(timetable)
 
     # more hypermedia
-    # query classes -> hypermedia to class timetable
+    for cl in teacher.classes:
+        links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=cl.id,
+                            rel='http://relations.highschool.com/timetable')
+
+    # response
+    return build_response(timetable)
 
 
 # FIXME cambiare risultati appointment
@@ -1156,7 +1162,6 @@ def teacher_notifications(teacher_id):
         classes_not_list.append(
             {'class': {'id': c.id, 'name': c.name}, 'notifications': class_not_list})
 
-    # TODO niente da fare in realtà, volevo solo avvertire che ho tolto 'id' dalla risposta perché tanto non serve
     notifications_teachers_list = []
     for n in notifications_teachers:
         notifications_teachers_list.append({'date': n.date, 'text': n.text})
@@ -1241,12 +1246,12 @@ def parent_data(parent_id):
             parent.lastname = data['lastname']
 
         session.commit()
-        return build_response({'message': 'Update successful.'}, links=links)
+
+        return build_response({'data': {'name': parent.name, 'lastname': parent.lastname}}, links=links)
 
     else:
         '''Show parent personal data'''
-        return build_response({'data': {'name': parent.name, 'lastname': parent.lastname, 'id': parent.id}},
-                              links=links)
+        return build_response({'data': {'name': parent.name, 'lastname': parent.lastname}}, links=links)
 
 
 # DONE
@@ -1365,12 +1370,13 @@ def parent_child_data(parent_id, student_id):
 
         session.commit()
 
-        return build_response({'message': 'Update successful.'}, links=links)
+        res = {'data': {'name': student.name, 'lastname': student.lastname}}
+        return build_response(res, links=links)
 
     else:
         '''Show child personal data'''
 
-        res = {'student': {'name': student.name, 'lastname': student.lastname, 'id': student.id}}
+        res = {'data': {'name': student.name, 'lastname': student.lastname}}
         return build_response(res, links=links)
 
 
@@ -1491,7 +1497,7 @@ def parent_appointment(parent_id):
         try:
             data = request.get_json()
         except TypeError:
-            return build_response(error='The request was not valid JSON.'), 400
+            return build_response(error='The request was not valid JSON.', links=links), 400
 
         if 'date' not in data or 'teacher_id' not in data:
             return build_response(error='The JSON structure must contain all the requested parameters.',
@@ -1500,7 +1506,7 @@ def parent_appointment(parent_id):
         teacher = session.query(Teacher).filter_by(id=data['teacher_id']).one()
 
         if not teacher:
-            return build_response(error='Teacher not found.')
+            return build_response(error='Teacher not found.', links=links), 404
 
         new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
 
@@ -1517,10 +1523,10 @@ def parent_appointment(parent_id):
                 new_id = new_appointment.id
                 return build_response({'id': new_id}), 201
             else:
-                return build_response(error='Choose a free slot.')
+                return build_response(error='Choose a free slot.', links=links), 400
 
         else:
-            return build_response(error='Wrong date/time format.'), 400
+            return build_response(error='Wrong date/time format.', links=links), 400
 
 
     else:
@@ -1532,7 +1538,7 @@ def parent_appointment(parent_id):
                                  'parent_accepted': a.parent_accepted,
                                  'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}})
 
-        return build_response(appointments)
+        return build_response(appointments, links=links)
 
 
 # TODO calendar-like support
@@ -1550,7 +1556,7 @@ def parent_appointment_with_id(parent_id, appointment_id):
         try:
             data = request.get_json()
         except TypeError:
-            return build_response(error='The request was not valid JSON.'), 400
+            return build_response(error='The request was not valid JSON.', links=links), 400
 
         if 'date' in data:
             new_date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
@@ -1559,7 +1565,7 @@ def parent_appointment_with_id(parent_id, appointment_id):
                 appointment.date = new_date
                 appointment.parent_accepted = 0
             else:
-                return build_response(error='Wrong date/time.'), 400
+                return build_response(error='Wrong date/time.', links=links), 400
 
         if 'teacher_id' in data:
             if int(data['teacher_id']) != appointment.teacher_id:
@@ -1579,7 +1585,7 @@ def parent_appointment_with_id(parent_id, appointment_id):
         return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
                                                'teacher_accepted': appointment.teacher_accepted,
                                                'parent_accepted': appointment.parent_accepted,
-                                               'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}})
+                                               'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}}, links=links)
 
 
 # @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
@@ -1633,7 +1639,7 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     teacher = session.query(Teacher).filter_by(id=teacher_id).one()
 
     if not teacher:
-        return build_response(None, 'Teacher not found.')
+        return build_response(error='Teacher not found.', links=links), 404
 
     res = []
     for d in calendar.Calendar().itermonthdays(year, month):
@@ -1641,7 +1647,7 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
                                                                     teacher.appointments, teacher.subjects):
             res.append({'date': datetime.datetime(year, month, d)})
     if not res:
-        return build_response(None, 'No available appointments for this month.')
+        return build_response(error='No available appointments for this month.', links=links), 404
 
     # day_to_check = datetime.datetime(year,month,3)
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
@@ -1657,7 +1663,7 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     teacher = session.query(Teacher).filter_by(id=teacher_id).one()
 
     if not teacher:
-        return build_response(None, 'Teacher not found.')
+        return build_response(error='Teacher not found.'), 404
 
     # setto tutti gli slot a 1=libero
     daily_slots = {}
@@ -1687,34 +1693,40 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
 
     res = {'date': datetime.datetime(year, month, day), 'free_slots': free}
 
-    return build_response(res)
+    return build_response(res, links=links)
 
 
 @app.route('/parent/<int:parent_id>/payment/')
 @auth_check
 def parent_payment(parent_id):
-    '''list all payments, paid or pending'''
+    '''List all payments, paid or pending'''
 
     # hypermedia
     links = build_link('parent_payment', parent_id=parent_id, rel='self')
     links += build_link('parent_payment', parent_id=parent_id,
                         rel='http://relations.highschool.com/paymentlist')
-    # FIXME peter :D
-    # links += build_link('parent_payment_paid', parent_id=parent_id, rel=)
-    # links += build_link('parent_payment_pending', parent_id=parent_id, rel=)
+    links += build_link('parent_payment_paid', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_payment_pending', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
 
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
 
     # checks
-    parent = session.query(Parent).filter_by(id=parent_id).one()
+    parent = session.query(Parent).get(parent_id)
 
     if not parent:
-        return build_response('Parent not found.')
+        return build_response('Parent not found.', links=links), 404
 
     payments = []
 
     for p in parent.payments:
         payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason, 'pending': p.is_pending})
+
+    # more hypermedia
+    for i in range(min(5, len(payments))):
+        links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payments[i].payment_id,
+                            rel='http://relations.highschool.com/payment')
 
     return build_response({'payments': payments}, links=links)
 
@@ -1726,10 +1738,10 @@ def parent_payment_paid(parent_id):
     # TODO LINKS
 
     # checks
-    parent = session.query(Parent).filter_by(id=parent_id).one()
+    parent = session.query(Parent).get(parent_id)
 
     if not parent:
-        return build_response('Parent not found.')
+        return build_response(error='Parent not found.', links=links), 404
 
     payments = []
 
@@ -1737,7 +1749,7 @@ def parent_payment_paid(parent_id):
         if (not p.is_pending):
             payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason})
 
-    return build_response({'payments': payments})
+    return build_response({'payments': payments}, links=links)
 
 
 @app.route('/parent/<int:parent_id>/payment/pending/')
@@ -1748,7 +1760,7 @@ def parent_payment_pending(parent_id):
     parent = session.query(Parent).filter_by(id=parent_id).one()
 
     if not parent:
-        return build_response('Parent not found.')
+        return build_response(error='Parent not found.', links=links), 404
 
     payments = []
 
@@ -1756,7 +1768,7 @@ def parent_payment_pending(parent_id):
         if (p.is_pending):
             payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason})
 
-    return build_response({'payments': payments})
+    return build_response({'payments': payments}, links=links)
 
 
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/')
@@ -1776,11 +1788,8 @@ def parent_payment_with_id(parent_id, payment_id):
     # checks
     payment = session.query(Payment).get(payment_id)
 
-    if not payment:
-        return build_response('Payment not found.')
-
-    if (payment.parent_id != parent_id):
-        return build_response('Data not found.')
+    if not payment or payment.parent_id != parent_id:
+        return build_response(error='Payment not found.', links=links), 404
 
     # query
     return build_response(
@@ -1788,11 +1797,10 @@ def parent_payment_with_id(parent_id, payment_id):
         links=links)
 
 
-# FIXME non è una put? si paga con le post?
-@app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['POST'])
+@app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['PUT'])
 @auth_check
 def parent_pay(parent_id, payment_id):
-    '''magic payment endpoint'''
+    '''Magic payment endpoint'''
     # TODO test
 
     # hypermedia
@@ -1874,6 +1882,7 @@ def parent_notifications(parent_id):
 
 
 # DONE
+# schema done
 @app.route('/admin/', methods=['GET', 'POST'])
 @auth_check
 def admin():
