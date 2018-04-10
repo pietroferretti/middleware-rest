@@ -1,0 +1,42 @@
+{
+  "url_template": "/teacher/{teacher_id}/class/",
+  "template_parameters": [
+    {
+      "teacher_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/teacherid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "classes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/classid"
+                },
+                "name": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/classname"
+                },
+                "room": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/teacherhasaccepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
