@@ -4,7 +4,7 @@
         {
             "teacher_id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/someid"
+              "entity": "http://entities.highschool.com/teacherid"
             }
         }
     ],
@@ -13,7 +13,7 @@
             "method": "GET",
             "outputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
-                "type": "null"
+              "type": "object"
             }
         },
         {
@@ -22,13 +22,16 @@
                 "$schema": "http://json-schema.org/draft-06/schema#",
                 "type": "object",
                 "properties": {
-                    "username": {
+                  "date": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/username"
+                    "entity": "http://entities.highschool.com/date"
                     },
-                    "password": {
-                        "type": "string",
-                        "entity": "http://entities.highschool.com/password"
+                  "id": {
+                    "type": "integer",
+                    "entity": "http://entities.highschool.com/appointmentid"
+                  }
+                  "parent": {
+                        
                     }
                 },
                 "required": ["username", "password"]

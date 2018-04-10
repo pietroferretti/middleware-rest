@@ -1,3 +1,5 @@
+---- RELATIONS ----
+
 http://relations.highschool.com/index
 http://relations.highschool.com/data
 http://relations.highschool.com/updatedata
@@ -31,3 +33,16 @@ http://relations.highschool.com/parent
 http://relations.highschool.com/parentlist
 http://relations.highschool.com/createparent
 http://relations.highschool.com/createadmin
+
+
+---- ENTITIES ----
+
+http://entities.highschool.com/teacherid
+http://entities.highschool.com/date
+http://entities.highschool.com/appointmentid
+http://entities.highschool.com/parent
+http://entities.highschool.com/parentlastname
+http://entities.highschool.com/parentname
+http://entities.highschool.com/room
+http://entities.highschool.com/teacherhasaccepted
+http://entities.highschool.com/parenthasaccepted
