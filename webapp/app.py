@@ -412,18 +412,6 @@ def teacher_class_with_id(teacher_id, class_id):
     if not c:
         return build_response(error='Class not found.', links=links), 404
 
-    ## TODO remove
-    # students = c.students
-    # st = []
-    # for s in students:
-    #    st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
-
-    # subjects_list = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
-    # subjects = []
-    # for s in subjects_list:
-    #     subjects.append({'id': s.id, 'name': s.name})
-
-    # res = {'class': {'id': class_id, 'name': c.name, 'room': c.room, 'students': st, 'subjects': subjects}}
     res = {'class': {'id': class_id, 'name': c.name, 'room': c.room}}
 
     # more hypermedia
@@ -994,21 +982,20 @@ def teacher_timetable(teacher_id):
 
     # query
     timetable = []
-
+    classes_id = set()
     for s in teacher.subjects:
         c = session.query(Class).get(s.class_id)
         timetable.append(
             {'subjects_name': s.name, 'schedule': json.loads(s.timetable),
              'class': {'name': c.name, 'id': c.id, 'room': c.room}})
+        classes_id.add(c.id)
 
     # more hypermedia
-    for cl in teacher.classes:
-        links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=cl.id,
+    for c in classes_id:
+        links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=c,
                             rel='http://relations.highschool.com/timetable')
-
     # response
-    return build_response(timetable)
-
+    return build_response(timetable, links=links)
 
 # FIXME cambiare risultati appointment
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
@@ -1021,9 +1008,6 @@ def teacher_appointment(teacher_id):
     links += build_link('teacher_appointment', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/createappointment')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
-
-    # more hypermedia
-    ## hypermedia to appointment_with_id (query per la get, singolo link per la post)
 
     if request.method == 'POST':
         '''create new appointment'''
@@ -1063,8 +1047,15 @@ def teacher_appointment(teacher_id):
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
                                              'parent': {'name': parent.name, 'lastname': parent.lastname}}})
+        links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
+                            rel='http://relations.highschool.com/appointment')
+        links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
+                            rel='http://relations.highschool.com/updateappointment')
 
-    return build_response(appointments)
+    # more hypermedia
+    ## hypermedia to appointment_with_id (query per la get, singolo link per la post)
+
+    return build_response(appointments, links=links)
 
 
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
