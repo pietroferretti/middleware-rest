@@ -1000,7 +1000,6 @@ def teacher_timetable(teacher_id):
     # response
     return build_response(timetable, links=links)
 
-# FIXME cambiare risultati appointment
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
@@ -1034,7 +1033,7 @@ def teacher_appointment(teacher_id):
             res = {'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
-                                             'parent': {'name': parent.name, 'lastname': parent.lastname}}}
+                                   'parent': {'id': parent.id, 'name': parent.name, 'lastname': parent.lastname}}}
             return build_response(res), 201
 
         else:
@@ -1053,7 +1052,8 @@ def teacher_appointment(teacher_id):
         appointments.append({'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
-                                             'parent': {'name': parent.name, 'lastname': parent.lastname}}})
+                                             'parent': {'id': parent.id, 'name': parent.name,
+                                                        'lastname': parent.lastname}}})
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
                             rel='http://relations.highschool.com/appointment')
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,

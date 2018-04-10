@@ -41,8 +41,22 @@ http://entities.highschool.com/teacherid
 http://entities.highschool.com/date
 http://entities.highschool.com/appointmentid
 
+http://entities.highschool.com/parentid
 http://entities.highschool.com/parentlastname
 http://entities.highschool.com/parentname
+
 http://entities.highschool.com/room
 http://entities.highschool.com/teacherhasaccepted
 http://entities.highschool.com/parenthasaccepted
+
+http://entities.highschool.com/classid
+http://entities.highschool.com/classname
+
+http://entities.highschool.com/subjectid
+
+http://entities.highschool.com/studentid
+http://entities.highschool.com/studentname
+http://entities.highschool.com/studentlastname
+
+http://entities.highschool.com/gradeid
+http://entities.highschool.com/gradevalue
