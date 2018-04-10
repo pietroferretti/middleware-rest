@@ -40,7 +40,7 @@ http://relations.highschool.com/createadmin
 http://entities.highschool.com/teacherid
 http://entities.highschool.com/date
 http://entities.highschool.com/appointmentid
-http://entities.highschool.com/parent
+
 http://entities.highschool.com/parentlastname
 http://entities.highschool.com/parentname
 http://entities.highschool.com/room

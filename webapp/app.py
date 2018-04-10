@@ -1059,9 +1059,6 @@ def teacher_appointment(teacher_id):
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
                             rel='http://relations.highschool.com/updateappointment')
 
-    # more hypermedia
-    ## hypermedia to appointment_with_id (query per la get, singolo link per la post)
-
     return build_response(appointments, links=links)
 
 
