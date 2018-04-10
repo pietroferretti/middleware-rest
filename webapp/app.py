@@ -336,7 +336,10 @@ def teacher_data(teacher_id):
             teacher.lastname = data['lastname']
         session.commit()
 
-        return build_response({'message': 'Update successful.'}, links=links)
+        res = {'data': {'name': teacher.name,
+               'lastname': teacher.lastname}}
+
+        return build_response(res, links=links)
 
     else:
         '''Show teacher personal data'''
@@ -1027,13 +1030,17 @@ def teacher_appointment(teacher_id):
                                           room=data['room'], parent_id=data['parent_id'])
             session.add(new_appointment)
             session.commit()
-            new_id = new_appointment.id
-            return build_response({'id': new_id}), 201
+            a = new_appointment
+            res = {'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
+                                             'parent_accepted': a.parent_accepted,
+                                             'teacher_accepted': a.teacher_accepted,
+                                             'parent': {'name': parent.name, 'lastname': parent.lastname}}}
+            return build_response(res), 201
 
         else:
             return build_response(error='Wrong date/time.'), 400
 
-    '''show list of appointments for a teacher'''
+    '''Show list of appointments for a teacher'''
 
     appointments_list = session.query(Appointment).filter_by(teacher_id=teacher_id).all()
 
@@ -1077,7 +1084,7 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         return build_response(error='Appointment not found.'), 404
 
     if request.method == 'PUT':
-        '''edit appointment'''
+        '''Edit appointment'''
         try:
             data = request.get_json()
         except TypeError:
@@ -1104,17 +1111,22 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             appointment.teacher_accepted = int(data['teacher_accepted'])
 
         session.commit()
-        return build_response({'message': 'Update successful.'})
+
+        return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
+                                               'teacher_accepted': appointment.teacher_accepted,
+                                               'parent_accepted': appointment.parent_accepted,
+                                               'parent': {'id': parent.id, 'name': parent.name,
+                                                          'lastname': parent.lastname}}}, links=links)
 
     else:
-        '''show appointment info'''
+        '''Show appointment info'''
         parent = session.query(Parent).filter_by(id=appointment.parent_id).one()
 
         return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
                                                'teacher_accepted': appointment.teacher_accepted,
                                                'parent_accepted': appointment.parent_accepted,
                                                'parent': {'id': parent.id, 'name': parent.name,
-                                                          'lastname': parent.lastname}}})
+                                                          'lastname': parent.lastname}}}, links=links)
 
 
 # DONE
@@ -1511,8 +1523,10 @@ def parent_appointment(parent_id):
                                               teacher_id=data['teacher_id'], parent_id=parent_id)
                 session.add(new_appointment)
                 session.commit()
-                new_id = new_appointment.id
-                return build_response({'id': new_id}), 201
+                a = new_appointment
+                return build_response({'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
+                                 'parent_accepted': a.parent_accepted,
+                                 'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}}), 201
             else:
                 return build_response(error='Choose a free slot.', links=links), 400
 
@@ -1568,7 +1582,10 @@ def parent_appointment_with_id(parent_id, appointment_id):
 
         session.commit()
 
-        return build_response({'message': 'Update successful.'})
+        return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
+                                               'teacher_accepted': appointment.teacher_accepted,
+                                               'parent_accepted': appointment.parent_accepted,
+                                               'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}}, links=links)
     else:
         '''show appointment info'''
         teacher = session.query(Teacher).filter_by(id=appointment.teacher_id).one()
@@ -2422,6 +2439,11 @@ def student_with_id(student_id):
         if 'lastname' in data:
             st.lastname = data['lastname']
 
+        # build response object
+        s_obj = {'id': st.id, 'name': st.name, 'lastname': st.lastname, 'parent_id': st.parent_id,
+                 'class_id': st.class_id}
+        res = {'student': s_obj}
+
         # more hypermedia (parent, class)
         if st.parent_id:
             links += build_link('admin_parent_with_id', parent_id=st.parent_id,
@@ -2429,7 +2451,7 @@ def student_with_id(student_id):
         if st.class_id:
             links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.highschool.com/class')
 
-        return build_response({'message': 'Update successful.'}, links=links)
+        return build_response(res, links=links)
 
 
     else:
