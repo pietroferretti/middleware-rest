@@ -1,0 +1,71 @@
+{
+  "url_template": "/teacher/{teacher_id}/timetable/",
+  "template_parameters": [
+    {
+      "teacher_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/teacherid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "timetable": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "subjects_name": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/subjectsname"
+                },
+                "schedule": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day": {
+                        "type": "integer",
+                        "entities": "http://entities.highschool.com/day"
+                      },
+                      "start_hour": {
+                        "type": "integer",
+                        "entities": "http://entities.highschool.com/hour"
+                      },
+                      "end_hour": {
+                        "type": "integer",
+                        "entities": "http://entities.highschool.com/hour"
+                      }
+                    }
+                  }
+                },
+                "class": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "entity": "http://entities.highschool.com/classid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "entity": "http://entities.highschool.com/classname"
+                    },
+                    "room": {
+                      "type": "string",
+                      "entity": "http://entities.highschool.com/teacherhasaccepted"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

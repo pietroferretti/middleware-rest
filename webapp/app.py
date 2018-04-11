@@ -339,7 +339,7 @@ def teacher_data(teacher_id):
         res = {'data': {'name': teacher.name,
                'lastname': teacher.lastname}}
 
-        return build_response(res, links=links)
+        # return build_response(res, links=links)
 
     else:
         '''Show teacher personal data'''
@@ -352,7 +352,7 @@ def teacher_data(teacher_id):
         res = {'data': {'name': teacher.name,
                'lastname': teacher.lastname}}
 
-        return build_response(res, links=links)
+    return build_response(res, links=links)
 
 
 # DONE
@@ -998,7 +998,7 @@ def teacher_timetable(teacher_id):
         links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=c,
                             rel='http://relations.highschool.com/timetable')
     # response
-    return build_response(timetable, links=links)
+    return build_response({'timetable': timetable}, links=links)
 
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check

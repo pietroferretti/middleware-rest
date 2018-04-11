@@ -53,6 +53,7 @@ http://entities.highschool.com/classid
 http://entities.highschool.com/classname
 
 http://entities.highschool.com/subjectid
+http://entities.highschool.com/subjectsname
 
 http://entities.highschool.com/studentid
 http://entities.highschool.com/studentname
@@ -60,3 +61,5 @@ http://entities.highschool.com/studentlastname
 
 http://entities.highschool.com/gradeid
 http://entities.highschool.com/gradevalue
+
+http://entities.highschool.com/hour
