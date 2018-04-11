@@ -33,6 +33,8 @@ http://relations.highschool.com/parent
 http://relations.highschool.com/parentlist
 http://relations.highschool.com/createparent
 http://relations.highschool.com/createadmin
+http://relations.highschool.com/freedays
+http://relations.highschool.com/freeslots
 
 
 ---- ENTITIES ----

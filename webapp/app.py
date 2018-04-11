@@ -248,7 +248,7 @@ def login():
     # save authorized endpoints in a cryptographically secure client side cookie
     clienttoken['scopes'] = scopes
     clienttoken.permanent = True
-    app.permanent_session_lifetime = timedelta(hours=1)
+    app.permanent_session_lifetime = datetime.timedelta(hours=1)
 
     return build_response({'message': 'Login successful.', 'username': data['username']}, links=links)
 
@@ -1001,6 +1001,7 @@ def teacher_timetable(teacher_id):
     return build_response(timetable, links=links)
 
 # FIXME cambiare risultati appointment
+# DONE hypermedia
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
@@ -1035,17 +1036,17 @@ def teacher_appointment(teacher_id):
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
                                              'parent': {'name': parent.name, 'lastname': parent.lastname}}}
-            return build_response(res), 201
+            return build_response(res, links=links), 201
 
         else:
-            return build_response(error='Wrong date/time.'), 400
+            return build_response(error='Wrong date/time.', links=links), 400
 
     '''Show list of appointments for a teacher'''
 
     appointments_list = session.query(Appointment).filter_by(teacher_id=teacher_id).all()
 
     if not appointments_list:
-        return build_response(error='Appointments not found.'), 404
+        return build_response(error='Appointments not found.', links=links), 404
 
     appointments = []
     for a in appointments_list:
@@ -1059,12 +1060,10 @@ def teacher_appointment(teacher_id):
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
                             rel='http://relations.highschool.com/updateappointment')
 
-    # more hypermedia
-    ## hypermedia to appointment_with_id (query per la get, singolo link per la post)
-
     return build_response(appointments, links=links)
 
 
+# DONE
 @app.route('/teacher/<int:teacher_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def teacher_appointment_with_id(teacher_id, appointment_id):
@@ -1487,16 +1486,37 @@ def teacher_available(datetime_to_check, appointments, subjects):
 
 # TODO capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
 # TODO provare le post durante orario di lezione
+# DONE hypermedia
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def parent_appointment(parent_id):
-    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    # hypermedia
+    links = build_link('parent_appointment', parent_id=parent_id, rel='self')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
+    parent = session.query(Parent).get(parent_id)
 
     if not parent:
-        return build_response(error='Parent not found.')
+        return build_response(error='Parent not found.', links=links), 404
+
+    # more hypermedia
+    ts = session.query(Teacher).all()
+    for t in ts:
+        if any(c.class_id in t.classes for c in parent.children):
+            links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=t.id,
+                                year=datetime.datetime.now().year, month=datetime.datetime.now().month,
+                                rel='http://relations.highschool.com/freedays')
+            links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=t.id,
+                                year=datetime.datetime.now().year, month=datetime.datetime.now().month,
+                                day=datetime.datetime.now().day, rel='http://relations.highschool.com/freeslots')
 
     if request.method == 'POST':
-        '''create new appointment'''
+        '''Create new appointment'''
         try:
             data = request.get_json()
         except TypeError:
@@ -1524,6 +1544,11 @@ def parent_appointment(parent_id):
                 session.add(new_appointment)
                 session.commit()
                 a = new_appointment
+
+                # more hypermedia
+                links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id,
+                                    rel='http://relations.highschool.com/appointment')
+
                 return build_response({'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
                                  'parent_accepted': a.parent_accepted,
                                  'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}}), 201
@@ -1535,7 +1560,7 @@ def parent_appointment(parent_id):
 
 
     else:
-        '''show all appointments'''
+        '''Show all appointments'''
         appointments = []
         for a in parent.appointments:
             teacher = session.query(Teacher).filter_by(id=a.teacher_id).one()
@@ -1543,21 +1568,37 @@ def parent_appointment(parent_id):
                                  'parent_accepted': a.parent_accepted,
                                  'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}})
 
+        # more hypermedia
+        for i in range(min(10, len(appointments))):
+            links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointments[i].id,
+                            rel='http://relations.highschool.com/appointment')
+
         return build_response(appointments, links=links)
 
 
-# TODO calendar-like support
-
+# DONE
 @app.route('/parent/<int:parent_id>/appointment/<int:appointment_id>/', methods=['GET', 'PUT'])
 @auth_check
 def parent_appointment_with_id(parent_id, appointment_id):
+
+    # hypermedia
+    links = build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointment_id, rel='self')
+    links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointment_id,
+                        rel='http://relations.highschool.com/appointment')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
+
+
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(parent_id=parent_id).one()
 
     if not appointment:
         return build_response('Appointment not found.')
 
     if request.method == 'PUT':
-        '''edit appointment'''
+        '''Edit appointment'''
         try:
             data = request.get_json()
         except TypeError:
@@ -1587,7 +1628,7 @@ def parent_appointment_with_id(parent_id, appointment_id):
                                                'parent_accepted': appointment.parent_accepted,
                                                'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}}, links=links)
     else:
-        '''show appointment info'''
+        '''Show appointment info'''
         teacher = session.query(Teacher).filter_by(id=appointment.teacher_id).one()
 
         return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
@@ -1640,11 +1681,24 @@ def available_slot_in_day(day_to_check, appointments, subjects):
     return False
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
 @auth_check
 def parent_appointment_month(parent_id, teacher_id, year, month):
     '''Show which days have appointments and free slots for the month'''
-    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+
+    # hypermedia
+    links = build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
+                        year=year, month=month, rel='self')
+    links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
+                        year=year, month=month, rel='http://relations.highschool.com/freedays')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
+
+    teacher = session.query(Teacher).get(teacher_id)
 
     if not teacher:
         return build_response(error='Teacher not found.', links=links), 404
@@ -1657,21 +1711,41 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     if not res:
         return build_response(error='No available appointments for this month.', links=links), 404
 
+    # more hypermedia
+    for d in res:
+        links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
+                            year=year, month=month,
+                            day=d['date'].day, rel='http://relations.highschool.com/freeslots')
+
     # day_to_check = datetime.datetime(year,month,3)
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
 
     return build_response({'available_days': res})
 
-
+# DONE
 @app.route(
     '/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/day/<int:day>/')
 @auth_check
 def parent_appointment_day(parent_id, teacher_id, year, month, day):
     '''Show appointments, free slots for the day'''
-    teacher = session.query(Teacher).filter_by(id=teacher_id).one()
+
+    # hypermedia
+    links = build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
+                        year=year, month=month, day=day, rel='self')
+    links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
+                        year=year, month=month, day=day, rel='http://relations.highschool.com/freeslots')
+    links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
+                        year=year, month=month, rel='http://relations.highschool.com/freedays')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/appointmentlist')
+    links += build_link('parent_appointment', parent_id=parent_id,
+                        rel='http://relations.highschool.com/createappointment')
+
+    teacher = session.query(Teacher).get(teacher_id)
 
     if not teacher:
-        return build_response(error='Teacher not found.'), 404
+        return build_response(error='Teacher not found.', links=links), 404
 
     # setto tutti gli slot a 1=libero
     daily_slots = {}
@@ -1704,6 +1778,7 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     return build_response(res, links=links)
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/payment/')
 @auth_check
 def parent_payment(parent_id):
@@ -1717,7 +1792,6 @@ def parent_payment(parent_id):
                         rel='http://relations.highschool.com/paymentlist')
     links += build_link('parent_payment_pending', parent_id=parent_id, 
                         rel='http://relations.highschool.com/paymentlist')
-
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
 
     # checks
@@ -1732,18 +1806,29 @@ def parent_payment(parent_id):
         payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason, 'pending': p.is_pending})
 
     # more hypermedia
-    for i in range(min(5, len(payments))):
+    for i in range(min(5, len(parent.payments))):
         links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payments[i].payment_id,
                             rel='http://relations.highschool.com/payment')
 
     return build_response({'payments': payments}, links=links)
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/payment/paid/')
 @auth_check
 def parent_payment_paid(parent_id):
     '''list old paid payments'''
-    # TODO LINKS
+
+    # hypermedia
+    links = build_link('parent_payment_paid', parent_id=parent_id, rel='self')
+    links += build_link('parent_payment_paid', parent_id=parent_id,
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_payment', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_payment_pending', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -1757,15 +1842,31 @@ def parent_payment_paid(parent_id):
         if (not p.is_pending):
             payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason})
 
+    # more hypermedia
+    for i in range(min(5, len(parent.payments))):
+        links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payments[i].payment_id,
+                            rel='http://relations.highschool.com/payment')
+
     return build_response({'payments': payments}, links=links)
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/payment/pending/')
 @auth_check
 def parent_payment_pending(parent_id):
     '''list pending payments'''
-    # TODO LINKS
-    parent = session.query(Parent).filter_by(id=parent_id).one()
+
+    # hypermedia
+    links = build_link('parent_payment_pending', parent_id=parent_id, rel='self')
+    links += build_link('parent_payment_pending', parent_id=parent_id,
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_payment', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_payment_paid', parent_id=parent_id, 
+                        rel='http://relations.highschool.com/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+
+    parent = session.query(Parent).get(parent_id)
 
     if not parent:
         return build_response(error='Parent not found.', links=links), 404
@@ -1776,9 +1877,15 @@ def parent_payment_pending(parent_id):
         if (p.is_pending):
             payments.append({'id': p.id, 'amount': p.amount, 'date': p.date, 'reason': p.reason})
 
+    # more hypermedia
+    for i in range(min(5, len(parent.payments))):
+        links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payments[i].payment_id,
+                            rel='http://relations.highschool.com/payment')
+
     return build_response({'payments': payments}, links=links)
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/')
 @auth_check
 def parent_payment_with_id(parent_id, payment_id):
@@ -1786,11 +1893,9 @@ def parent_payment_with_id(parent_id, payment_id):
 
     # hypermedia
     links = build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payment_id, rel='self')
+    links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payment_id,
+                       rel='http://relation.highschool.com/payment')
     links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-
-    links += build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
-                        rel='http://relations.highschool.com/completepayment')
-
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
 
     # checks
@@ -1799,12 +1904,17 @@ def parent_payment_with_id(parent_id, payment_id):
     if not payment or payment.parent_id != parent_id:
         return build_response(error='Payment not found.', links=links), 404
 
-    # query
-    return build_response(
-        {'amount': payment.amount, 'date': payment.date, 'reason': payment.reason, 'pending': payment.is_pending},
-        links=links)
+    res = {'amount': payment.amount, 'date': payment.date, 'reason': payment.reason, 'pending': payment.is_pending}
+
+    # more hypermedia
+    if payment.is_pending:
+        links += build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
+                            rel='http://relations.highschool.com/completepayment')
+
+    return build_response(res, links=links)
 
 
+# DONE
 @app.route('/parent/<int:parent_id>/payment/<int:payment_id>/pay/', methods=['PUT'])
 @auth_check
 def parent_pay(parent_id, payment_id):
@@ -1813,6 +1923,8 @@ def parent_pay(parent_id, payment_id):
 
     # hypermedia
     links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id, rel='self')
+    links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id, 
+                       rel='http://relations.highschool.com/completepayment')
     links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
 
@@ -1821,16 +1933,15 @@ def parent_pay(parent_id, payment_id):
     if not parent:
         return build_response(error='Parent not found.', links=links), 404
 
-    payment = session.query(Payment).filter_by(id=payment_id).filter_by(parent_id=parent_id).one()
+    payment = session.query(Payment).get(payment_id)
+    if not payment or payment.parent_id != parent_id:
+        return build_response(error='Payment not found.', links=links), 404
 
     if payment.is_pending:
         # MAGIC HAPPENS!
         payment.is_pending = False
         session.commit()
         return build_response('Payment confirmed.', links=links)
-
-    else:
-        return build_response(error='Already paid.', links=links)
 
 
 # DONE
