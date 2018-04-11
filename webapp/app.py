@@ -339,7 +339,7 @@ def teacher_data(teacher_id):
         res = {'data': {'name': teacher.name,
                'lastname': teacher.lastname}}
 
-        return build_response(res, links=links)
+        # return build_response(res, links=links)
 
     else:
         '''Show teacher personal data'''
@@ -352,7 +352,7 @@ def teacher_data(teacher_id):
         res = {'data': {'name': teacher.name,
                'lastname': teacher.lastname}}
 
-        return build_response(res, links=links)
+    return build_response(res, links=links)
 
 
 # DONE
@@ -998,10 +998,10 @@ def teacher_timetable(teacher_id):
         links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=c,
                             rel='http://relations.highschool.com/timetable')
     # response
-    return build_response(timetable, links=links)
+    return build_response({'timetable': timetable}, links=links)
 
-# FIXME cambiare risultati appointment
-# DONE hypermedia
+
+# DONE
 @app.route('/teacher/<int:teacher_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def teacher_appointment(teacher_id):
@@ -1035,7 +1035,7 @@ def teacher_appointment(teacher_id):
             res = {'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
-                                             'parent': {'name': parent.name, 'lastname': parent.lastname}}}
+                                   'parent': {'id': parent.id, 'name': parent.name, 'lastname': parent.lastname}}}
             return build_response(res, links=links), 201
 
         else:
@@ -1054,7 +1054,8 @@ def teacher_appointment(teacher_id):
         appointments.append({'appointment': {'id': a.id, 'date': a.date, 'room': a.room,
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
-                                             'parent': {'name': parent.name, 'lastname': parent.lastname}}})
+                                             'parent': {'id': parent.id, 'name': parent.name,
+                                                        'lastname': parent.lastname}}})
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
                             rel='http://relations.highschool.com/appointment')
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,

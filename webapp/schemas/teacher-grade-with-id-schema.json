@@ -1,0 +1,114 @@
+{
+    "url_template": "/teacher/{teacher_id}/class/{class_id}/subject/{subject_id}/grade/{grade_id}/",
+    "template_parameters": [
+        {
+            "class_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/classid"
+            }
+        },
+        {
+            "teacher_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/teacherid"
+            }
+        },
+        {
+            "subject_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/subjectid"
+            }
+        },
+        {
+            "grade_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/gradeid"
+            }
+        }
+    ],
+    "actions": [
+        {
+            "method": "GET",
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "grade": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/gradeid"
+                            },
+                            "date": {
+                                "type": "string",
+                                "entity": "http://entities.highschool.com/date"
+                            },
+                            "subject_id": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/subjectid"
+                            },
+                            "student_id": {
+                                "type": "string",
+                                "entity": "http://entities.highschool.com/studentid"
+                            },
+                            "value": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/gradevalue"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "PUT",
+            "inputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/date"
+                    },
+                    "value": {
+                        "type": "integer",
+                        "entity": "http://entities.highschool.com/gradevalue"
+                    }
+                },
+                "required": []
+            },
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "grade": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/gradeid"
+                            },
+                            "date": {
+                                "type": "string",
+                                "entity": "http://entities.highschool.com/date"
+                            },
+                            "subject_id": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/subjectid"
+                            },
+                            "student_id": {
+                                "type": "string",
+                                "entity": "http://entities.highschool.com/studentid"
+                            },
+                            "value": {
+                                "type": "integer",
+                                "entity": "http://entities.highschool.com/gradevalue"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

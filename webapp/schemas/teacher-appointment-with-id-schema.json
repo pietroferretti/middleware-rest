@@ -1,0 +1,136 @@
+{
+  "url_template": "/teacher/{teacher_id}/appointment/{appointment_id}/",
+  "template_parameters": [
+    {
+      "teacher_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/teacherid"
+      }
+    },
+    {
+      "appointment_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/appointmentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "appointment": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/date"
+              },
+              "parent": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "entity": "http://entities.highschool.com/parentid"
+                  },
+                  "lastname": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/parentlastname"
+                  },
+                  "name": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/parentname"
+                  }
+                }
+              },
+              "parent_accepted": {
+                "type": "boolean",
+                "entity": "http://entities.highschool.com/parenthasaccepted"
+              },
+              "room": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teacherhasaccepted"
+              },
+              "teacher_accepted": {
+                "type": "boolean",
+                "entity": "http://entities.highschool.com/room"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/date"
+          },
+          "parent_id": {
+            "type": "integer",
+            "entity": "http://entities.highschool.com/appointmentid"
+          },
+          "room": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/teacherhasaccepted"
+          },
+          "teacher_accepted": {
+            "type": "boolean",
+            "entity": "http://entities.highschool.com/room"
+          }
+        },
+        "required": []
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "appointment": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/date"
+              },
+              "parent": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "entity": "http://entities.highschool.com/parentid"
+                  },
+                  "lastname": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/parentlastname"
+                  },
+                  "name": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/parentname"
+                  }
+                }
+              },
+              "parent_accepted": {
+                "type": "boolean",
+                "entity": "http://entities.highschool.com/parenthasaccepted"
+              },
+              "room": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teacherhasaccepted"
+              },
+              "teacher_accepted": {
+                "type": "boolean",
+                "entity": "http://entities.highschool.com/room"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

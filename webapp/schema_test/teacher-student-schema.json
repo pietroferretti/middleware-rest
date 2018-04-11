@@ -4,13 +4,13 @@
         {
             "class_id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/someid"
+              "entity": "http://entities.highschool.com/classid"
             }
         },
         {
             "teacher_id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/someid"
+              "entity": "http://entities.highschool.com/teacherid"
             }
         }
     ],
@@ -19,7 +19,29 @@
             "method": "GET",
             "outputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
-                "type": "null"
+              "type": "object",
+              "properties": {
+                "students": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "entity": "http://entities.highschool.com/studentid"
+                      },
+                      "lastname": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/studentlastname"
+                      },
+                      "name": {
+                        "type": "string",
+                        "entity": "http://entities.highschool.com/studentname"
+                      }
+                    }
+                  }
+                }
+              }
             }
         }
     ]
