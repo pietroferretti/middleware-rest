@@ -8,7 +8,6 @@
 import json
 
 # TODO
-# definire tutte le funzioni per ogni endpoint
 # spostare funzioni in altri file?
 # aggiungere PUT dove ci sono POST?
 # aggiungere metodi DELETE dove servono (es notification)
@@ -559,66 +558,6 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
     return build_response(res, links=links)
 
 
-# # MA È UGUALE A CLASS DI TEACHER? no, ora ho tolto tutte le cose estranee da /class/id/
-# # FIXME secondo me possiamo rimuovere questo endpoint, teniamo solo /class/id/student/
-# @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/')
-# @auth_check
-# def teacher_student(teacher_id, class_id, subject_id):
-#     '''show list of students for a subject taught by a teacher'''
-
-#     links = build_link('teacher_with_id', teacher_id=teacher_id,
-#                         rel='http://relations.highschool.com/index')
-#     links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-#                         rel='http://relations.highschool.com/subject')
-#     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-#                         rel='http://relations.highschool.com/studentlist')
-#     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-#                         rel='self')
-
-#     c = session.query(Class).get(class_id)
-#     subject = session.query(Subject).filter_by(id=subject_id).filter_by(teacher_id=teacher_id).filter_by(
-#         class_id=class_id).first()
-
-#     if not c:
-#         links = build_link('teacher_with_id', teacher_id=teacher_id,
-#                             rel='http://relations.highschool.com/index')
-#         links += build_link('teacher_class', teacher_id=teacher_id,
-#                             rel='http://relations.highschool.com/classlist')
-#         return build_response(error='Class not found.', links=links), 404
-
-#     if not subject:
-#         links = build_link('teacher_with_id', teacher_id=teacher_id,
-#                            rel='http://relations.highschool.com/index')
-#         links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
-#                             rel='http://relations.highschool.com/subjectlist')
-#         return build_response(error='Subject not found.', links=links), 404
-
-#     students = c.students
-#     st = []
-#     for s in students:
-#         st.append({'id': s.id, 'name': s.name, 'lastname': s.lastname})
-
-#     # subjects = []
-#     # for s in subjects_list:
-#     #     subjects.append({'id': s.id, 'name': s.name})
-
-#     res = {'students': st}
-
-#     # more hypermedia
-#     for i in range(min(10, len(st))):
-#         links += build_link('teacher_student_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-#                             student_id=st[i]['id'], rel='http://relations.highschool.com/student')
-
-#     return build_response(res)
-
-
-# # FIXME possiamo rimuovere anche questo endpoint, teniamo solo /class/id/student/
-# @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/')
-# @auth_check
-# def teacher_student_with_id(teacher_id, class_id, student_id):
-#     pass
-
-
 # DONE
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/student/<int:student_id>/grade/',
            methods=['GET', 'POST'])
@@ -681,7 +620,10 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                    grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('teacher_grade_with_id',  teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                   grade_id=grade_id)
+        return response, 201
 
     else:
         '''Show list of grades for this student'''
@@ -738,11 +680,6 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<subject_id>/grade/', methods=['GET', 'POST'])
 @auth_check
 def teacher_class_grades(teacher_id, class_id, subject_id):
-    # check_teacher_class_subj = session.query(Subject).filter_by(class_id=class_id).filter_by(
-    #     teacher_id=teacher_id).filter_by(id=subject_id).one()
-
-    # if not check_teacher_class_subj:
-    #     return build_response(error='Data not found.'), 404
 
     # hypermedia
     links = build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
@@ -773,9 +710,6 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         subject = session.query(Subject).get(subject_id)
         if not subject or teacher_id != subject.teacher_id or class_id != subject.class_id:
             return build_response(error='Subject not found.', links=links), 404
-
-        # if 'date' not in data or 'value' not in data:
-        #     return build_response(error='The JSON structure must contain all the requested parameters.'), 400
 
         if 'grades' not in data:
             return build_response(error='The JSON structure must contain all the requested parameters.'), 400
@@ -1036,7 +970,13 @@ def teacher_appointment(teacher_id):
                                              'parent_accepted': a.parent_accepted,
                                              'teacher_accepted': a.teacher_accepted,
                                    'parent': {'id': parent.id, 'name': parent.name, 'lastname': parent.lastname}}}
-            return build_response(res, links=links), 201
+
+            # more hypermedia
+            links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
+                                rel='http://www.highschool.com/appointment')
+            response = build_response(res, links=links)
+            response.headers['Location'] = url_for('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id)
+            return response, 201
 
         else:
             return build_response(error='Wrong date/time.', links=links), 400
@@ -1550,9 +1490,12 @@ def parent_appointment(parent_id):
                 links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id,
                                     rel='http://relations.highschool.com/appointment')
 
-                return build_response({'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
+                res = {'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
                                  'parent_accepted': a.parent_accepted,
-                                 'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}}), 201
+                                 'teacher': {'id': a.teacher_id, 'name': teacher.name, 'lastname': teacher.lastname}}
+                response = build_response(res, links=links)
+                response.headers['Location'] = url_for('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id)
+                return response, 201
             else:
                 return build_response(error='Choose a free slot.', links=links), 400
 
@@ -2123,7 +2066,9 @@ def admin_teacher():
         # more hypermedia
         links += build_link('admin_teacher_with_id', teacher_id=new_id, rel='http://relations.highschool.com/teacher')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('admin_teacher_with_id', teacher_id=new_id)
+        return response, 201
 
     else:
         '''List of teachers'''
@@ -2240,7 +2185,9 @@ def admin_parent():
         # more hypermedia
         links += build_link('admin_parent_with_id', parent_id=new_id, rel='http://relations.highschool.com/parent')
 
-        return build_response(res, links=links), 201
+        respose = build_response(res, links=links)
+        response.headers['Location'] = url_for('admin_parent_with_id', parent_id=new_id)
+        return response, 201
 
     else:
         '''Show list of parents'''
@@ -2461,7 +2408,9 @@ def student():
         # more hypermedia
         links += build_link('student_with_id', student_id=new_id, rel='http://relations.highschool.com/student')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('student_with_id', student_id=new_id)
+        return response, 201
 
     else:
         '''Show list of students'''
@@ -2752,7 +2701,9 @@ def payment_parent(parent_id):
         # more hypermedia
         links += build_link('admin_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/parent')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('admin_parent_with_id', parent_id=parent_id)
+        return response, 201
 
     else:
         '''List payments for a parent'''
@@ -2838,7 +2789,9 @@ def payment_class(class_id):
         # more hypermedia
         links += build_link('class_with_id', class_id=class_id, rel='http://relations.highschool.com/class')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('class_with_id', class_id=class_id)
+        return response, 201
 
     else:
         '''List payments for a class'''
@@ -3108,6 +3061,7 @@ def notification_parent_with_id(parent_id):
         return build_response(res, links=links)
 
 
+# DONE
 @app.route('/admin/notification/teacher/', methods=['GET', 'POST'])
 @auth_check
 def notification_teachers():
