@@ -4,9 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
-import IPython
-from datetime import datetime, timedelta
-
 
 
 def create_session():
@@ -43,28 +40,6 @@ teachers_classes_table = Table('teachers_classes', Base.metadata,
                                Column('class_id', Integer, ForeignKey('class.id'))
                                )
 
-# probabilmente non è il modo migliore di gestire le notification
-# teachers_notifications_table = Table('teachers_notifications', Base.metadata,
-#                                      Column('teacher_id', Integer, ForeignKey('teacher.id')),
-#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
-#                                      )
-
-# parents_notifications_table = Table('parents_notifications', Base.metadata,
-#                                     Column('parent_id', Integer, ForeignKey('parent.id')),
-#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-#                                     )
-
-# classes_notifications_table = Table('classes_notifications', Base.metadata,
-#                                     Column('class_id', Integer, ForeignKey('class.id')),
-#                                     Column('notification_id', Integer, ForeignKey('notification.id'))
-#                                     )
-
-# students_notifications_table = Table('students_notifications', Base.metadata,
-#                                      Column('student_id', Integer, ForeignKey('student.id')),
-#                                      Column('notification_id', Integer, ForeignKey('notification.id'))
-#                                      )
-
-
 class Student(Base):
     __tablename__ = 'student'
     # Here we define columns for the table person
@@ -91,8 +66,6 @@ class Teacher(Base):
 
 
 #    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
-
-
 
 class Subject(Base):
     # todo unire in qualche modo con class teacher table

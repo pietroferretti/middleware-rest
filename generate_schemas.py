@@ -1,4 +1,4 @@
-from app import *
+from webapp.app import *
 
 folder = 'webapp/schema_test/'
 
