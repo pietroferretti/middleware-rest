@@ -30,7 +30,7 @@
                 },
                 "room": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/teacherhasaccepted"
+                  "entity": "http://entities.highschool.com/room"
                 }
               }
             }
