@@ -1,0 +1,39 @@
+{
+  "url_template": "/admin/parent/{parent_id}/",
+  "template_parameters": [
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/parentid"
+              },
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentname"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentlastname"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

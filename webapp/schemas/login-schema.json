@@ -1,0 +1,40 @@
+{
+  "url_template": "/login/",
+  "template_parameters": [],
+  "actions": [
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/username"
+          },
+          "password": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/password"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "message": {
+            "constant": "Login successful."
+          },
+          "username": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/username"
+          }
+        }
+      }
+    }
+  ]
+}
