@@ -1,5 +1,5 @@
 {
-  "url_template": "/admin/notification/class/{class_id}/parents/",
+  "url_template": "/admin/notification/class/{class_id}/teachers/",
   "template_parameters": [
     {
       "class_id": {
@@ -29,7 +29,7 @@
                   "entity": "http://entities.highschool.com/date"
                 },
                 "scope": {
-                  "constant": "class_parents",
+                  "constant": "class_teachers",
                   "entity": "http://entities.highschool.com/notificationscope"
                 },
                 "class_id": {
@@ -77,7 +77,7 @@
                 "entity": "http://entities.highschool.com/date"
               },
               "scope": {
-                "constant": "class_parents",
+                "constant": "class_teachers",
                 "entity": "http://entities.highschool.com/notificationscope"
               },
               "class_id": {

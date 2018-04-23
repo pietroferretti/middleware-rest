@@ -1,10 +1,10 @@
 {
-  "url_template": "/admin/notification/class/{class_id}/parents/",
+  "url_template": "/admin/notification/teacher/{teacher_id}/",
   "template_parameters": [
     {
-      "class_id": {
+      "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/classid"
+        "entity": "http://entities.highschool.com/teacherid"
       }
     }
   ],
@@ -29,12 +29,12 @@
                   "entity": "http://entities.highschool.com/date"
                 },
                 "scope": {
-                  "constant": "class_parents",
+                  "constant": "one_teacher",
                   "entity": "http://entities.highschool.com/notificationscope"
                 },
-                "class_id": {
+                "teacher_id": {
                   "type": "integer",
-                  "entity": "http://entities.highschool.com/classid"
+                  "entity": "http://entities.highschool.com/teacherid"
                 },
                 "text": {
                   "type": "string",
@@ -77,12 +77,12 @@
                 "entity": "http://entities.highschool.com/date"
               },
               "scope": {
-                "constant": "class_parents",
+                "constant": "one_teacher",
                 "entity": "http://entities.highschool.com/notificationscope"
               },
-              "class_id": {
+              "teacher_id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/classid"
+                "entity": "http://entities.highschool.com/teacherid"
               },
               "text": {
                 "type": "string",

@@ -1,13 +1,6 @@
 {
-  "url_template": "/admin/notification/class/{class_id}/parents/",
-  "template_parameters": [
-    {
-      "class_id": {
-        "type": "integer",
-        "entity": "http://entities.highschool.com/classid"
-      }
-    }
-  ],
+  "url_template": "/admin/notification/teacher/",
+  "template_parameters": [],
   "actions": [
     {
       "method": "GET",
@@ -29,7 +22,7 @@
                   "entity": "http://entities.highschool.com/date"
                 },
                 "scope": {
-                  "constant": "class_parents",
+                  "constant": "teachers",
                   "entity": "http://entities.highschool.com/notificationscope"
                 },
                 "class_id": {
@@ -77,12 +70,8 @@
                 "entity": "http://entities.highschool.com/date"
               },
               "scope": {
-                "constant": "class_parents",
+                "constant": "teachers",
                 "entity": "http://entities.highschool.com/notificationscope"
-              },
-              "class_id": {
-                "type": "integer",
-                "entity": "http://entities.highschool.com/classid"
               },
               "text": {
                 "type": "string",
