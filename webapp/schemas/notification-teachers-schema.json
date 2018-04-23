@@ -10,7 +10,7 @@
         "properties": {
           "notifications": {
             "type": "array",
-            "item": {
+            "items": {
               "type": "object",
               "properties": {
                 "id": {
