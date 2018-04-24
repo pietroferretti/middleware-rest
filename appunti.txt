@@ -51,15 +51,16 @@ cose nel database:
 - grades
 - appointments
 - payments
+- notifications
 
 # cosa non si può modificare (ma nemmeno gli admin? nella consegna non c'è però avrebbe senso)
 - admins
-- notifications
 - timetables
 - accounts
 
 # cosa si può cancellare
-niente
+- grades
+- notifications
 
 # cosa non si può cancellare
-tutto
+tutto il resto

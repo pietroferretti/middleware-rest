@@ -109,6 +109,18 @@
                     }
                 }
             }
+        },
+        {
+            "method": "DELETE",
+            "outputschema": {
+                "$schema": "http://json-schema.org/draft-06/schema#",
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "constant": "Grade deleted successfully."
+                    }
+                }
+            }
         }
     ]
 }

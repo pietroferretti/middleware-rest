@@ -12,7 +12,6 @@ from webapp.db.db_declarative import session
 from webapp.db.db_declarative import Teacher, Parent, Student, Class, Notification, Payment, Account
 
 
-
 @app.route('/admin/', methods=['GET', 'POST'])
 @auth_check
 def admin():
@@ -99,7 +98,7 @@ def admin_teacher():
             return build_response(error='The JSON structure must contain all the requested parameters.',
                                   links=links), 400
 
-        existing = session.query(Account).filter_by(username=data['username'])
+        existing = session.query(Account).filter_by(username=data['username']).all()
         if existing:
             return build_response(error='The username is already in use.', links=links), 400
 
@@ -116,7 +115,7 @@ def admin_teacher():
         username = data['username']
         password = data['password']
         salt = os.urandom(16)
-        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
         saved_password = salt.hex() + ':' + hash.hex()
         account = Account(username=username, password=saved_password, type='teacher', teacher_id=new_teacher.id)
 
@@ -220,7 +219,7 @@ def admin_parent():
             return build_response(error='The JSON structure must contain all the requested parameters.',
                                   links=links), 400
 
-        existing = session.query(Account).filter_by(username=data['username'])
+        existing = session.query(Account).filter_by(username=data['username']).all()
         if existing:
             return build_response(error='The username is already in use.', links=links), 400
 
@@ -237,9 +236,13 @@ def admin_parent():
         username = data['username']
         password = data['password']
         salt = os.urandom(16)
-        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
         saved_password = salt.hex() + ':' + hash.hex()
         account = Account(username=username, password=saved_password, type='parent', parent_id=new_parent.id)
+
+        # insert account in database
+        session.add(account)
+        session.commit()
 
         # return parent, account objects
         p_obj = {'id': new_parent.id, 'name': name, 'lastname': lastname}
@@ -407,6 +410,7 @@ def class_student(class_id):
     # hypermedia
     for i in range(min(10, len(students))):
         links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.highschool.com/student')
+        links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.highschool.com/updatestudent')
 
     return build_response(res, links=links)
 
@@ -466,6 +470,7 @@ def student():
 
         # more hypermedia
         links += build_link('student_with_id', student_id=new_id, rel='http://relations.highschool.com/student')
+        links += build_link('student_with_id', student_id=new_id, rel='http://relations.highschool.com/updatestudent')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('student_with_id', student_id=new_id)
@@ -498,6 +503,8 @@ def student():
         for i in range(min(10, len(students))):
             links += build_link('student_with_id', student_id=students[i].id,
                                 rel='http://relations.highschool.com/student')
+            links += build_link('student_with_id', student_id=students[i].id,
+                                rel='http://relations.highschool.com/updatestudent')
 
         return build_response(res, links=links)
 
@@ -920,6 +927,12 @@ def notification():
         res = {'notification': n_obj}
 
         # more hypermedia
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
         links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
         links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
         links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
@@ -931,7 +944,9 @@ def notification():
             links += build_link('notification_class', class_id=classes[i].id,
                                 rel='http://relations.highschool.com/createnotification')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List school-wide notifications'''
@@ -956,6 +971,13 @@ def notification():
         res = {'notifications': n_list}
 
         # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
         links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
         links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
         links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
@@ -1004,6 +1026,12 @@ def notification_parents():
         res = {'notification': n_obj}
 
         # more hypermedia
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
@@ -1011,7 +1039,9 @@ def notification_parents():
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
                                 rel='http://relations.highschool.com/createnotification')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List notifications for all parents'''
@@ -1036,6 +1066,13 @@ def notification_parents():
         res = {'notifications': n_list}
 
         # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
@@ -1087,7 +1124,16 @@ def notification_parent_with_id(parent_id):
                  'scope': 'one_parent', 'parent_id': parent_id}
         res = {'notification': n_obj}
 
-        return build_response(res, links=links), 201
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
+
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List notifications for this parent'''
@@ -1112,6 +1158,15 @@ def notification_parent_with_id(parent_id):
         for n in nots:
             n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'parent_id': parent_id})
         res = {'notifications': n_list}
+
+        # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1151,6 +1206,12 @@ def notification_teachers():
         res = {'notification': n_obj}
 
         # more hypermedia
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(teachers))):
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
@@ -1158,7 +1219,9 @@ def notification_teachers():
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
                                 rel='http://relations.highschool.com/createnotification')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List notifications for all teachers'''
@@ -1183,6 +1246,13 @@ def notification_teachers():
         res = {'notifications': n_list}
 
         # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(teachers))):
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
@@ -1234,7 +1304,16 @@ def notification_teacher_with_id(teacher_id):
                  'scope': 'one_teacher', 'teacher_id': teacher_id}
         res = {'notification': n_obj}
 
-        return build_response(res, links=links), 201
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
+
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List notifications for a single teacher'''
@@ -1259,6 +1338,15 @@ def notification_teacher_with_id(teacher_id):
         for n in nots:
             n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'teacher_id': teacher_id})
         res = {'notifications': n_list}
+
+        # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1305,6 +1393,12 @@ def notification_class(class_id):
         res = {'notification': n_obj}
 
         # more hypermedia
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
         links += build_link('notification_class_parents', class_id=class_id,
                             rel='http://relations.highschool.com/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
@@ -1314,7 +1408,9 @@ def notification_class(class_id):
         links += build_link('notification_class_teachers', class_id=class_id,
                             rel='http://relations.highschool.com/createnotification')
 
-        return build_response(res, links=links), 201
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List class-wide notifications'''
@@ -1341,6 +1437,13 @@ def notification_class(class_id):
         res = {'notifications': n_list}
 
         # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
         links += build_link('notification_class_parents', class_id=class_id,
                             rel='http://relations.highschool.com/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
@@ -1394,7 +1497,16 @@ def notification_class_parents(class_id):
                  'scope': 'class_parents', 'class_id': class_id}
         res = {'notification': n_obj}
 
-        return build_response(res, links=links), 201
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
+
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List all notifications for the parents in a class'''
@@ -1419,6 +1531,15 @@ def notification_class_parents(class_id):
         for n in nots:
             n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'class_id': class_id})
         res = {'notifications': n_list}
+
+        # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1464,7 +1585,16 @@ def notification_class_teachers(class_id):
                  'scope': 'class_teachers', 'class_id': class_id}
         res = {'notification': n_obj}
 
-        return build_response(res, links=links), 201
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=new_notification.id,
+                            rel='http://relations.highschool.com/deletenotification')
+
+        response = build_response(res, links=links)
+        response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
+        return response, 201
 
     else:
         '''List all notifications for the teachers in a class'''
@@ -1489,5 +1619,121 @@ def notification_class_teachers(class_id):
         for n in nots:
             n_list.append({'id': n.id, 'date': str(n.date), 'text': n.text, 'scope': n.scope, 'class_id': class_id})
         res = {'notifications': n_list}
+
+        # more hypermedia
+        for i in range(min(3, len(nots))):
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/notification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/updatenotification')
+            links += build_link('notification_with_id', notification_id=nots[i].id,
+                                rel='http://relations.highschool.com/deletenotification')
+
+        return build_response(res, links=links)
+
+
+@app.route('/admin/notification/<int:notification_id>/', methods=['GET', 'PUT', 'DELETE'])
+def notification_with_id(notification_id):
+    if request.method == 'GET':
+        '''Show notification'''
+
+        # hypermedia
+        links = build_link('notification_with_id', notification_id=notification_id, rel='self')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/deletenotification')
+        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
+
+        # query
+        notif = session.query(Notification).get(notification_id)
+
+        # check query results
+        if not notif:
+            return build_response(error='Notification not found.', links=links), 404
+
+        # build response object
+        n_obj = ({'id': notif.id, 'date': str(notif.date), 'text': notif.text, 'scope': notif.scope})
+        if 'scope' == 'one_teacher':
+            n_obj['teacher_id'] = notif.teacher_id
+        elif 'scope' == 'one_parent':
+            n_obj['parent_id'] = notif.parent_id
+        elif 'scope' in ('class', 'class_teachers', 'class_parents'):
+            n_obj['class_id'] = notif.class_id
+        res = {'notification': n_obj}
+
+        return build_response(res, links=links)
+
+    elif request.method == 'PUT':
+        '''Edit notification'''
+
+        # hypermedia
+        links = build_link('notification_with_id', notification_id=notification_id, rel='self')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/notification')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/updatenotification')
+        links += build_link('notification_with_id', notification_id=notification_id,
+                            rel='http://relations.highschool.com/deletenotification')
+        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
+
+        # check content type
+        try:
+            data = request.get_json()
+        except TypeError:
+            return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check input
+        if 'text' not in data:
+            return build_response(error='The request must contain all the required parameters.', links=links), 400
+
+        # query
+        notif = session.query(Notification).get(notification_id)
+
+        # check query results
+        if not notif:
+            return build_response(error='Notification not found.', links=links), 404
+
+        # update object
+        notif.text = data['text']
+        session.commit()
+
+        # build response object
+        n_obj = ({'id': notif.id, 'date': str(notif.date), 'text': notif.text, 'scope': notif.scope})
+        if 'scope' == 'one_teacher':
+            n_obj['teacher_id'] = notif.teacher_id
+        elif 'scope' == 'one_parent':
+            n_obj['parent_id'] = notif.parent_id
+        elif 'scope' in ('class', 'class_teachers', 'class_parents'):
+            n_obj['class_id'] = notif.class_id
+        res = {'notification': n_obj}
+
+        return build_response(res, links=links)
+
+    elif request.method == 'DELETE':
+        '''Delete notification'''
+
+        # hypermedia
+        links = build_link('notification', rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
+        links += build_link('admin', rel='http://relations.highschool.com/index')
+
+        # query
+        notif = session.query(Notification).get(notification_id)
+
+        # check query results
+        if not notif:
+            return build_response(error='Notification not found.', links=links), 404
+
+        session.delete(notif)
+        session.commit()
+
+        res = {'message': 'Notification deleted successfully.'}
 
         return build_response(res, links=links)

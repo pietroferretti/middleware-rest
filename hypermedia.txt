@@ -1,40 +1,56 @@
 ---- RELATIONS ----
 
 http://relations.highschool.com/index
+
 http://relations.highschool.com/data
 http://relations.highschool.com/updatedata
+
 http://relations.highschool.com/class
 http://relations.highschool.com/classlist
+
 http://relations.highschool.com/timetable
+
+http://relations.highschool.com/notification
+http://relations.highschool.com/updatenotification
+http://relations.highschool.com/deletenotification
 http://relations.highschool.com/notificationlist
 http://relations.highschool.com/createnotification
+
+http://relations.highschool.com/freedays
+http://relations.highschool.com/freeslots
 http://relations.highschool.com/appointment
 http://relations.highschool.com/appointmentlist
 http://relations.highschool.com/createappointment
 http://relations.highschool.com/updateappointment
+
 http://relations.highschool.com/subject
 http://relations.highschool.com/subjectlist
-http://relations.highschool.com/student
-http://relations.highschool.com/studentlist
-http://relations.highschool.com/createstudent
-http://relations.highschool.com/updatestudent
+
 http://relations.highschool.com/grade
 http://relations.highschool.com/gradelist
 http://relations.highschool.com/publishgrade
 http://relations.highschool.com/updategrade
-http://relations.highschool.com/teacher
-http://relations.highschool.com/teacherlist
-http://relations.highschool.com/createteacher
+http://relations.highschool.com/deletegrade
+
 http://relations.highschool.com/payment
 http://relations.highschool.com/paymentlist
 http://relations.highschool.com/createpayment
 http://relations.highschool.com/completepayment
+
+http://relations.highschool.com/teacher
+http://relations.highschool.com/teacherlist
+http://relations.highschool.com/createteacher
+
 http://relations.highschool.com/parent
 http://relations.highschool.com/parentlist
 http://relations.highschool.com/createparent
+
+http://relations.highschool.com/student
+http://relations.highschool.com/studentlist
+http://relations.highschool.com/createstudent
+http://relations.highschool.com/updatestudent
+
 http://relations.highschool.com/createadmin
-http://relations.highschool.com/freedays
-http://relations.highschool.com/freeslots
 
 
 ---- ENTITIES ----

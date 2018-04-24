@@ -364,10 +364,12 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         res = {'grade': g_obj}
 
         # more hypermedia
-        build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                    grade_id=new_id, rel='http://relations.highschool.com/grade')
-        build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                    grade_id=new_id, rel='http://relations.highschool.com/updategrade')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                   grade_id=new_id, rel='http://relations.highschool.com/deletegrade')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('teacher_grade_with_id',  teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
@@ -417,10 +419,12 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
 
         # more hypermedia
         for i in range(min(10, len(grade_list))):
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        grade_id=grades[i].id, rel='http://relations.highschool.com/grade')
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        grade_id=grades[i].id, rel='http://relations.highschool.com/updategrade')
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                       grade_id=grades[i].id, rel='http://relations.highschool.com/deletegrade')
 
         return build_response(res, links=links)
 
@@ -489,10 +493,12 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 
         # more hypermedia
         for g in g_list:
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        grade_id=g['id'], rel='http://relations.highschool.com/grade')
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        grade_id=g['id'], rel='http://relations.highschool.com/updategrade')
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                       grade_id=g['id'], rel='http://relations.highschool.com/deletegrade')
 
         return build_response(res, links=links), 201
 
@@ -531,29 +537,38 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 
         # more hypermedia
         for i in range(min(10, len(all_grades))):
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/grade')
-            build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/updategrade')
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/grade')
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/updategrade')
+            links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/deletegrade')
 
         return build_response(res, links=links)
 
 
 @app.route('/teacher/<int:teacher_id>/class/<int:class_id>/subject/<int:subject_id>/grade/<int:grade_id>/',
-           methods=['GET', 'PUT'])
+           methods=['GET', 'PUT', 'DELETE'])
 @auth_check
 def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
     # hypermedia
-    links = build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=grade_id, rel='self')
-    links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        grade_id=grade_id, rel='http://relations.highschool.com/grade')
-    links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+    links = build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+    links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/gradelist')
+    links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                        rel='http://relations.highschool.com/publishgrade')
 
     if request.method == 'PUT':
         '''Edit old grade'''
+
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                           grade_id=grade_id, rel='self')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/grade')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/deletegrade')
 
         # checks
         try:
@@ -594,8 +609,17 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
 
         return build_response(res, links=links)
 
-    else:
+    elif request.method == 'GET':
         '''Show grade'''
+
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                           grade_id=grade_id, rel='self')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/grade')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
+        links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+                            grade_id=grade_id, rel='http://relations.highschool.com/deletegrade')
 
         # checks
         teacher = session.query(Teacher).get(teacher_id)
@@ -618,6 +642,35 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         g_obj = {'id': grade.id, 'date': str(grade.date), 'value': grade.value, 'student_id': grade.student_id,
                  'subject_id': grade.subject_id}
         res = {'grade': g_obj}
+
+        return build_response(res, links=links)
+
+    elif request.method == 'DELETE':
+        '''Delete grade'''
+
+        # checks
+        teacher = session.query(Teacher).get(teacher_id)
+        if not teacher:
+            return build_response(error='Teacher not found.', links=links), 404
+
+        c = session.query(Class).get(class_id)
+        if not c or not c in teacher.classes:
+            return build_response(error='Class not found.', links=links), 404
+
+        subject = session.query(Subject).get(subject_id)
+        if not subject or teacher_id != subject.teacher_id or class_id != subject.class_id:
+            return build_response(error='Subject not found.', links=links), 404
+
+        grade = session.query(Grade).get(grade_id)
+
+        if not grade:
+            return build_response(error='Grade not found.', links=links), 404
+
+        # delete object
+        session.delete(grade)
+        session.commit()
+
+        res = {'message': 'Grade deleted successfully.'}
 
         return build_response(res, links=links)
 
