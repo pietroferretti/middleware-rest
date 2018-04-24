@@ -1,7 +1,7 @@
 # coding: utf-8
 
-DEBUG = True
-# DEBUG = False
+# DEBUG = True
+DEBUG = False
 RESPONSE_SCHEMA = 'response-schema.json'
 SCHEMA_FOLDER = 'schemas'
 # SCHEMA_FOLDER = 'schema_test'

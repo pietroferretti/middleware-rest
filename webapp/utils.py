@@ -14,7 +14,7 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
     '''Builds a HTTP response with the specified content in a JSON envelope'''
     resp_dict = dict()
     resp_dict['links'] = links
-    if result:
+    if result is not None:
         resp_dict['result'] = result
     if result_schema:
         resp_dict['result-schema'] = result_schema

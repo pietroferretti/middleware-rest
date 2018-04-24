@@ -1,0 +1,107 @@
+{
+	"info": {
+		"_postman_id": "71bc5d36-fd19-4492-9e25-69baa4366bfa",
+		"name": "Admin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "admin login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\": \"admin\", \"password\": \"admin\"}"
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/login/",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"login",
+						""
+					]
+				},
+				"description": "login admin:admin"
+			},
+			"response": []
+		},
+		{
+			"name": "admin new parent",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Franco\",\n\t\"lastname\": \"Bianchi\",\n\t\"username\": \"f.bianchi\",\n\t\"password\": \"12345678\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/admin/parent/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"admin",
+						"parent",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "admin new teacher",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Ferruccio\",\n\t\"lastname\": \"Resta\",\n\t\"username\": \"f.resta\",\n\t\"password\": \"password\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/admin/teacher/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"admin",
+						"teacher",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

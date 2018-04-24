@@ -217,11 +217,13 @@ def teacher_student(teacher_id, class_id):
     res = {'students': st}
 
     # more hypermedia
+    subjects = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
     for i in range(min(10, len(students))):
-        links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id,
-                            student_id=students[i].id, rel='http://relations.highschool.com/gradelist')
-        links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id,
-                            student_id=students[i].id, rel='http://relations.highschool.com/publishgrade')
+        for j in range(min(3, len(subjects))):
+            links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[j].id,
+                                student_id=students[i].id, rel='http://relations.highschool.com/gradelist')
+            links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[j].id,
+                                student_id=students[i].id, rel='http://relations.highschool.com/publishgrade')
 
     return build_response(res, links=links)
 
@@ -234,7 +236,7 @@ def teacher_subject(teacher_id, class_id):
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
                        rel='http://relations.highschool.com/index')
-    links += build_link('teacher_class', teacher_id=teacher_id, class_id=class_id,
+    links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/class')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/subjectlist')
@@ -298,7 +300,7 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
     res = {'subject': {'id': subject.id, 'name': subject.name}}
 
     # more hypermedia
-    links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
+    links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
                         rel='http://relations.highschool.com/studentlist')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                         rel='http://relations.highschool.com/gradelist')
@@ -350,7 +352,11 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
             return build_response(error='Student not found.', links=links), 404
 
         # create new grade
-        date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+        try:
+            date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+        except (ValueError, TypeError):
+            return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
+                                  links=links), 400
         value = data['value']
 
         new_grade = Grade(date=date, subject_id=subject_id, student_id=student_id, value=value)
@@ -379,16 +385,6 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     else:
         '''Show list of grades for this student'''
 
-        # checks
-        try:
-            data = request.get_json()
-        except TypeError:
-            return build_response(error='The request was not valid JSON.', links=links), 400
-
-        if 'date' not in data or 'value' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
-
         teacher = session.query(Teacher).get(teacher_id)
         if not teacher:
             return build_response(error='Teacher not found.', links=links), 404
@@ -409,7 +405,7 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         grade_list = session.query(Grade).filter_by(subject_id=subject_id).filter_by(student_id=student_id).all()
 
         if not grade_list:
-            return build_response(error='Grades not found.'), 404
+            return build_response(error='No grades found.', links=links), 404
 
         grades = []
         for g in grade_list:
@@ -420,11 +416,11 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         # more hypermedia
         for i in range(min(10, len(grade_list))):
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=grades[i].id, rel='http://relations.highschool.com/grade')
+                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/grade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=grades[i].id, rel='http://relations.highschool.com/updategrade')
+                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/updategrade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=grades[i].id, rel='http://relations.highschool.com/deletegrade')
+                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/deletegrade')
 
         return build_response(res, links=links)
 
@@ -469,7 +465,11 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         g_list = []
         for grade in data['grades']:
             try:
-                date = datetime.datetime.strptime(grade['date'], '%Y-%m-%d %H:%M')
+                try:
+                    date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+                except (ValueError, TypeError):
+                    return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
+                                          links=links), 400
                 value = grade['value']
                 student_id = grade['student_id']
             except KeyError:
@@ -595,8 +595,12 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
 
         # update
         if 'date' in data:
-            grade.date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
-
+            try:
+                date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
+                return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
+                                      links=links), 400
+            grade.date = date
         if 'value' in data:
             grade.value = int(data['value'])
 
@@ -755,7 +759,11 @@ def teacher_appointment(teacher_id):
             return build_response(error='The JSON structure must contain all the requested parameters.',
                                   links=links), 400
 
-        new_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+        try:
+            new_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+        except (ValueError, TypeError):
+            return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
+                                  links=links), 400
 
         if (check_appointment_time_constraint(new_date)):
             new_appointment = Appointment(date=new_date, teacher_accepted=1, parent_accepted=0, teacher_id=teacher_id,
@@ -828,9 +836,13 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             return build_response(error='The request was not valid JSON.'), 400
 
         if 'date' in data:
-            new_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+            try:
+                new_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
+                return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
+                                      links=links), 400
 
-            if (check_appointment_time_constraint(new_date)):
+            if check_appointment_time_constraint(new_date):
                 appointment.date = new_date
                 appointment.parent_accepted = 0
             else:
@@ -839,17 +851,12 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
         if 'room' in data:
             appointment.room = data['room']
 
-        if 'parent_id' in data:
-            if int(data['parent_id']) != appointment.parent_id:
-                appointment.parent_accepted = 0
-            appointment.parent_id = int(data['parent_id'])
-
         if 'teacher_accepted' in data:
             appointment.teacher_accepted = int(data['teacher_accepted'])
 
         session.commit()
 
-        parent = session.query(Parent).get(data['parent_id'])
+        parent = session.query(Parent).get(appointment.parent_id)
 
         return build_response({'appointment': {'date': appointment.date, 'room': appointment.room,
                                                'teacher_accepted': appointment.teacher_accepted,
@@ -874,8 +881,8 @@ def teacher_notifications(teacher_id):
     '''Show notifications for this teacher'''
 
     # hypermedia
-    links = build_link('teacher_appointment_with_id', teacher_id=teacher_id, rel='self')
-    links += build_link('teacher_appointment_with_id', teacher_id=teacher_id,
+    links = build_link('teacher_notifications', teacher_id=teacher_id, rel='self')
+    links += build_link('teacher_notifications', teacher_id=teacher_id,
                         rel='http://relations.highschool.com/notificationlist')
     links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
 

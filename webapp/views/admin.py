@@ -640,7 +640,7 @@ def payment():
         amount = data['amount']
         reason = data['reason']
         try:
-            date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+            date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
         except (ValueError, TypeError):
             return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
                                   links=links), 400
@@ -747,7 +747,7 @@ def payment_parent(parent_id):
         amount = data['amount']
         reason = data['reason']
         try:
-            date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M')
+            date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
         except (ValueError, TypeError):
             return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
                                   links=links), 400
@@ -1366,6 +1366,14 @@ def notification_class(class_id):
         links += build_link('notification_class', class_id=class_id,
                             rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
 
         # check content type
         try:
@@ -1401,14 +1409,6 @@ def notification_class(class_id):
                             rel='http://relations.highschool.com/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
                             rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1424,6 +1424,14 @@ def notification_class(class_id):
         links += build_link('notification_class', class_id=class_id,
                             rel='http://relations.highschool.com/createnotification')
         links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_parents', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/notificationlist')
+        links += build_link('notification_class_teachers', class_id=class_id,
+                            rel='http://relations.highschool.com/createnotification')
 
         # query
         nots = session.query(Notification).filter_by(scope='class').filter_by(class_id=class_id).all()
@@ -1446,14 +1454,6 @@ def notification_class(class_id):
                                 rel='http://relations.highschool.com/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
                                 rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
 
         return build_response(res, links=links)
 
