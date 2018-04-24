@@ -1,13 +1,6 @@
 {
-  "url_template": "/teacher/{teacher_id}/class/",
-  "template_parameters": [
-    {
-      "teacher_id": {
-        "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
-      }
-    }
-  ],
+  "url_template": "/admin/class/",
+  "template_parameters": [],
   "actions": [
     {
       "method": "GET",

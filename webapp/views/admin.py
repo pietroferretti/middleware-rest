@@ -289,15 +289,15 @@ def admin_parent_with_id(parent_id):
     links += build_link('admin', rel='http://relations.highschool.com/index')
 
     # query info
-    t = session.query(Parent).get(parent_id)
+    p = session.query(Parent).get(parent_id)
 
     # check query result
-    if not t:
-        return build_response(error='Teacher not found.', links=links)
+    if not p:
+        return build_response(error='Parent not found.', links=links)
 
     # build response
-    t_obj = {'id': t.id, 'name': t.name, 'lastname': t.lastname}
-    res = {'teacher': t_obj}
+    p_obj = {'id': p.id, 'name': p.name, 'lastname': p.lastname}
+    res = {'parent': p_obj}
 
     # hypermedia
     links += build_link('notification_parent_with_id', parent_id=parent_id,

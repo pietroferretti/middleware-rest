@@ -1,0 +1,126 @@
+{
+  "url_template": "/parent/{parent_id}/appointment/",
+  "template_parameters": [
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "entity": "http://entities.highschool.com/appointmentid"
+            },
+            "date": {
+              "type": "string",
+              "entity": "http://entities.highschool.com/date"
+            },
+            "parent_accepted": {
+              "type": "boolean",
+              "entity": "http://entities.highschool.com/parenthasaccepted"
+            },
+            "room": {
+              "type": "string",
+              "entity": "http://entities.highschool.com/teacherhasaccepted"
+            },
+            "teacher_accepted": {
+              "type": "boolean",
+              "entity": "http://entities.highschool.com/room"
+            },
+            "teacher": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/teacherid"
+                },
+                "lastname": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/teacherlastname"
+                },
+                "name": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/teachername"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/date"
+          },
+          "teacher_id": {
+            "type": "integer",
+            "entity": "http://entities.highschool.com/teacherid"
+          }
+        },
+        "required": [
+          "date",
+          "teacher_id"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "entity": "http://entities.highschool.com/appointmentid"
+          },
+          "date": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/date"
+          },
+          "parent_accepted": {
+            "type": "boolean",
+            "entity": "http://entities.highschool.com/parenthasaccepted"
+          },
+          "room": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/teacherhasaccepted"
+          },
+          "teacher_accepted": {
+            "type": "boolean",
+            "entity": "http://entities.highschool.com/room"
+          },
+          "teacher": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/teacherid"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teacherlastname"
+              },
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teachername"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

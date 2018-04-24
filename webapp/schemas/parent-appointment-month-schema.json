@@ -1,10 +1,30 @@
 {
-  "url_template": "/teacher/{teacher_id}/class/",
+  "url_template": "/parent/{parent_id}/appointment/teacher/{teacher_id}/year/{year}/month/{month}/",
   "template_parameters": [
     {
       "teacher_id": {
         "type": "integer",
         "entity": "http://entities.highschool.com/teacherid"
+      }
+    },
+    {
+      "month": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 12
+      }
+    },
+    {
+      "year": {
+        "type": "integer",
+        "minimum": 2017,
+        "maximum": 2018
+      }
+    },
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
       }
     }
   ],
@@ -15,22 +35,14 @@
         "$schema": "http://json-schema.org/draft-06/schema#",
         "type": "object",
         "properties": {
-          "classes": {
+          "available_days": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "integer",
-                  "entity": "http://entities.highschool.com/classid"
-                },
-                "name": {
+                "date": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/classname"
-                },
-                "room": {
-                  "type": "string",
-                  "entity": "http://entities.highschool.com/room"
+                  "entity": "http://entities.highschool.com/date"
                 }
               }
             }

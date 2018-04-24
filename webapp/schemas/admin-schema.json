@@ -24,7 +24,10 @@
                         "entity": "http://entities.highschool.com/password"
                     }
                 },
-                "required": ["username", "password"]
+              "required": [
+                "username",
+                "password"
+              ]
             },
             "outputschema": {
                 "$schema": "http://json-schema.org/draft-06/schema#",
@@ -37,9 +40,9 @@
                                 "type": "string",
                                 "entity": "http://entities.highschool.com/username"
                             },
-                            "role": {
-                                "type":"string",
-                                "entity": "http://entities.highschool.com/accountrole"
+                          "role": {
+                            "constant": "admin",
+                            "entity": "http://entities.highschool.com/role"
                             }
                         }
                     }

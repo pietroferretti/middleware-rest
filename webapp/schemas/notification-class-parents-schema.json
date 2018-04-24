@@ -1,0 +1,97 @@
+{
+  "url_template": "/admin/notification/class/{class_id}/parents/",
+  "template_parameters": [
+    {
+      "class_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/classid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "notifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/notificationid"
+                },
+                "date": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/date"
+                },
+                "scope": {
+                  "constant": "class_parents",
+                  "entity": "http://entities.highschool.com/notificationscope"
+                },
+                "class_id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/classid"
+                },
+                "text": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/notificationtext"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/notificationtext"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "notification": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/notificationid"
+              },
+              "date": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/date"
+              },
+              "scope": {
+                "constant": "class_parents",
+                "entity": "http://entities.highschool.com/notificationscope"
+              },
+              "class_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/classid"
+              },
+              "text": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/notificationtext"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

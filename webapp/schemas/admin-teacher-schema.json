@@ -1,0 +1,106 @@
+{
+  "url_template": "/admin/teacher/",
+  "template_parameters": [],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "teachers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/teacherid"
+                },
+                "name": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/teachername"
+                },
+                "lastname": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/teacherlastname"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/username"
+          },
+          "password": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/password"
+          },
+          "name": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/teachername"
+          },
+          "lastname": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/teacherlastname"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "name",
+          "lastname"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "teacher": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/teacherid"
+              },
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teachername"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/teacherlastname"
+              }
+            }
+          },
+          "account": {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/username"
+              },
+              "role": {
+                "constant": "teacher",
+                "entity": "http://entities.highschool.com/role"
+              },
+              "teacher_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/teacherid"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -39,6 +39,10 @@ http://relations.highschool.com/freeslots
 
 ---- ENTITIES ----
 
+http://entities.highschool.com/username
+http://entities.highschool.com/password
+http://entities.highschool.com/role
+
 http://entities.highschool.com/teacherid
 http://entities.highschool.com/date
 http://entities.highschool.com/appointmentid
@@ -66,6 +70,6 @@ http://entities.highschool.com/gradevalue
 
 http://entities.highschool.com/hour
 
-http://entities.highschool.com/username
-http://entities.highschool.com/password
-http://entities.highschool.com/accountrole
+http://entities.highschool.com/notificationscope
+http://entities.highschool.com/notificationtext
+http://entities.highschool.com/notificationid
