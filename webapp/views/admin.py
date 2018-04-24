@@ -40,7 +40,7 @@ def admin():
 
         # create account object
         salt = os.urandom(16)
-        hash = hashlib.pbkdf2_hmac('sha256', data['password'].encode(), salt.encode(), 100000)
+        hash = hashlib.pbkdf2_hmac('sha256', data['password'].encode(), salt, 100000)
         saved_password = salt.hex() + ':' + hash.hex()
         account = Account(username=data['username'], password=saved_password, type='admin')
 

@@ -8,7 +8,7 @@ import datetime
 
 from webapp import app
 from webapp.config import DEBUG, SCHEMA_FOLDER
-from webapp.utils import get_index, build_link, build_response
+from webapp.utils import get_index, build_link, build_response, get_endpoint_function
 from webapp.db.db_declarative import session, Account
 
 
@@ -16,7 +16,8 @@ from webapp.db.db_declarative import session, Account
 @app.errorhandler(400)
 def bad_request(e):
     # hypermedia back to endpoint, index
-    links = [{'link': request.url, 'rel': 'self'}]
+    filename = endpoint.replace('_', '-') + '-schema.json'
+    links = [{'link': request.url, 'rel': 'self', 'schema': request.url_root.rstrip('/') + url_for('schema', path=filename)}]
     index, kwargs = get_index(request.path)
     links += build_link(index, rel='http://relations.highschool.com/index', **kwargs)
     if DEBUG:
@@ -58,7 +59,14 @@ def page_not_found(e):
 @app.errorhandler(405)
 def method_not_allowed(e):
     # hypermedia back to endpoint, index
-    links = [{'link': request.url, 'rel': 'self'}]
+    for m in ('GET', 'POST', 'PUT', 'DELETE'):
+        endpoint, kwargs = get_endpoint_function(request.path, m)
+        if endpoint:
+            break
+    if endpoint:
+        links = build_link(endpoint, rel='self', **kwargs)
+    else:
+        links = []
     index, kwargs = get_index(request.path)
     links += build_link(index, rel='http://relations.highschool.com/index', **kwargs)
     if DEBUG:
@@ -109,7 +117,7 @@ def login():
         return build_response(error='The request was not valid JSON.', links=links), 400
 
     # check json content
-    if 'username' not in data or 'password' not in data:
+    if not data or 'username' not in data or 'password' not in data:
         return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
 
     # get username, password

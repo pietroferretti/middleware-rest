@@ -65,3 +65,7 @@ http://entities.highschool.com/gradeid
 http://entities.highschool.com/gradevalue
 
 http://entities.highschool.com/hour
+
+http://entities.highschool.com/username
+http://entities.highschool.com/password
+http://entities.highschool.com/accountrole

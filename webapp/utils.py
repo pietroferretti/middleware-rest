@@ -2,9 +2,11 @@
 
 from flask import request, url_for, abort, jsonify
 from flask import session as clienttoken
+from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
 
 from functools import wraps
 
+from webapp import app
 from webapp.config import DEBUG, RESPONSE_SCHEMA
 
 
@@ -73,6 +75,17 @@ def get_index(url):
             return 'login', {}
     return 'login', {}
 
+
+def get_endpoint_function(url, method):
+    adapter = app.url_map.bind('localhost')
+    try:
+        return adapter.match(url, method=method)
+    except RequestRedirect as e:
+        # recursively match redirects
+        return get_endpoint_function(e.new_url.split('localhost', maxsplit=1)[1], method)
+    except (MethodNotAllowed, NotFound):
+        # no match
+        return '', {}
 
 
 def check_appointment_time_constraint(date):
