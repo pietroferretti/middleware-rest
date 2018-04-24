@@ -1,0 +1,57 @@
+{
+  "url_template": "/parent/{parent_id}/child/{student_id}/grades/",
+  "template_parameters": [
+    {
+      "student_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/studentid"
+      }
+    },
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "grades": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "grade": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "entity": "http://entities.highschool.com/date"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "entity": "http://entities.highschool.com/gradeid"
+                    },
+                    "value": {
+                      "type": "integer",
+                      "entity": "http://entities.highschool.com/gradevalue"
+                    },
+                    "subject": {
+                      "type": "string",
+                      "entity": "http://entities.highschool.com/subjectsname"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
