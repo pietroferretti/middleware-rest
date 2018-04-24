@@ -565,6 +565,8 @@ def student_with_id(student_id):
         if 'lastname' in data:
             st.lastname = data['lastname']
 
+        session.commit()
+
         # build response object
         s_obj = {'id': st.id, 'name': st.name, 'lastname': st.lastname, 'parent_id': st.parent_id,
                  'class_id': st.class_id}
