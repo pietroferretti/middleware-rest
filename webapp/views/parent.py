@@ -103,13 +103,13 @@ def parent_child(parent_id):
     for c in parent.children:
         children.append({'name': c.name, 'lastname': c.lastname, 'id': c.id})
     res = {'students': children}
-
+    # TODO perchè 10?
     # more hypermedia
     for i in range(min(10, len(children))):
         links += build_link('parent_child_with_id', parent_id=parent_id, student_id=children[i]['id'],
                             rel='http://relations.highschool.com/student')
 
-    return build_response(children, links=links)
+    return build_response(res, links=links)
 
 
 @app.route('/parent/<int:parent_id>/child/<int:student_id>/')

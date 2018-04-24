@@ -1,0 +1,78 @@
+{
+  "url_template": "/parent/{parent_id}/child/{student_id}/",
+  "template_parameters": [
+    {
+      "student_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/studentid"
+      }
+    },
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "student": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/studentid"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/studentlastname"
+              },
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/studentname"
+              },
+              "class": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "entity": "http://entities.highschool.com/classid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/classname"
+                  },
+                  "room": {
+                    "type": "string",
+                    "entity": "http://entities.highschool.com/room"
+                  },
+                  "subjects": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "entity": "http://entities.highschool.com/subjectid"
+                        },
+                        "name": {
+                          "type": "string",
+                          "entity": "http://entities.highschool.com/subjectname"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
