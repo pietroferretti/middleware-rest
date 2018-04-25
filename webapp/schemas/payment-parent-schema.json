@@ -1,0 +1,106 @@
+{
+  "url_template": "/admin/payment/parent/{parent_id}/",
+  "template_parameters": [
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "payments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "object": "http://entities.highschool.com/paymentid"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "date": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/date"
+                },
+                "reason": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/paymentreason"
+                },
+                "pending": {
+                  "type": "boolean"
+                },
+                "parent_id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/parentid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/date"
+          },
+          "reason": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/paymentreason"
+          }
+        },
+        "required": [
+          "amount",
+          "date",
+          "reason"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "payment": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              },
+              "date": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/date"
+              },
+              "reason": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/paymentreason"
+              },
+              "pending": {
+                "type": "boolean"
+              },
+              "parent_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/parentid"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "url_template": "/admin/student/",
+  "template_parameters": [],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "students": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/studentid"
+                },
+                "lastname": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/studentlastname"
+                },
+                "name": {
+                  "type": "string",
+                  "entity": "http://entities.highschool.com/studentname"
+                },
+                "class_id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/classid"
+                },
+                "parent_id": {
+                  "type": "integer",
+                  "entity": "http://entities.highschool.com/parentid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "lastname": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/studentlastname"
+          },
+          "name": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/studentname"
+          },
+          "class_id": {
+            "type": "integer",
+            "entity": "http://entities.highschool.com/classid"
+          },
+          "parent_id": {
+            "type": "integer",
+            "entity": "http://entities.highschool.com/parentid"
+          }
+        },
+        "required": [
+          "name",
+          "lastname"
+        ]
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "student": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/studentid"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/studentlastname"
+              },
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/studentname"
+              },
+              "class_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/classid"
+              },
+              "parent_id": {
+                "type": "integer",
+                "entity": "http://entities.highschool.com/parentid"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

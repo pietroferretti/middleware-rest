@@ -1,0 +1,46 @@
+{
+  "url_template": "/parent/{parent_id}/payment/{payment_id}/",
+  "template_parameters": [
+    {
+      "payment_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/paymentid"
+      }
+    },
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "object": "http://entities.highschool.com/paymentid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/date"
+          },
+          "reason": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/paymentreason"
+          },
+          "pending": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  ]
+}
