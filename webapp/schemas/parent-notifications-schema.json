@@ -1,10 +1,10 @@
 {
-  "url_template": "/teacher/{teacher_id}/notifications/",
+  "url_template": "/parent/{parent_id}/notifications/",
   "template_parameters": [
     {
-      "teacher_id": {
+      "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.highschool.com/parentid"
       }
     }
   ],
@@ -28,16 +28,16 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "class": {
+                      "student": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "integer",
-                            "entity": "http://entities.highschool.com/classid"
+                          "lastname": {
+                            "type": "string",
+                            "entity": "http://entities.highschool.com/studentlastname"
                           },
                           "name": {
                             "type": "string",
-                            "entity": "http://entities.highschool.com/classname"
+                            "entity": "http://entities.highschool.com/studentname"
                           }
                         }
                       },

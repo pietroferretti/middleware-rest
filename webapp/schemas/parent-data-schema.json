@@ -1,0 +1,72 @@
+{
+  "url_template": "/parent/{parent_id}/data/",
+  "template_parameters": [
+    {
+      "parent_id": {
+        "type": "integer",
+        "entity": "http://entities.highschool.com/parentid"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "method": "GET",
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentname"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentlastname"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "inputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/parentname"
+          },
+          "lastname": {
+            "type": "string",
+            "entity": "http://entities.highschool.com/parentlastname"
+          }
+        },
+        "required": []
+      },
+      "outputschema": {
+        "$schema": "http://json-schema.org/draft-06/schema#",
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentname"
+              },
+              "lastname": {
+                "type": "string",
+                "entity": "http://entities.highschool.com/parentlastname"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

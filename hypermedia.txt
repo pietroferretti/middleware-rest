@@ -89,3 +89,6 @@ http://entities.highschool.com/hour
 http://entities.highschool.com/notificationscope
 http://entities.highschool.com/notificationtext
 http://entities.highschool.com/notificationid
+
+http://entities.highschool.com/paymentid
+http://entities.highschool.com/paymentreason

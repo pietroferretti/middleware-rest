@@ -790,7 +790,7 @@ def parent_notifications(parent_id):
     for n in notifications_one_parent:
         notifications_one_parent_list.append({'date': n.date, 'text': n.text})
 
-    return build_response([{'scope': 'class', 'notifications': children_not_list},
+    return build_response([{'scope': 'class', 'notifications': "children_not_list"},
                            {'scope': 'parents', 'notifications': notifications_teachers_list},
                            {'scope': 'all', 'notifications': notifications_all_list},
                            {'scope': 'one_parent', 'notifications': notifications_one_parent_list}], links=links)
