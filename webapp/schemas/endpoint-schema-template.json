@@ -4,11 +4,11 @@
         {
             "id": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/myid"
+                "entity": "http://entities.backtoschool.io/myid"
             },
             "stuff": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/stuff"
+                "entity": "http://entities.backtoschool.io/stuff"
             }
         }
     ],
@@ -21,11 +21,11 @@
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "entity": "http://entities.highschool.com/parent_id"
+                        "entity": "http://entities.backtoschool.io/parent_id"
                     },
                     "name": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/name"
+                        "entity": "http://entities.backtoschool.io/name"
                     }
                 }
             }
@@ -38,7 +38,7 @@
                 "properties": {
                     "newdata": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/data"
+                        "entity": "http://entities.backtoschool.io/data"
                     }
                 }
             },
@@ -48,7 +48,7 @@
                 "properties": {
                     "message": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/text"
+                        "entity": "http://entities.backtoschool.io/text"
                     }
                 }
             }

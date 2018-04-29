@@ -19,7 +19,7 @@ def bad_request(e):
     filename = endpoint.replace('_', '-') + '-schema.json'
     links = [{'link': request.url, 'rel': 'self', 'schema': request.url_root.rstrip('/') + url_for('schema', path=filename)}]
     index, kwargs = get_index(request.path)
-    links += build_link(index, rel='http://relations.highschool.com/index', **kwargs)
+    links += build_link(index, rel='http://relations.backtoschool.io/index', **kwargs)
     if DEBUG:
         return build_response(error=str(e), links=links), 400
     else:
@@ -29,7 +29,7 @@ def bad_request(e):
 @app.errorhandler(401)
 def authorization_required(e):
     # hypermedia to login
-    links = build_link('login', rel='http://relations.highschool.com/login')
+    links = build_link('login', rel='http://relations.backtoschool.io/login')
     if DEBUG:
         return build_response(error=str(e), links=links), 401
     else:
@@ -39,7 +39,7 @@ def authorization_required(e):
 @app.errorhandler(403)
 def forbidden(e):
     # hypermedia back to login
-    links = build_link('login', rel='http://relations.highschool.com/login')
+    links = build_link('login', rel='http://relations.backtoschool.io/login')
     if DEBUG:
         return build_response(error=str(e), links=links), 403
     else:
@@ -49,7 +49,7 @@ def forbidden(e):
 @app.errorhandler(404)
 def page_not_found(e):
     # hypermedia back to login
-    links = build_link('login', rel='http://relations.highschool.com/login')
+    links = build_link('login', rel='http://relations.backtoschool.io/login')
     if DEBUG:
         return build_response(error=str(e), links=links), 404
     else:
@@ -68,7 +68,7 @@ def method_not_allowed(e):
     else:
         links = []
     index, kwargs = get_index(request.path)
-    links += build_link(index, rel='http://relations.highschool.com/index', **kwargs)
+    links += build_link(index, rel='http://relations.backtoschool.io/index', **kwargs)
     if DEBUG:
         return build_response(error=str(e), links=links), 405
     else:
@@ -80,7 +80,7 @@ def server_error(e):
     # hypermedia back to endpoint, index
     links = [{'link': request.url, 'rel': 'self'}]
     index, kwargs = get_index(request.path)
-    links += build_link(index, rel='http://relations.highschool.com/index', **kwargs)
+    links += build_link(index, rel='http://relations.backtoschool.io/index', **kwargs)
     if DEBUG:
         return build_response(error=str(e), links=links), 500
     else:
@@ -108,7 +108,7 @@ def login():
 
     # hypermedia
     links = build_link('login', rel='self')
-    links += build_link('login', rel='http://relations.highschool.com/login')
+    links += build_link('login', rel='http://relations.backtoschool.io/login')
 
     # check content type
     try:
@@ -141,17 +141,17 @@ def login():
     role = account.type
     if role == 'admin':
         scopes = ['/admin/', '/teacher/', '/parent/']
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
     elif role == 'teacher':
         teacher_id = account.teacher_id
         scopes = ['/teacher/{}/'.format(teacher_id)]
         links += build_link('teacher_with_id', teacher_id=teacher_id,
-                            rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/index')
     elif role == 'parent':
         parent_id = account.parent_id
         scopes = ['/parent/{}/'.format(parent_id)]
         links += build_link('parent_with_id', parent_id=parent_id,
-                            rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/index')
     else:
         raise ValueError('Role "{}" not recognized!'.format(role))
 

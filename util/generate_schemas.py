@@ -16,7 +16,7 @@ param_template = '''
         {{
             "{param}": {{
                 "type": "integer",
-                "entity": "http://entities.highschool.com/someid"
+                "entity": "http://entities.backtoschool.io/someid"
             }}
         }}'''
 
@@ -38,11 +38,11 @@ post_template = '''
                 "properties": {
                     "username": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/username"
+                        "entity": "http://entities.backtoschool.io/username"
                     },
                     "password": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/password"
+                        "entity": "http://entities.backtoschool.io/password"
                     }
                 },
                 "required": ["username", "password"]
@@ -62,11 +62,11 @@ put_template = '''
                 "properties": {
                     "username": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/username"
+                        "entity": "http://entities.backtoschool.io/username"
                     },
                     "password": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/password"
+                        "entity": "http://entities.backtoschool.io/password"
                     }
                 },
                 "required": ["username", "password"]

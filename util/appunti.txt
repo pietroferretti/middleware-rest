@@ -57,6 +57,8 @@ cose nel database:
 - admins
 - timetables
 - accounts
+- classes
+- subjects
 
 # cosa si può cancellare
 - grades

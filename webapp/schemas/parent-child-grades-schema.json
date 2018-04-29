@@ -4,13 +4,13 @@
     {
       "student_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/studentid"
+        "entity": "http://entities.backtoschool.io/studentid"
       }
     },
     {
       "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/parentid"
+        "entity": "http://entities.backtoschool.io/parentid"
       }
     }
   ],
@@ -31,19 +31,19 @@
                   "properties": {
                     "date": {
                       "type": "string",
-                      "entity": "http://entities.highschool.com/date"
+                      "entity": "http://entities.backtoschool.io/date"
                     },
                     "id": {
                       "type": "integer",
-                      "entity": "http://entities.highschool.com/gradeid"
+                      "entity": "http://entities.backtoschool.io/gradeid"
                     },
                     "value": {
                       "type": "integer",
-                      "entity": "http://entities.highschool.com/gradevalue"
+                      "entity": "http://entities.backtoschool.io/gradevalue"
                     },
                     "subject": {
                       "type": "string",
-                      "entity": "http://entities.highschool.com/subjectsname"
+                      "entity": "http://entities.backtoschool.io/subjectsname"
                     }
                   }
                 }

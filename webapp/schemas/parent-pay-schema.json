@@ -4,13 +4,13 @@
     {
       "payment_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/paymentid"
+        "entity": "http://entities.backtoschool.io/paymentid"
       }
     },
     {
       "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/parentid"
+        "entity": "http://entities.backtoschool.io/parentid"
       }
     }
   ],

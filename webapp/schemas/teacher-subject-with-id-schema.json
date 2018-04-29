@@ -4,19 +4,19 @@
     {
       "class_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/classid"
+        "entity": "http://entities.backtoschool.io/classid"
       }
     },
     {
       "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.backtoschool.io/teacherid"
       }
     },
     {
       "subject_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/subjectid"
+        "entity": "http://entities.backtoschool.io/subjectid"
       }
     }
   ],
@@ -32,11 +32,11 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/subjectid"
+                "entity": "http://entities.backtoschool.io/subjectid"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/subjectname"
+                "entity": "http://entities.backtoschool.io/subjectname"
               }
             }
           }

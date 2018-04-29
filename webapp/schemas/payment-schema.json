@@ -15,25 +15,25 @@
               "properties": {
                 "id": {
                   "type": "integer",
-                  "object": "http://entities.highschool.com/paymentid"
+                  "object": "http://entities.backtoschool.io/paymentid"
                 },
                 "amount": {
                   "type": "number"
                 },
                 "date": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/date"
+                  "entity": "http://entities.backtoschool.io/date"
                 },
                 "reason": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/paymentreason"
+                  "entity": "http://entities.backtoschool.io/paymentreason"
                 },
                 "is_pending": {
                   "type": "boolean"
                 },
                 "parent_id": {
                   "type": "integer",
-                  "entity": "http://entities.highschool.com/parentid"
+                  "entity": "http://entities.backtoschool.io/parentid"
                 }
               }
             }
@@ -52,11 +52,11 @@
           },
           "date": {
             "type": "string",
-            "entity": "http://entities.highschool.com/date"
+            "entity": "http://entities.backtoschool.io/date"
           },
           "reason": {
             "type": "string",
-            "entity": "http://entities.highschool.com/paymentreason"
+            "entity": "http://entities.backtoschool.io/paymentreason"
           }
         },
         "required": [
@@ -77,11 +77,11 @@
               },
               "date": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/date"
+                "entity": "http://entities.backtoschool.io/date"
               },
               "reason": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/paymentreason"
+                "entity": "http://entities.backtoschool.io/paymentreason"
               },
               "pending": {
                 "type": "bool",

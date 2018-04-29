@@ -21,7 +21,7 @@ def teacher_with_id(teacher_id):
     links = build_link('teacher_with_id', teacher_id=teacher_id,
                        rel='self')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
 
     # get teacher with id
     teacher = session.query(Teacher).get(teacher_id)
@@ -35,19 +35,19 @@ def teacher_with_id(teacher_id):
 
     # more hypermedia
     links += build_link('teacher_data', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/data')
+                        rel='http://relations.backtoschool.io/data')
     links += build_link('teacher_data', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/updatedata')
+                        rel='http://relations.backtoschool.io/updatedata')
     links += build_link('teacher_class', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/classlist')
+                        rel='http://relations.backtoschool.io/classlist')
     links += build_link('teacher_timetable', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/timetable')
+                        rel='http://relations.backtoschool.io/timetable')
     links += build_link('teacher_notifications', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/notificationlist')
+                        rel='http://relations.backtoschool.io/notificationlist')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/createappointment')
+                        rel='http://relations.backtoschool.io/createappointment')
 
     return build_response(res, links=links)
 
@@ -59,11 +59,11 @@ def teacher_data(teacher_id):
     links = build_link('teacher_data', teacher_id=teacher_id,
                        rel='self')
     links += build_link('teacher_data', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/data')
+                        rel='http://relations.backtoschool.io/data')
     links += build_link('teacher_data', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/updatedata')
+                        rel='http://relations.backtoschool.io/updatedata')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
 
     if request.method == 'PUT':
         '''Modify teacher personal data'''
@@ -118,9 +118,9 @@ def teacher_class(teacher_id):
     links = build_link('teacher_class', teacher_id=teacher_id,
                        rel='self')
     links += build_link('teacher_class', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/classlist')
+                        rel='http://relations.backtoschool.io/classlist')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
 
     teacher = session.query(Teacher).get(teacher_id)
 
@@ -138,7 +138,7 @@ def teacher_class(teacher_id):
     # more hypermedia
     for i in range(min(10, len(cl))):
         links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=cl[i]['id'],
-                            rel='http://relations.highschool.com/class')
+                            rel='http://relations.backtoschool.io/class')
 
     return build_response(res, links=links)
 
@@ -152,11 +152,11 @@ def teacher_class_with_id(teacher_id, class_id):
     links = build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
                        rel='self')
     links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/class')
+                        rel='http://relations.backtoschool.io/class')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_class', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/classlist')
+                        rel='http://relations.backtoschool.io/classlist')
 
     # checks
     teacher = session.query(Teacher).get(teacher_id)
@@ -171,11 +171,11 @@ def teacher_class_with_id(teacher_id, class_id):
 
     # more hypermedia
     links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/timetable')
+                        rel='http://relations.backtoschool.io/timetable')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/subjectlist')
+                        rel='http://relations.backtoschool.io/subjectlist')
     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/studentlist')
 
     return build_response(res, links=links)
 
@@ -189,11 +189,11 @@ def teacher_student(teacher_id, class_id):
     links = build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
                        rel='self')
     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/studentlist')
     links += build_link('teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/class')
+                        rel='http://relations.backtoschool.io/class')
 
     # checks
     teacher = session.query(Teacher).get(teacher_id)
@@ -221,9 +221,9 @@ def teacher_student(teacher_id, class_id):
     for i in range(min(10, len(students))):
         for j in range(min(3, len(subjects))):
             links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[j].id,
-                                student_id=students[i].id, rel='http://relations.highschool.com/gradelist')
+                                student_id=students[i].id, rel='http://relations.backtoschool.io/gradelist')
             links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subjects[j].id,
-                                student_id=students[i].id, rel='http://relations.highschool.com/publishgrade')
+                                student_id=students[i].id, rel='http://relations.backtoschool.io/publishgrade')
 
     return build_response(res, links=links)
 
@@ -235,11 +235,11 @@ def teacher_subject(teacher_id, class_id):
 
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
-                       rel='http://relations.highschool.com/index')
+                       rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_class_with_id', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/class')
+                        rel='http://relations.backtoschool.io/class')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/subjectlist')
+                        rel='http://relations.backtoschool.io/subjectlist')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
                         rel='self')
 
@@ -265,7 +265,7 @@ def teacher_subject(teacher_id, class_id):
     for i in range(min(10, len(subjects))):
         links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id,
                             subject_id=subjects[i]['id'],
-                            rel='http://relations.highschool.com/subject')
+                            rel='http://relations.backtoschool.io/subject')
 
     return build_response(res, links=links)
 
@@ -277,11 +277,11 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 
     # hypermedia
     links = build_link('teacher_with_id', teacher_id=teacher_id,
-                       rel='http://relations.highschool.com/index')
+                       rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_subject', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/subjectlist')
+                        rel='http://relations.backtoschool.io/subjectlist')
     links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/subject')
+                        rel='http://relations.backtoschool.io/subject')
     links += build_link('teacher_subject_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                         rel='self')
 
@@ -301,11 +301,11 @@ def teacher_subject_with_id(teacher_id, class_id, subject_id):
 
     # more hypermedia
     links += build_link('teacher_student', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/studentlist')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/gradelist')
+                        rel='http://relations.backtoschool.io/gradelist')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/publishgrade')
+                        rel='http://relations.backtoschool.io/publishgrade')
 
     return build_response(res, links=links)
 
@@ -318,10 +318,10 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
     links = build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        student_id=student_id, rel='self')
     links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        student_id=student_id, rel='http://relations.highschool.com/gradelist')
+                        student_id=student_id, rel='http://relations.backtoschool.io/gradelist')
     links += build_link('teacher_student_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        student_id=student_id, rel='http://relations.highschool.com/publishgrade')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+                        student_id=student_id, rel='http://relations.backtoschool.io/publishgrade')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
 
     if request.method == 'POST':
         '''Add new grade for this student'''
@@ -371,11 +371,11 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
 
         # more hypermedia
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                   grade_id=new_id, rel='http://relations.highschool.com/grade')
+                   grade_id=new_id, rel='http://relations.backtoschool.io/grade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                   grade_id=new_id, rel='http://relations.highschool.com/updategrade')
+                   grade_id=new_id, rel='http://relations.backtoschool.io/updategrade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                   grade_id=new_id, rel='http://relations.highschool.com/deletegrade')
+                   grade_id=new_id, rel='http://relations.backtoschool.io/deletegrade')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('teacher_grade_with_id',  teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
@@ -416,11 +416,11 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         # more hypermedia
         for i in range(min(10, len(grade_list))):
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/grade')
+                                grade_id=grade_list[i].id, rel='http://relations.backtoschool.io/grade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/updategrade')
+                                grade_id=grade_list[i].id, rel='http://relations.backtoschool.io/updategrade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=grade_list[i].id, rel='http://relations.highschool.com/deletegrade')
+                                grade_id=grade_list[i].id, rel='http://relations.backtoschool.io/deletegrade')
 
         return build_response(res, links=links)
 
@@ -433,10 +433,10 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
     links = build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                        rel='self')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/gradelist')
+                        rel='http://relations.backtoschool.io/gradelist')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/publishgrade')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/publishgrade')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
 
     if request.method == 'POST':
         '''Add new list of grades for the whole class'''
@@ -494,11 +494,11 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         # more hypermedia
         for g in g_list:
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=g['id'], rel='http://relations.highschool.com/grade')
+                       grade_id=g['id'], rel='http://relations.backtoschool.io/grade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=g['id'], rel='http://relations.highschool.com/updategrade')
+                       grade_id=g['id'], rel='http://relations.backtoschool.io/updategrade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                       grade_id=g['id'], rel='http://relations.highschool.com/deletegrade')
+                       grade_id=g['id'], rel='http://relations.backtoschool.io/deletegrade')
 
         return build_response(res, links=links), 201
 
@@ -538,11 +538,11 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         # more hypermedia
         for i in range(min(10, len(all_grades))):
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/grade')
+                                grade_id=all_grades[i]['id'], rel='http://relations.backtoschool.io/grade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/updategrade')
+                                grade_id=all_grades[i]['id'], rel='http://relations.backtoschool.io/updategrade')
             links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                                grade_id=all_grades[i]['id'], rel='http://relations.highschool.com/deletegrade')
+                                grade_id=all_grades[i]['id'], rel='http://relations.backtoschool.io/deletegrade')
 
         return build_response(res, links=links)
 
@@ -552,11 +552,11 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
 @auth_check
 def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
     # hypermedia
-    links = build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+    links = build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/gradelist')
+                        rel='http://relations.backtoschool.io/gradelist')
     links += build_link('teacher_class_grades', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                        rel='http://relations.highschool.com/publishgrade')
+                        rel='http://relations.backtoschool.io/publishgrade')
 
     if request.method == 'PUT':
         '''Edit old grade'''
@@ -564,11 +564,11 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                            grade_id=grade_id, rel='self')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/grade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/grade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/updategrade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/deletegrade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/deletegrade')
 
         # checks
         try:
@@ -619,11 +619,11 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
                            grade_id=grade_id, rel='self')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/grade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/grade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/updategrade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/updategrade')
         links += build_link('teacher_grade_with_id', teacher_id=teacher_id, class_id=class_id, subject_id=subject_id,
-                            grade_id=grade_id, rel='http://relations.highschool.com/deletegrade')
+                            grade_id=grade_id, rel='http://relations.backtoschool.io/deletegrade')
 
         # checks
         teacher = session.query(Teacher).get(teacher_id)
@@ -687,9 +687,9 @@ def teacher_class_timetable(teacher_id, class_id):
     # hypermedia
     links = build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id, rel='self')
     links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=class_id,
-                        rel='http://relations.highschool.com/timetable')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
-    links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.highschool.com/timetable')
+                        rel='http://relations.backtoschool.io/timetable')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
+    links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.backtoschool.io/timetable')
 
     subjects = session.query(Subject).filter_by(teacher_id=teacher_id).filter_by(class_id=class_id).all()
 
@@ -711,8 +711,8 @@ def teacher_timetable(teacher_id):
 
     # hypermedia
     links = build_link('teacher_timetable', teacher_id=teacher_id, rel='self')
-    links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.highschool.com/timetable')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+    links += build_link('teacher_timetable', teacher_id=teacher_id, rel='http://relations.backtoschool.io/timetable')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
 
     teacher = session.query(Teacher).get(teacher_id)
 
@@ -732,7 +732,7 @@ def teacher_timetable(teacher_id):
     # more hypermedia
     for c in classes_id:
         links += build_link('teacher_class_timetable', teacher_id=teacher_id, class_id=c,
-                            rel='http://relations.highschool.com/timetable')
+                            rel='http://relations.backtoschool.io/timetable')
     # response
     return build_response({'timetable': timetable}, links=links)
 
@@ -743,10 +743,10 @@ def teacher_appointment(teacher_id):
     # hypermedia
     links = build_link('teacher_appointment', teacher_id=teacher_id, rel='self')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/createappointment')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/createappointment')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
 
     if request.method == 'POST':
         '''create new appointment'''
@@ -779,7 +779,7 @@ def teacher_appointment(teacher_id):
 
             # more hypermedia
             links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
-                                rel='http://www.highschool.com/appointment')
+                                rel='http://www.backtoschool.io/appointment')
             response = build_response(res, links=links)
             response.headers['Location'] = url_for('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id)
             return response, 201
@@ -803,9 +803,9 @@ def teacher_appointment(teacher_id):
                                              'parent': {'id': parent.id, 'name': parent.name,
                                                         'lastname': parent.lastname}}})
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
-                            rel='http://relations.highschool.com/appointment')
+                            rel='http://relations.backtoschool.io/appointment')
         links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=a.id,
-                            rel='http://relations.highschool.com/updateappointment')
+                            rel='http://relations.backtoschool.io/updateappointment')
 
     return build_response(appointments, links=links)
 
@@ -816,12 +816,12 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
     # hypermedia
     links = build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id, rel='self')
     links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id,
-                        rel='http://relations.highschool.com/appointment')
+                        rel='http://relations.backtoschool.io/appointment')
     links += build_link('teacher_appointment_with_id', teacher_id=teacher_id, appointment_id=appointment_id,
-                        rel='http://relations.highschool.com/updateappointment')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/updateappointment')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
     links += build_link('teacher_appointment', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
 
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
 
@@ -883,8 +883,8 @@ def teacher_notifications(teacher_id):
     # hypermedia
     links = build_link('teacher_notifications', teacher_id=teacher_id, rel='self')
     links += build_link('teacher_notifications', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/notificationlist')
-    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/notificationlist')
+    links += build_link('teacher_with_id', teacher_id=teacher_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     teacher = session.query(Teacher).filter_by(id=teacher_id).one()

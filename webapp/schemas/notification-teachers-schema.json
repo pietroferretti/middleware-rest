@@ -15,23 +15,23 @@
               "properties": {
                 "id": {
                   "type": "integer",
-                  "entity": "http://entities.highschool.com/notificationid"
+                  "entity": "http://entities.backtoschool.io/notificationid"
                 },
                 "date": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/date"
+                  "entity": "http://entities.backtoschool.io/date"
                 },
                 "scope": {
                   "constant": "teachers",
-                  "entity": "http://entities.highschool.com/notificationscope"
+                  "entity": "http://entities.backtoschool.io/notificationscope"
                 },
                 "class_id": {
                   "type": "integer",
-                  "entity": "http://entities.highschool.com/classid"
+                  "entity": "http://entities.backtoschool.io/classid"
                 },
                 "text": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/notificationtext"
+                  "entity": "http://entities.backtoschool.io/notificationtext"
                 }
               }
             }
@@ -47,7 +47,7 @@
         "properties": {
           "text": {
             "type": "string",
-            "entity": "http://entities.highschool.com/notificationtext"
+            "entity": "http://entities.backtoschool.io/notificationtext"
           }
         },
         "required": [
@@ -63,19 +63,19 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/notificationid"
+                "entity": "http://entities.backtoschool.io/notificationid"
               },
               "date": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/date"
+                "entity": "http://entities.backtoschool.io/date"
               },
               "scope": {
                 "constant": "teachers",
-                "entity": "http://entities.highschool.com/notificationscope"
+                "entity": "http://entities.backtoschool.io/notificationscope"
               },
               "text": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/notificationtext"
+                "entity": "http://entities.backtoschool.io/notificationtext"
               }
             }
           }

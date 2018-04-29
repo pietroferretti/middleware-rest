@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
-    "title": "HighSchool API response",
-    "description": "The body of a generic HTTP response from the HighSchool API",
+    "title": "BackToSchool API response",
+    "description": "The body of a generic HTTP response from the BackToSchool API",
     "type": "object",
     "properties": {
         "result": {

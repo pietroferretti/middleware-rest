@@ -21,7 +21,7 @@ def parent_with_id(parent_id):
     links = build_link('parent_with_id', parent_id=parent_id,
                        rel='self')
     links += build_link('parent_with_id', parent_id=parent_id,
-                        rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/index')
 
     parent = session.query(Parent).get(parent_id)
     if not parent:
@@ -31,15 +31,15 @@ def parent_with_id(parent_id):
            'lastname': parent.lastname}
 
     # more hypermedia
-    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.highschool.com/data')
-    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
+    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.backtoschool.io/data')
+    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
-    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/createappointment')
+    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_notifications', parent_id=parent_id,
-                        rel='http://relations.highschool.com/notificationlist')
+                        rel='http://relations.backtoschool.io/notificationlist')
 
     return build_response(res, links=links)
 
@@ -49,9 +49,9 @@ def parent_with_id(parent_id):
 def parent_data(parent_id):
     # hypermedia
     links = build_link('parent_data', parent_id=parent_id, rel='self')
-    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.highschool.com/data')
-    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.highschool.com/updatedata')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.backtoschool.io/data')
+    links += build_link('parent_data', parent_id=parent_id, rel='http://relations.backtoschool.io/updatedata')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -88,8 +88,8 @@ def parent_child(parent_id):
 
     # hypermedia
     links = build_link('parent_child', parent_id=parent_id, rel='self')
-    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -107,7 +107,7 @@ def parent_child(parent_id):
     # more hypermedia
     for i in range(min(10, len(children))):
         links += build_link('parent_child_with_id', parent_id=parent_id, student_id=children[i]['id'],
-                            rel='http://relations.highschool.com/student')
+                            rel='http://relations.backtoschool.io/student')
 
     return build_response(res, links=links)
 
@@ -120,8 +120,8 @@ def parent_child_with_id(parent_id, student_id):
     # hypermedia
     links = build_link('parent_child_with_id', parent_id=parent_id, student_id=student_id, rel='self')
     links += build_link('parent_child_with_id', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/student')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/student')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -146,13 +146,13 @@ def parent_child_with_id(parent_id, student_id):
 
     # more hypermedia
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/data')
+                        rel='http://relations.backtoschool.io/data')
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/updatedata')
+                        rel='http://relations.backtoschool.io/updatedata')
     links += build_link('parent_child_grades', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/gradelist')
+                        rel='http://relations.backtoschool.io/gradelist')
     links += build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/teacherlist')
+                        rel='http://relations.backtoschool.io/teacherlist')
 
     return build_response(res, links=links)
 
@@ -164,11 +164,11 @@ def parent_child_data(parent_id, student_id):
     links = build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
                        rel='self')
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/data')
+                        rel='http://relations.backtoschool.io/data')
     links += build_link('parent_child_data', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/updatedata')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
-    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/updatedata')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
+    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -213,9 +213,9 @@ def parent_child_grades(parent_id, student_id):
     links = build_link('parent_child_grades', parent_id=parent_id, student_id=student_id,
                        rel='self')
     links += build_link('parent_child_grades', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/gradelist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
-    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/gradelist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
+    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -251,9 +251,9 @@ def parent_child_teacher(parent_id, student_id):
     links = build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
                        rel='self')
     links += build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.highschool.com/teacgherlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
-    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/teacgherlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
+    links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -282,9 +282,9 @@ def parent_child_teacher(parent_id, student_id):
 
     # more hypermedia
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
+                        rel='http://relations.backtoschool.io/createappointment')
 
     return build_response(res, links=links)
 
@@ -313,10 +313,10 @@ def parent_appointment(parent_id):
     # hypermedia
     links = build_link('parent_appointment', parent_id=parent_id, rel='self')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/createappointment')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     parent = session.query(Parent).get(parent_id)
 
@@ -329,10 +329,10 @@ def parent_appointment(parent_id):
         if any(c.class_id in [x.id for x in t.classes] for c in parent.children):
             links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=t.id,
                                 year=datetime.datetime.now().year, month=datetime.datetime.now().month,
-                                rel='http://relations.highschool.com/freedays')
+                                rel='http://relations.backtoschool.io/freedays')
             links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=t.id,
                                 year=datetime.datetime.now().year, month=datetime.datetime.now().month,
-                                day=datetime.datetime.now().day, rel='http://relations.highschool.com/freeslots')
+                                day=datetime.datetime.now().day, rel='http://relations.backtoschool.io/freeslots')
 
     if request.method == 'POST':
         '''Create new appointment'''
@@ -370,7 +370,7 @@ def parent_appointment(parent_id):
 
                 # more hypermedia
                 links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id,
-                                    rel='http://relations.highschool.com/appointment')
+                                    rel='http://relations.backtoschool.io/appointment')
 
                 res = {'id': a.id, 'date': a.date, 'room': a.room, 'teacher accepted': a.teacher_accepted,
                                  'parent_accepted': a.parent_accepted,
@@ -397,7 +397,7 @@ def parent_appointment(parent_id):
         # more hypermedia
         for i in range(min(10, len(appointments))):
             links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointments[i].id,
-                            rel='http://relations.highschool.com/appointment')
+                            rel='http://relations.backtoschool.io/appointment')
 
         return build_response(appointments, links=links)
 
@@ -409,12 +409,12 @@ def parent_appointment_with_id(parent_id, appointment_id):
     # hypermedia
     links = build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointment_id, rel='self')
     links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointment_id,
-                        rel='http://relations.highschool.com/appointment')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/appointment')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
+                        rel='http://relations.backtoschool.io/createappointment')
 
     appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(parent_id=parent_id).one()
 
@@ -498,12 +498,12 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     links = build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
                         year=year, month=month, rel='self')
     links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
-                        year=year, month=month, rel='http://relations.highschool.com/freedays')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        year=year, month=month, rel='http://relations.backtoschool.io/freedays')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
+                        rel='http://relations.backtoschool.io/createappointment')
 
     teacher = session.query(Teacher).get(teacher_id)
 
@@ -522,7 +522,7 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     for d in res:
         links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
                             year=year, month=month,
-                            day=d['date'].day, rel='http://relations.highschool.com/freeslots')
+                            day=d['date'].day, rel='http://relations.backtoschool.io/freeslots')
 
     # day_to_check = datetime.datetime(year,month,3)
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
@@ -539,14 +539,14 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     links = build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
                         year=year, month=month, day=day, rel='self')
     links += build_link('parent_appointment_day', parent_id=parent_id, teacher_id=teacher_id,
-                        year=year, month=month, day=day, rel='http://relations.highschool.com/freeslots')
+                        year=year, month=month, day=day, rel='http://relations.backtoschool.io/freeslots')
     links += build_link('parent_appointment_month', parent_id=parent_id, teacher_id=teacher_id,
-                        year=year, month=month, rel='http://relations.highschool.com/freedays')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        year=year, month=month, rel='http://relations.backtoschool.io/freedays')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/appointmentlist')
+                        rel='http://relations.backtoschool.io/appointmentlist')
     links += build_link('parent_appointment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createappointment')
+                        rel='http://relations.backtoschool.io/createappointment')
 
     teacher = session.query(Teacher).get(teacher_id)
 
@@ -592,12 +592,12 @@ def parent_payment(parent_id):
     # hypermedia
     links = build_link('parent_payment', parent_id=parent_id, rel='self')
     links += build_link('parent_payment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment_paid', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment_pending', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -613,7 +613,7 @@ def parent_payment(parent_id):
     # more hypermedia
     for i in range(min(5, len(parent.payments))):
         links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=parent.payments[i].id,
-                            rel='http://relations.highschool.com/payment')
+                            rel='http://relations.backtoschool.io/payment')
 
     return build_response({'payments': payments}, links=links)
 
@@ -626,12 +626,12 @@ def parent_payment_paid(parent_id):
     # hypermedia
     links = build_link('parent_payment_paid', parent_id=parent_id, rel='self')
     links += build_link('parent_payment_paid', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment_pending', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
 
     # checks
@@ -649,7 +649,7 @@ def parent_payment_paid(parent_id):
     # more hypermedia
     for i in range(min(5, len(parent.payments))):
         links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=parent.payments[i].id,
-                            rel='http://relations.highschool.com/payment')
+                            rel='http://relations.backtoschool.io/payment')
 
     return build_response({'payments': payments}, links=links)
 
@@ -662,12 +662,12 @@ def parent_payment_pending(parent_id):
     # hypermedia
     links = build_link('parent_payment_pending', parent_id=parent_id, rel='self')
     links += build_link('parent_payment_pending', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
+                        rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_payment_paid', parent_id=parent_id,
-                        rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     parent = session.query(Parent).get(parent_id)
 
@@ -683,7 +683,7 @@ def parent_payment_pending(parent_id):
     # more hypermedia
     for i in range(min(5, len(parent.payments))):
         links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=parent.payments[i].id,
-                            rel='http://relations.highschool.com/payment')
+                            rel='http://relations.backtoschool.io/payment')
 
     return build_response({'payments': payments}, links=links)
 
@@ -696,9 +696,9 @@ def parent_payment_with_id(parent_id, payment_id):
     # hypermedia
     links = build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payment_id, rel='self')
     links += build_link('parent_payment_with_id', parent_id=parent_id, payment_id=payment_id,
-                       rel='http://relation.highschool.com/payment')
-    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                       rel='http://relation.backtoschool.io/payment')
+    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     payment = session.query(Payment).get(payment_id)
@@ -711,7 +711,7 @@ def parent_payment_with_id(parent_id, payment_id):
     # more hypermedia
     if payment.is_pending:
         links += build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
-                            rel='http://relations.highschool.com/completepayment')
+                            rel='http://relations.backtoschool.io/completepayment')
 
     return build_response(res, links=links)
 
@@ -724,9 +724,9 @@ def parent_pay(parent_id, payment_id):
     # hypermedia
     links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id, rel='self')
     links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
-                       rel='http://relations.highschool.com/completepayment')
-    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                       rel='http://relations.backtoschool.io/completepayment')
+    links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)
@@ -752,8 +752,8 @@ def parent_notifications(parent_id):
     # hypermedia
     links = build_link('parent_notifications', parent_id=parent_id, rel='self')
     links += build_link('parent_notifications', parent_id=parent_id,
-                        rel='http://relations.highschool.com/notificationlist')
-    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/index')
+                        rel='http://relations.backtoschool.io/notificationlist')
+    links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 
     # checks
     parent = session.query(Parent).get(parent_id)

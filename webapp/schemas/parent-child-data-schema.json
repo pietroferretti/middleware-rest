@@ -4,13 +4,13 @@
     {
       "student_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/studentid"
+        "entity": "http://entities.backtoschool.io/studentid"
       }
     },
     {
       "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/parentid"
+        "entity": "http://entities.backtoschool.io/parentid"
       }
     }
   ],
@@ -26,11 +26,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentlastname"
+                "entity": "http://entities.backtoschool.io/studentlastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentname"
+                "entity": "http://entities.backtoschool.io/studentname"
               }
             }
           }
@@ -44,11 +44,11 @@
         "properties": {
           "lastname": {
             "type": "string",
-            "entity": "http://entities.highschool.com/studentlastname"
+            "entity": "http://entities.backtoschool.io/studentlastname"
           },
           "name": {
             "type": "string",
-            "entity": "http://entities.highschool.com/studentname"
+            "entity": "http://entities.backtoschool.io/studentname"
           }
         },
         "required": []
@@ -62,11 +62,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentlastname"
+                "entity": "http://entities.backtoschool.io/studentlastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentname"
+                "entity": "http://entities.backtoschool.io/studentname"
               }
             }
           }

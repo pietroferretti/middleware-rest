@@ -4,7 +4,7 @@
     {
       "class_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/classid"
+        "entity": "http://entities.backtoschool.io/classid"
       }
     }
   ],
@@ -27,11 +27,11 @@
           },
           "date": {
             "type": "string",
-            "entity": "http://entities.highschool.com/date"
+            "entity": "http://entities.backtoschool.io/date"
           },
           "reason": {
             "type": "string",
-            "entity": "http://entities.highschool.com/paymentreason"
+            "entity": "http://entities.backtoschool.io/paymentreason"
           }
         },
         "required": [
@@ -52,11 +52,11 @@
               },
               "date": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/date"
+                "entity": "http://entities.backtoschool.io/date"
               },
               "reason": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/paymentreason"
+                "entity": "http://entities.backtoschool.io/paymentreason"
               },
               "pending": {
                 "type": "bool",

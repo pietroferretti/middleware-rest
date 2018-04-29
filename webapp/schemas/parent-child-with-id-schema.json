@@ -4,13 +4,13 @@
     {
       "student_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/studentid"
+        "entity": "http://entities.backtoschool.io/studentid"
       }
     },
     {
       "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/parentid"
+        "entity": "http://entities.backtoschool.io/parentid"
       }
     }
   ],
@@ -26,30 +26,30 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/studentid"
+                "entity": "http://entities.backtoschool.io/studentid"
               },
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentlastname"
+                "entity": "http://entities.backtoschool.io/studentlastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/studentname"
+                "entity": "http://entities.backtoschool.io/studentname"
               },
               "class": {
                 "type": "object",
                 "properties": {
                   "id": {
                     "type": "integer",
-                    "entity": "http://entities.highschool.com/classid"
+                    "entity": "http://entities.backtoschool.io/classid"
                   },
                   "name": {
                     "type": "string",
-                    "entity": "http://entities.highschool.com/classname"
+                    "entity": "http://entities.backtoschool.io/classname"
                   },
                   "room": {
                     "type": "string",
-                    "entity": "http://entities.highschool.com/room"
+                    "entity": "http://entities.backtoschool.io/room"
                   },
                   "subjects": {
                     "type": "array",
@@ -58,11 +58,11 @@
                       "properties": {
                         "id": {
                           "type": "integer",
-                          "entity": "http://entities.highschool.com/subjectid"
+                          "entity": "http://entities.backtoschool.io/subjectid"
                         },
                         "name": {
                           "type": "string",
-                          "entity": "http://entities.highschool.com/subjectname"
+                          "entity": "http://entities.backtoschool.io/subjectname"
                         }
                       }
                     }

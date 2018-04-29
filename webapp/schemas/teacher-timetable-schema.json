@@ -4,7 +4,7 @@
     {
       "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.backtoschool.io/teacherid"
       }
     }
   ],
@@ -22,7 +22,7 @@
               "properties": {
                 "subjects_name": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/subjectsname"
+                  "entity": "http://entities.backtoschool.io/subjectsname"
                 },
                 "schedule": {
                   "type": "array",
@@ -31,15 +31,15 @@
                     "properties": {
                       "day": {
                         "type": "integer",
-                        "entities": "http://entities.highschool.com/day"
+                        "entities": "http://entities.backtoschool.io/day"
                       },
                       "start_hour": {
                         "type": "integer",
-                        "entities": "http://entities.highschool.com/hour"
+                        "entities": "http://entities.backtoschool.io/hour"
                       },
                       "end_hour": {
                         "type": "integer",
-                        "entities": "http://entities.highschool.com/hour"
+                        "entities": "http://entities.backtoschool.io/hour"
                       }
                     }
                   }
@@ -49,15 +49,15 @@
                   "properties": {
                     "id": {
                       "type": "integer",
-                      "entity": "http://entities.highschool.com/classid"
+                      "entity": "http://entities.backtoschool.io/classid"
                     },
                     "name": {
                       "type": "string",
-                      "entity": "http://entities.highschool.com/classname"
+                      "entity": "http://entities.backtoschool.io/classname"
                     },
                     "room": {
                       "type": "string",
-                      "entity": "http://entities.highschool.com/teacherhasaccepted"
+                      "entity": "http://entities.backtoschool.io/teacherhasaccepted"
                     }
                   }
                 }

@@ -23,12 +23,12 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
     # create response object
     resp = jsonify(resp_dict)
     # add content type, response schema
-    resp.headers["Content-Type"] = 'application/vnd.highschool+json; schema="{}"'.format(
+    resp.headers["Content-Type"] = 'application/vnd.backtoschool+json; schema="{}"'.format(
         request.url_root.rstrip('/') + url_for('schema', path=RESPONSE_SCHEMA))
     return resp
 
 
-def build_link(endpoint, rel='http://relations.highschool.com/linkrelation', **kwargs):
+def build_link(endpoint, rel='http://relations.backtoschool.io/linkrelation', **kwargs):
     filename = endpoint.replace('_', '-') + '-schema.json'
     schema = request.url_root.rstrip('/') + url_for('schema', path=filename)
     res = [{'link': request.url_root.rstrip('/') + url_for(endpoint, **kwargs),

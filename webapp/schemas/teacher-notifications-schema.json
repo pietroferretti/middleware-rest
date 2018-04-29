@@ -4,7 +4,7 @@
     {
       "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.backtoschool.io/teacherid"
       }
     }
   ],
@@ -21,7 +21,7 @@
               "properties": {
                 "scope": {
                   "constant": "class",
-                  "entity": "http://entities.highschool.com/notificationscope"
+                  "entity": "http://entities.backtoschool.io/notificationscope"
                 },
                 "notifications": {
                   "type": "array",
@@ -33,11 +33,11 @@
                         "properties": {
                           "id": {
                             "type": "integer",
-                            "entity": "http://entities.highschool.com/classid"
+                            "entity": "http://entities.backtoschool.io/classid"
                           },
                           "name": {
                             "type": "string",
-                            "entity": "http://entities.highschool.com/classname"
+                            "entity": "http://entities.backtoschool.io/classname"
                           }
                         }
                       },
@@ -46,15 +46,15 @@
                         "properties": {
                           "date": {
                             "type": "string",
-                            "entity": "http://entities.highschool.com/date"
+                            "entity": "http://entities.backtoschool.io/date"
                           },
                           "text": {
                             "type": "string",
-                            "entity": "http://entities.highschool.com/notificationtext"
+                            "entity": "http://entities.backtoschool.io/notificationtext"
                           },
                           "class_notification_scope": {
                             "type": "string",
-                            "entity": "http://entities.highschool.com/notificationscope"
+                            "entity": "http://entities.backtoschool.io/notificationscope"
                           }
                         }
                       }
@@ -68,7 +68,7 @@
               "properties": {
                 "scope": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/notificationscope"
+                  "entity": "http://entities.backtoschool.io/notificationscope"
                 },
                 "notifications": {
                   "type": "array",
@@ -77,11 +77,11 @@
                     "properties": {
                       "date": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/date"
+                        "entity": "http://entities.backtoschool.io/date"
                       },
                       "text": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/notificationtext"
+                        "entity": "http://entities.backtoschool.io/notificationtext"
                       }
                     }
                   }

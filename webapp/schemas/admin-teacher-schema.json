@@ -15,15 +15,15 @@
               "properties": {
                 "id": {
                   "type": "integer",
-                  "entity": "http://entities.highschool.com/teacherid"
+                  "entity": "http://entities.backtoschool.io/teacherid"
                 },
                 "name": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/teachername"
+                  "entity": "http://entities.backtoschool.io/teachername"
                 },
                 "lastname": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/teacherlastname"
+                  "entity": "http://entities.backtoschool.io/teacherlastname"
                 }
               }
             }
@@ -39,19 +39,19 @@
         "properties": {
           "username": {
             "type": "string",
-            "entity": "http://entities.highschool.com/username"
+            "entity": "http://entities.backtoschool.io/username"
           },
           "password": {
             "type": "string",
-            "entity": "http://entities.highschool.com/password"
+            "entity": "http://entities.backtoschool.io/password"
           },
           "name": {
             "type": "string",
-            "entity": "http://entities.highschool.com/teachername"
+            "entity": "http://entities.backtoschool.io/teachername"
           },
           "lastname": {
             "type": "string",
-            "entity": "http://entities.highschool.com/teacherlastname"
+            "entity": "http://entities.backtoschool.io/teacherlastname"
           }
         },
         "required": [
@@ -70,15 +70,15 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/teacherid"
+                "entity": "http://entities.backtoschool.io/teacherid"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teachername"
+                "entity": "http://entities.backtoschool.io/teachername"
               },
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teacherlastname"
+                "entity": "http://entities.backtoschool.io/teacherlastname"
               }
             }
           },
@@ -87,15 +87,15 @@
             "properties": {
               "username": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/username"
+                "entity": "http://entities.backtoschool.io/username"
               },
               "role": {
                 "constant": "teacher",
-                "entity": "http://entities.highschool.com/role"
+                "entity": "http://entities.backtoschool.io/role"
               },
               "teacher_id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/teacherid"
+                "entity": "http://entities.backtoschool.io/teacherid"
               }
             }
           }

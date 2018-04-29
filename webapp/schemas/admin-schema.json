@@ -17,11 +17,11 @@
                 "properties": {
                     "username": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/username"
+                        "entity": "http://entities.backtoschool.io/username"
                     },
                     "password": {
                         "type": "string",
-                        "entity": "http://entities.highschool.com/password"
+                        "entity": "http://entities.backtoschool.io/password"
                     }
                 },
               "required": [
@@ -38,11 +38,11 @@
                         "properties": {
                             "username": {
                                 "type": "string",
-                                "entity": "http://entities.highschool.com/username"
+                                "entity": "http://entities.backtoschool.io/username"
                             },
                           "role": {
                             "constant": "admin",
-                            "entity": "http://entities.highschool.com/role"
+                            "entity": "http://entities.backtoschool.io/role"
                             }
                         }
                     }

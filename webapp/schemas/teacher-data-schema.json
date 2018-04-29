@@ -4,7 +4,7 @@
     {
       "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.backtoschool.io/teacherid"
       }
     }
   ],
@@ -20,11 +20,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teacherlastname"
+                "entity": "http://entities.backtoschool.io/teacherlastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teachername"
+                "entity": "http://entities.backtoschool.io/teachername"
               }
             }
           }
@@ -39,11 +39,11 @@
         "properties": {
           "lastname": {
             "type": "string",
-            "entity": "http://entities.highschool.com/teacherlastname"
+            "entity": "http://entities.backtoschool.io/teacherlastname"
           },
           "name": {
             "type": "string",
-            "entity": "http://entities.highschool.com/teachername"
+            "entity": "http://entities.backtoschool.io/teachername"
           }
         },
         "required": [
@@ -60,11 +60,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teacherlastname"
+                "entity": "http://entities.backtoschool.io/teacherlastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/teachername"
+                "entity": "http://entities.backtoschool.io/teachername"
               }
             }
           }

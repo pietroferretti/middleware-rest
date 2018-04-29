@@ -20,8 +20,8 @@ def admin():
 
         # hypermedia
         links = build_link('admin', rel='self')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
-        links += build_link('admin', rel='http://relations.highschool.com/createadmin')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
+        links += build_link('admin', rel='http://relations.backtoschool.io/createadmin')
 
         # check content type
         try:
@@ -58,19 +58,19 @@ def admin():
 
         # hypermedia
         links = build_link('admin', rel='self')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
-        links += build_link('admin', rel='http://relations.highschool.com/createadmin')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-        links += build_link('admin_parent', rel='http://relations.highschool.com/parentlist')
-        links += build_link('admin_parent', rel='http://relations.highschool.com/createparent')
-        links += build_link('classes', rel='http://relations.highschool.com/classlist')
-        links += build_link('student', rel='http://relations.highschool.com/studentlist')
-        links += build_link('student', rel='http://relations.highschool.com/createstudent')
-        links += build_link('payment', rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment', rel='http://relations.highschool.com/createpayment')
-        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
+        links += build_link('admin', rel='http://relations.backtoschool.io/createadmin')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/teacherlist')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/createteacher')
+        links += build_link('admin_parent', rel='http://relations.backtoschool.io/parentlist')
+        links += build_link('admin_parent', rel='http://relations.backtoschool.io/createparent')
+        links += build_link('classes', rel='http://relations.backtoschool.io/classlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/studentlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/createstudent')
+        links += build_link('payment', rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment', rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
 
         return build_response(links=links)
 
@@ -83,9 +83,9 @@ def admin_teacher():
 
         # hypermedia
         links = build_link('admin_teacher', rel='self')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/teacherlist')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/createteacher')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -129,7 +129,7 @@ def admin_teacher():
         res = {'teacher': t_obj, 'account': a_obj}
 
         # more hypermedia
-        links += build_link('admin_teacher_with_id', teacher_id=new_teacher.id, rel='http://relations.highschool.com/teacher')
+        links += build_link('admin_teacher_with_id', teacher_id=new_teacher.id, rel='http://relations.backtoschool.io/teacher')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('admin_teacher_with_id', teacher_id=new_teacher.id)
@@ -140,9 +140,9 @@ def admin_teacher():
 
         # hypermedia
         links = build_link('admin_teacher', rel='self')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-        links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/teacherlist')
+        links += build_link('admin_teacher', rel='http://relations.backtoschool.io/createteacher')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # get list of teachers from db
         teachers = session.query(Teacher).all()
@@ -160,7 +160,7 @@ def admin_teacher():
         # more hypermedia
         for i in range(min(10, len(teachers))):
             links += build_link('admin_teacher_with_id', teacher_id=teachers[i].id,
-                                rel='http://relations.highschool.com/teacher')
+                                rel='http://relations.backtoschool.io/teacher')
 
         return build_response(res, links=links)
 
@@ -172,9 +172,9 @@ def admin_teacher_with_id(teacher_id):
 
     # hypermedia
     links = build_link('admin_teacher_with_id', teacher_id=teacher_id, rel='self')
-    links += build_link('admin_teacher', rel='http://relations.highschool.com/teacherlist')
-    links += build_link('admin_teacher', rel='http://relations.highschool.com/createteacher')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links += build_link('admin_teacher', rel='http://relations.backtoschool.io/teacherlist')
+    links += build_link('admin_teacher', rel='http://relations.backtoschool.io/createteacher')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
     # query info
     t = session.query(Teacher).get(teacher_id)
@@ -189,9 +189,9 @@ def admin_teacher_with_id(teacher_id):
 
     # more hypermedia
     links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/notificationlist')
+                        rel='http://relations.backtoschool.io/notificationlist')
     links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                        rel='http://relations.highschool.com/createnotification')
+                        rel='http://relations.backtoschool.io/createnotification')
 
     return build_response(res, links=links)
 
@@ -201,9 +201,9 @@ def admin_teacher_with_id(teacher_id):
 def admin_parent():
     # hypermedia
     links = build_link('admin_parent', rel='self')
-    links += build_link('admin_parent', rel='http://relations.highschool.com/parentlist')
-    links += build_link('admin_parent', rel='http://relations.highschool.com/createparent')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links += build_link('admin_parent', rel='http://relations.backtoschool.io/parentlist')
+    links += build_link('admin_parent', rel='http://relations.backtoschool.io/createparent')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
     if request.method == 'POST':
         '''Create new parent account'''
@@ -250,7 +250,7 @@ def admin_parent():
         res = {'parent': p_obj, 'account': a_obj}
 
         # more hypermedia
-        links += build_link('admin_parent_with_id', parent_id=new_parent.id, rel='http://relations.highschool.com/parent')
+        links += build_link('admin_parent_with_id', parent_id=new_parent.id, rel='http://relations.backtoschool.io/parent')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('admin_parent_with_id', parent_id=new_parent.id)
@@ -275,7 +275,7 @@ def admin_parent():
         # hypermedia
         for i in range(min(10, len(parents))):
             links += build_link('admin_parent_with_id', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/parent')
+                                rel='http://relations.backtoschool.io/parent')
 
         return build_response(res, links=links)
 
@@ -287,9 +287,9 @@ def admin_parent_with_id(parent_id):
 
     # hypermedia
     links = build_link('admin_parent_with_id', parent_id=parent_id, rel='self')
-    links += build_link('admin_parent', rel='http://relations.highschool.com/parentlist')
-    links += build_link('admin_parent', rel='http://relations.highschool.com/createparent')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links += build_link('admin_parent', rel='http://relations.backtoschool.io/parentlist')
+    links += build_link('admin_parent', rel='http://relations.backtoschool.io/createparent')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
     # query info
     p = session.query(Parent).get(parent_id)
@@ -304,11 +304,11 @@ def admin_parent_with_id(parent_id):
 
     # hypermedia
     links += build_link('notification_parent_with_id', parent_id=parent_id,
-                        rel='http://relations.highschool.com/notificationlist')
+                        rel='http://relations.backtoschool.io/notificationlist')
     links += build_link('notification_parent_with_id', parent_id=parent_id,
-                        rel='http://relations.highschool.com/createnotification')
-    links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-    links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/createpayment')
+                        rel='http://relations.backtoschool.io/createnotification')
+    links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/createpayment')
 
     return build_response(res, links=links)
 
@@ -320,8 +320,8 @@ def classes():
 
     # hypermedia
     links = build_link('classes', rel='self')
-    links += build_link('classes', rel='http://relations.highschool.com/classlist')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links += build_link('classes', rel='http://relations.backtoschool.io/classlist')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
     # query classes
     classes = session.query(Class).all()
@@ -339,7 +339,7 @@ def classes():
     # hypermedia
     for i in range(min(10, len(classes))):
         links += build_link('class_with_id', class_id=classes[i].id,
-                            rel='http://relations.highschool.com/class')
+                            rel='http://relations.backtoschool.io/class')
 
     return build_response(res, links=links)
 
@@ -351,9 +351,9 @@ def class_with_id(class_id):
 
     # hypermedia
     links = build_link('class_with_id', class_id=class_id, rel='self')
-    links += build_link('class_with_id', class_id=class_id, rel='http://relations.highschool.com/class')
-    links += build_link('classes', rel='http://relations.highschool.com/classlist')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links += build_link('class_with_id', class_id=class_id, rel='http://relations.backtoschool.io/class')
+    links += build_link('classes', rel='http://relations.backtoschool.io/classlist')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
     # query
     c = session.query(Class).get(class_id)
@@ -367,12 +367,12 @@ def class_with_id(class_id):
     res = {'class': c_obj}
 
     # hypermedia
-    links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/paymentlist')
-    links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/createpayment')
-    links += build_link('notification_class', class_id=class_id, rel='http://relations.highschool.com/notificationlist')
+    links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/paymentlist')
+    links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/createpayment')
+    links += build_link('notification_class', class_id=class_id, rel='http://relations.backtoschool.io/notificationlist')
     links += build_link('notification_class', class_id=class_id,
-                        rel='http://relations.highschool.com/createnotification')
-    links += build_link('class_student', class_id=class_id, rel='http://relations.highschool.com/studentlist')
+                        rel='http://relations.backtoschool.io/createnotification')
+    links += build_link('class_student', class_id=class_id, rel='http://relations.backtoschool.io/studentlist')
 
     return build_response(res, links=links)
 
@@ -383,10 +383,10 @@ def class_student(class_id):
     '''Show list of students in the class'''
 
     # hypermedia
-    links = build_link('classes', rel='http://relations.highschool.com/classlist')
-    links += build_link('admin', rel='http://relations.highschool.com/index')
+    links = build_link('classes', rel='http://relations.backtoschool.io/classlist')
+    links += build_link('admin', rel='http://relations.backtoschool.io/index')
     links += build_link('class_student', class_id=class_id, rel='self')
-    links += build_link('class_student', class_id=class_id, rel='http://relations.highschool.com/studentlist')
+    links += build_link('class_student', class_id=class_id, rel='http://relations.backtoschool.io/studentlist')
 
     # check input
     c = session.query(Class).get(class_id)
@@ -409,8 +409,8 @@ def class_student(class_id):
 
     # hypermedia
     for i in range(min(10, len(students))):
-        links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.highschool.com/student')
-        links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.highschool.com/updatestudent')
+        links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.backtoschool.io/student')
+        links += build_link('student_with_id', student_id=students[i].id, rel='http://relations.backtoschool.io/updatestudent')
 
     return build_response(res, links=links)
 
@@ -423,9 +423,9 @@ def student():
 
         # hypermedia
         links = build_link('student', rel='self')
-        links += build_link('student', rel='http://relations.highschool.com/studentlist')
-        links += build_link('student', rel='http://relations.highschool.com/createstudent')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('student', rel='http://relations.backtoschool.io/studentlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/createstudent')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -469,8 +469,8 @@ def student():
         res = {'student': s_obj}
 
         # more hypermedia
-        links += build_link('student_with_id', student_id=new_id, rel='http://relations.highschool.com/student')
-        links += build_link('student_with_id', student_id=new_id, rel='http://relations.highschool.com/updatestudent')
+        links += build_link('student_with_id', student_id=new_id, rel='http://relations.backtoschool.io/student')
+        links += build_link('student_with_id', student_id=new_id, rel='http://relations.backtoschool.io/updatestudent')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('student_with_id', student_id=new_id)
@@ -481,9 +481,9 @@ def student():
 
         # hypermedia
         links = build_link('student', rel='self')
-        links += build_link('student', rel='http://relations.highschool.com/studentlist')
-        links += build_link('student', rel='http://relations.highschool.com/createstudent')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('student', rel='http://relations.backtoschool.io/studentlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/createstudent')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         students = session.query(Student).all()
@@ -502,9 +502,9 @@ def student():
         # more hypermedia
         for i in range(min(10, len(students))):
             links += build_link('student_with_id', student_id=students[i].id,
-                                rel='http://relations.highschool.com/student')
+                                rel='http://relations.backtoschool.io/student')
             links += build_link('student_with_id', student_id=students[i].id,
-                                rel='http://relations.highschool.com/updatestudent')
+                                rel='http://relations.backtoschool.io/updatestudent')
 
         return build_response(res, links=links)
 
@@ -517,12 +517,12 @@ def student_with_id(student_id):
 
         # hypermedia
         links = build_link('student_with_id', student_id=student_id, rel='self')
-        links += build_link('student_with_id', student_id=student_id, rel='http://relations.highschool.com/student')
+        links += build_link('student_with_id', student_id=student_id, rel='http://relations.backtoschool.io/student')
         links += build_link('student_with_id', student_id=student_id,
-                            rel='http://relations.highschool.com/updatestudent')
-        links += build_link('student', rel='http://relations.highschool.com/studentlist')
-        links += build_link('student', rel='http://relations.highschool.com/createstudent')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/updatestudent')
+        links += build_link('student', rel='http://relations.backtoschool.io/studentlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/createstudent')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -575,9 +575,9 @@ def student_with_id(student_id):
         # more hypermedia (parent, class)
         if st.parent_id:
             links += build_link('admin_parent_with_id', parent_id=st.parent_id,
-                                rel='http://relations.highschool.com/parent')
+                                rel='http://relations.backtoschool.io/parent')
         if st.class_id:
-            links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.highschool.com/class')
+            links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.backtoschool.io/class')
 
         return build_response(res, links=links)
 
@@ -587,12 +587,12 @@ def student_with_id(student_id):
 
         # hypermedia
         links = build_link('student_with_id', student_id=student_id, rel='self')
-        links += build_link('student_with_id', student_id=student_id, rel='http://relations.highschool.com/student')
+        links += build_link('student_with_id', student_id=student_id, rel='http://relations.backtoschool.io/student')
         links += build_link('student_with_id', student_id=student_id,
-                            rel='http://relations.highschool.com/updatestudent')
-        links += build_link('student', rel='http://relations.highschool.com/studentlist')
-        links += build_link('student', rel='http://relations.highschool.com/createstudent')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/updatestudent')
+        links += build_link('student', rel='http://relations.backtoschool.io/studentlist')
+        links += build_link('student', rel='http://relations.backtoschool.io/createstudent')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         st = session.query(Student).get(student_id)
@@ -607,9 +607,9 @@ def student_with_id(student_id):
         # more hypermedia (parent, class)
         if st.parent_id:
             links += build_link('admin_parent_with_id', parent_id=st.parent_id,
-                                rel='http://relations.highschool.com/parent')
+                                rel='http://relations.backtoschool.io/parent')
         if st.class_id:
-            links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.highschool.com/class')
+            links += build_link('class_with_id', class_id=st.class_id, rel='http://relations.backtoschool.io/class')
 
         return build_response(res, links=links)
 
@@ -622,9 +622,9 @@ def payment():
 
         # hypermedia
         links = build_link('payment', rel='self')
-        links += build_link('payment', rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment', rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment', rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment', rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -667,13 +667,13 @@ def payment():
         # more hypermedia
         for i in range(min(5, len(parents))):
             links += build_link('payment_parent', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/createpayment')
+                                rel='http://relations.backtoschool.io/createpayment')
             links += build_link('payment_parent', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/paymentlist')
+                                rel='http://relations.backtoschool.io/paymentlist')
         classes = session.query(Class).limit(5).all()
         for c in classes:
-            links += build_link('payment_class', class_id=c.id, rel='http://relations.highschool.com/createpayment')
-            links += build_link('payment_class', class_id=c.id, rel='http://relations.highschool.com/paymentlist')
+            links += build_link('payment_class', class_id=c.id, rel='http://relations.backtoschool.io/createpayment')
+            links += build_link('payment_class', class_id=c.id, rel='http://relations.backtoschool.io/paymentlist')
 
         return build_response(res, links=links), 201
 
@@ -682,9 +682,9 @@ def payment():
 
         # hypermedia
         links = build_link('payment', rel='self')
-        links += build_link('payment', rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment', rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment', rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment', rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         payments = session.query(Payment).all()
@@ -704,15 +704,15 @@ def payment():
         # more hypermedia
         for i in range(min(5, len(payments))):
             links += build_link('admin_parent_with_id', parent_id=payments[i].parent_id,
-                                rel='http://relations.highschool.com/parent')
+                                rel='http://relations.backtoschool.io/parent')
         parents = session.query(Parent).limit(3).all()
         for p in parents:
-            links += build_link('payment_parent', parent_id=p.id, rel='http://relations.highschool.com/createpayment')
-            links += build_link('payment_parent', parent_id=p.id, rel='http://relations.highschool.com/paymentlist')
+            links += build_link('payment_parent', parent_id=p.id, rel='http://relations.backtoschool.io/createpayment')
+            links += build_link('payment_parent', parent_id=p.id, rel='http://relations.backtoschool.io/paymentlist')
         classes = session.query(Class).limit(3).all()
         for c in classes:
-            links += build_link('payment_class', class_id=c.id, rel='http://relations.highschool.com/createpayment')
-            links += build_link('payment_class', class_id=c.id, rel='http://relations.highschool.com/paymentlist')
+            links += build_link('payment_class', class_id=c.id, rel='http://relations.backtoschool.io/createpayment')
+            links += build_link('payment_class', class_id=c.id, rel='http://relations.backtoschool.io/paymentlist')
 
         return build_response(res, links=links)
 
@@ -725,9 +725,9 @@ def payment_parent(parent_id):
 
         # hypermedia
         links = build_link('payment_parent', parent_id=parent_id, rel='self')
-        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -764,7 +764,7 @@ def payment_parent(parent_id):
         res = {'payment': p_obj}
 
         # more hypermedia
-        links += build_link('admin_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/parent')
+        links += build_link('admin_parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/parent')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('admin_parent_with_id', parent_id=parent_id)
@@ -775,9 +775,9 @@ def payment_parent(parent_id):
 
         # hypermedia
         links = build_link('payment_parent', parent_id=parent_id, rel='self')
-        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check input
         parent = session.query(Parent).get(parent_id)
@@ -800,7 +800,7 @@ def payment_parent(parent_id):
         res = {'payments': p_list}
 
         # more hypermedia
-        links += build_link('admin_parent_with_id', parent_id=parent_id, rel='http://relations.highschool.com/parent')
+        links += build_link('admin_parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/parent')
 
         return build_response(res, links=links)
 
@@ -813,9 +813,9 @@ def payment_class(class_id):
 
         # hypermedia
         links = build_link('payment_class', class_id=class_id, rel='self')
-        links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -854,7 +854,7 @@ def payment_class(class_id):
         res = {'payment': p_obj, 'number_created': len(new_payments)}
 
         # more hypermedia
-        links += build_link('class_with_id', class_id=class_id, rel='http://relations.highschool.com/class')
+        links += build_link('class_with_id', class_id=class_id, rel='http://relations.backtoschool.io/class')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('class_with_id', class_id=class_id)
@@ -865,9 +865,9 @@ def payment_class(class_id):
 
         # hypermedia
         links = build_link('payment_class', class_id=class_id, rel='self')
-        links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/paymentlist')
-        links += build_link('payment_class', class_id=class_id, rel='http://relations.highschool.com/createpayment')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/paymentlist')
+        links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/createpayment')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check input
         c = session.query(Class).get(class_id)
@@ -890,7 +890,7 @@ def payment_class(class_id):
         res = {'payments': p_list}
 
         # more hypermedia
-        links += build_link('class_with_id', class_id=class_id, rel='http://relations.highschool.com/class')
+        links += build_link('class_with_id', class_id=class_id, rel='http://relations.backtoschool.io/class')
 
         return build_response(res, links=links)
 
@@ -903,9 +903,9 @@ def notification():
 
         # hypermedia
         links = build_link('notification', rel='self')
-        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -930,21 +930,21 @@ def notification():
 
         # more hypermedia
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/createnotification')
         classes = session.query(Class).limit(3).all()
         for i in range(min(3, len(classes))):
             links += build_link('notification_class', class_id=classes[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_class', class_id=classes[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -955,9 +955,9 @@ def notification():
 
         # hypermedia
         links = build_link('notification', rel='self')
-        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='all').all()
@@ -975,21 +975,21 @@ def notification():
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/createnotification')
         classes = session.query(Class).limit(3).all()
         for i in range(min(3, len(classes))):
             links += build_link('notification_class', class_id=classes[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_class', class_id=classes[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         return build_response(res, links=links)
 
@@ -1001,9 +1001,9 @@ def notification_parents():
 
         # hypermedia
         links = build_link('notification_parents', rel='self')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1029,17 +1029,17 @@ def notification_parents():
 
         # more hypermedia
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1050,9 +1050,9 @@ def notification_parents():
 
         # hypermedia
         links = build_link('notification_parents', rel='self')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_parents', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_parents', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='parents').all()
@@ -1070,17 +1070,17 @@ def notification_parents():
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
         parents = session.query(Parent).limit(5).all()
         for i in range(min(5, len(parents))):
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_parent_with_id', parent_id=parents[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         return build_response(res, links=links)
 
@@ -1094,10 +1094,10 @@ def notification_parent_with_id(parent_id):
         # hypermedia
         links = build_link('notification_parent_with_id', parent_id=parent_id, rel='self')
         links += build_link('notification_parent_with_id', parent_id=parent_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_parent_with_id', parent_id=parent_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1127,11 +1127,11 @@ def notification_parent_with_id(parent_id):
         res = {'notification': n_obj}
 
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1143,10 +1143,10 @@ def notification_parent_with_id(parent_id):
         # hypermedia
         links = build_link('notification_parent_with_id', parent_id=parent_id, rel='self')
         links += build_link('notification_parent_with_id', parent_id=parent_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_parent_with_id', parent_id=parent_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='one_parent').filter_by(parent_id=parent_id).all()
@@ -1164,11 +1164,11 @@ def notification_parent_with_id(parent_id):
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1181,9 +1181,9 @@ def notification_teachers():
 
         # hypermedia
         links = build_link('notification_teachers', rel='self')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1209,17 +1209,17 @@ def notification_teachers():
 
         # more hypermedia
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(teachers))):
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1230,9 +1230,9 @@ def notification_teachers():
 
         # hypermedia
         links = build_link('notification_teachers', rel='self')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification_teachers', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification_teachers', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='teachers').all()
@@ -1250,17 +1250,17 @@ def notification_teachers():
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
         teachers = session.query(Teacher).limit(5).all()
         for i in range(min(5, len(teachers))):
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
-                                rel='http://relations.highschool.com/notificationlist')
+                                rel='http://relations.backtoschool.io/notificationlist')
             links += build_link('notification_teacher_with_id', teacher_id=teachers[i].id,
-                                rel='http://relations.highschool.com/createnotification')
+                                rel='http://relations.backtoschool.io/createnotification')
 
         return build_response(res, links=links)
 
@@ -1274,10 +1274,10 @@ def notification_teacher_with_id(teacher_id):
         # hypermedia
         links = build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='self')
         links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1307,11 +1307,11 @@ def notification_teacher_with_id(teacher_id):
         res = {'notification': n_obj}
 
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1323,10 +1323,10 @@ def notification_teacher_with_id(teacher_id):
         # hypermedia
         links = build_link('notification_teacher_with_id', teacher_id=teacher_id, rel='self')
         links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_teacher_with_id', teacher_id=teacher_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='one_teacher').filter_by(teacher_id=teacher_id).all()
@@ -1344,11 +1344,11 @@ def notification_teacher_with_id(teacher_id):
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1362,18 +1362,18 @@ def notification_class(class_id):
         # hypermedia
         links = build_link('notification_class', class_id=class_id, rel='self')
         links += build_link('notification_class', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
+                            rel='http://relations.backtoschool.io/createnotification')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
+                            rel='http://relations.backtoschool.io/createnotification')
 
         # check content type
         try:
@@ -1404,11 +1404,11 @@ def notification_class(class_id):
 
         # more hypermedia
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1420,18 +1420,18 @@ def notification_class(class_id):
         # hypermedia
         links = build_link('notification_class', class_id=class_id, rel='self')
         links += build_link('notification_class', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
+                            rel='http://relations.backtoschool.io/createnotification')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
+                            rel='http://relations.backtoschool.io/createnotification')
 
         # query
         nots = session.query(Notification).filter_by(scope='class').filter_by(class_id=class_id).all()
@@ -1449,11 +1449,11 @@ def notification_class(class_id):
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1467,10 +1467,10 @@ def notification_class_parents(class_id):
         # hypermedia
         links = build_link('notification_class_parents', class_id=class_id, rel='self')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1500,11 +1500,11 @@ def notification_class_parents(class_id):
         res = {'notification': n_obj}
 
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1516,10 +1516,10 @@ def notification_class_parents(class_id):
         # hypermedia
         links = build_link('notification_class_parents', class_id=class_id, rel='self')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_parents', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='class_parents').filter_by(class_id=class_id).all()
@@ -1537,11 +1537,11 @@ def notification_class_parents(class_id):
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1555,10 +1555,10 @@ def notification_class_teachers(class_id):
         # hypermedia
         links = build_link('notification_class_teachers', class_id=class_id, rel='self')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1588,11 +1588,11 @@ def notification_class_teachers(class_id):
         res = {'notification': n_obj}
 
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=new_notification.id,
-                            rel='http://relations.highschool.com/deletenotification')
+                            rel='http://relations.backtoschool.io/deletenotification')
 
         response = build_response(res, links=links)
         response.headers['Location'] = url_for('notification_with_id', notification_id=new_notification.id)
@@ -1604,10 +1604,10 @@ def notification_class_teachers(class_id):
         # hypermedia
         links = build_link('notification_class_teachers', class_id=class_id, rel='self')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/notificationlist')
+                            rel='http://relations.backtoschool.io/notificationlist')
         links += build_link('notification_class_teachers', class_id=class_id,
-                            rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         nots = session.query(Notification).filter_by(scope='class_teachers').filter_by(class_id=class_id).all()
@@ -1625,11 +1625,11 @@ def notification_class_teachers(class_id):
         # more hypermedia
         for i in range(min(3, len(nots))):
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/notification')
+                                rel='http://relations.backtoschool.io/notification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/updatenotification')
+                                rel='http://relations.backtoschool.io/updatenotification')
             links += build_link('notification_with_id', notification_id=nots[i].id,
-                                rel='http://relations.highschool.com/deletenotification')
+                                rel='http://relations.backtoschool.io/deletenotification')
 
         return build_response(res, links=links)
 
@@ -1642,14 +1642,14 @@ def notification_with_id(notification_id):
         # hypermedia
         links = build_link('notification_with_id', notification_id=notification_id, rel='self')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/deletenotification')
+        links += build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         notif = session.query(Notification).get(notification_id)
@@ -1676,14 +1676,14 @@ def notification_with_id(notification_id):
         # hypermedia
         links = build_link('notification_with_id', notification_id=notification_id, rel='self')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/notification')
+                            rel='http://relations.backtoschool.io/notification')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/updatenotification')
+                            rel='http://relations.backtoschool.io/updatenotification')
         links += build_link('notification_with_id', notification_id=notification_id,
-                            rel='http://relations.highschool.com/deletenotification')
-        links += build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+                            rel='http://relations.backtoschool.io/deletenotification')
+        links += build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # check content type
         try:
@@ -1722,9 +1722,9 @@ def notification_with_id(notification_id):
         '''Delete notification'''
 
         # hypermedia
-        links = build_link('notification', rel='http://relations.highschool.com/notificationlist')
-        links += build_link('notification', rel='http://relations.highschool.com/createnotification')
-        links += build_link('admin', rel='http://relations.highschool.com/index')
+        links = build_link('notification', rel='http://relations.backtoschool.io/notificationlist')
+        links += build_link('notification', rel='http://relations.backtoschool.io/createnotification')
+        links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
         # query
         notif = session.query(Notification).get(notification_id)

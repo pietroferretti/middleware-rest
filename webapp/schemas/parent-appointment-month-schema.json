@@ -4,7 +4,7 @@
     {
       "teacher_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/teacherid"
+        "entity": "http://entities.backtoschool.io/teacherid"
       }
     },
     {
@@ -24,7 +24,7 @@
     {
       "parent_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/parentid"
+        "entity": "http://entities.backtoschool.io/parentid"
       }
     }
   ],
@@ -42,7 +42,7 @@
               "properties": {
                 "date": {
                   "type": "string",
-                  "entity": "http://entities.highschool.com/date"
+                  "entity": "http://entities.backtoschool.io/date"
                 }
               }
             }

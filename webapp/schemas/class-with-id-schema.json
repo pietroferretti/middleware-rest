@@ -4,7 +4,7 @@
     {
       "class_id": {
         "type": "integer",
-        "entity": "http://entities.highschool.com/classid"
+        "entity": "http://entities.backtoschool.io/classid"
       }
     }
   ],
@@ -20,15 +20,15 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "entity": "http://entities.highschool.com/classid"
+                "entity": "http://entities.backtoschool.io/classid"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/classname"
+                "entity": "http://entities.backtoschool.io/classname"
               },
               "room": {
                 "type": "string",
-                "entity": "http://entities.highschool.com/room"
+                "entity": "http://entities.backtoschool.io/room"
               }
             }
           }
