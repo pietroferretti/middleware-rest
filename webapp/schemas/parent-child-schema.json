@@ -22,11 +22,11 @@
               "properties": {
                 "lastname": {
                   "type": "string",
-                  "entity": "http://entities.backtoschool.io/studentlastname"
+                  "entity": "http://entities.backtoschool.io/lastname"
                 },
                 "name": {
                   "type": "string",
-                  "entity": "http://entities.backtoschool.io/studentname"
+                  "entity": "http://entities.backtoschool.io/name"
                 },
                 "student_id": {
                   "type": "integer",

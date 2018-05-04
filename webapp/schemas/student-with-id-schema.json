@@ -24,11 +24,11 @@
               },
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/studentlastname"
+                "entity": "http://entities.backtoschool.io/lastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/studentname"
+                "entity": "http://entities.backtoschool.io/name"
               },
               "parent_id": {
                 "type": "integer",
@@ -51,11 +51,11 @@
         "properties": {
           "lastname": {
             "type": "string",
-            "entity": "http://entities.backtoschool.io/studentlastname"
+            "entity": "http://entities.backtoschool.io/lastname"
           },
           "name": {
             "type": "string",
-            "entity": "http://entities.backtoschool.io/studentname"
+            "entity": "http://entities.backtoschool.io/name"
           },
           "parent_id": {
             "type": "integer",
@@ -81,11 +81,11 @@
               },
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/studentlastname"
+                "entity": "http://entities.backtoschool.io/lastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/studentname"
+                "entity": "http://entities.backtoschool.io/name"
               },
               "parent_id": {
                 "type": "integer",

@@ -10,7 +10,7 @@ import IPython
 
 from webapp import app
 from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint, \
-    available_slot_in_day
+    available_slot_in_day, teacher_available
 from webapp.db.db_declarative import session
 from webapp.db.db_declarative import Teacher, Parent, Student, Class, Subject, Appointment, Notification, Payment
 
@@ -292,23 +292,6 @@ def parent_child_teacher(parent_id, student_id):
     return build_response(res, links=links)
 
 
-def teacher_available(datetime_to_check, appointments, subjects):
-    check_appointment = True
-
-    app = [a for a in appointments if (a.date == datetime_to_check and a.teacher_accepted == 1)]
-    if not app:
-        i = datetime_to_check.hour
-        for s in subjects:
-            schedule = json.loads(s.timetable)
-            for t in schedule:
-                if t['day'] == datetime_to_check.weekday():
-                    if t['start_hour'] <= i and t['end_hour'] > i:
-                        return False
-    return True
-
-
-# TODO capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
-# TODO provare le post durante orario di lezione
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def parent_appointment(parent_id):
@@ -361,7 +344,6 @@ def parent_appointment(parent_id):
 
         # check if teacher available
 
-
         if (check_appointment_time_constraint(new_date)):
 
             if (teacher_available(new_date, teacher.appointments, teacher.subjects)):
@@ -382,7 +364,7 @@ def parent_appointment(parent_id):
                 response.headers['Location'] = url_for('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id)
                 return response, 201
             else:
-                return build_response(error='Choose a free slot.', links=links), 400
+                return build_response(error='Teacher not available. Choose a free slot.', links=links), 400
 
         else:
             return build_response(error='Wrong date/time format.', links=links), 400
@@ -399,8 +381,9 @@ def parent_appointment(parent_id):
 
         # more hypermedia
         for i in range(min(10, len(appointments))):
-            links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointments[i].id,
-                            rel='http://relations.backtoschool.io/appointment')
+            links += build_link('parent_appointment_with_id', parent_id=parent_id,
+                                appointment_id=parent.appointments[i].id,
+                                rel='http://relations.backtoschool.io/appointment')
 
         return build_response(appointments, links=links)
 
@@ -466,9 +449,6 @@ def parent_appointment_with_id(parent_id, appointment_id):
 
 
 
-
-
-
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
 @auth_check
 def parent_appointment_month(parent_id, teacher_id, year, month):
@@ -519,6 +499,7 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
 
     return build_response({'available_days': res}, links=links)
+
 
 @app.route(
     '/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/day/<int:day>/')

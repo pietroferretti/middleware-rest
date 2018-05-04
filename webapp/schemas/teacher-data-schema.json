@@ -20,11 +20,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teacherlastname"
+                "entity": "http://entities.backtoschool.io/lastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teachername"
+                "entity": "http://entities.backtoschool.io/name"
               }
             }
           }
@@ -39,11 +39,11 @@
         "properties": {
           "lastname": {
             "type": "string",
-            "entity": "http://entities.backtoschool.io/teacherlastname"
+            "entity": "http://entities.backtoschool.io/lastname"
           },
           "name": {
             "type": "string",
-            "entity": "http://entities.backtoschool.io/teachername"
+            "entity": "http://entities.backtoschool.io/name"
           }
         },
         "required": [
@@ -60,11 +60,11 @@
             "properties": {
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teacherlastname"
+                "entity": "http://entities.backtoschool.io/lastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teachername"
+                "entity": "http://entities.backtoschool.io/name"
               }
             }
           }

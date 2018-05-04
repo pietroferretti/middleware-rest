@@ -130,3 +130,19 @@ def available_slot_in_day(day_to_check, appointments, subjects):
             return True
 
     return False
+
+
+def teacher_available(datetime_to_check, appointments, subjects):
+    app = [a for a in appointments if (a.date == datetime_to_check and a.teacher_accepted == 1)]
+    if not app:
+        i = datetime_to_check.hour
+        for s in subjects:
+            schedule = json.loads(s.timetable)
+            for t in schedule:
+                if t['day'] == datetime_to_check.weekday():
+                    if t['start_hour'] <= i and t['end_hour'] > i:
+                        return False
+    else:
+        return False
+
+    return True
