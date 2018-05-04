@@ -9,6 +9,7 @@ from functools import wraps
 from webapp import app
 from webapp.config import DEBUG, RESPONSE_SCHEMA
 
+import json
 
 def build_response(result=None, error=None, result_schema=None, links=[]):
     '''Builds a HTTP response with the specified content in a JSON envelope'''
@@ -90,3 +91,42 @@ def get_endpoint_function(url, method):
 
 def check_appointment_time_constraint(date):
     return (date.minute == 30 or date.minute == 00) and (date.hour > 7 and date.hour < 13)
+
+
+def available_slot_in_day(day_to_check, appointments, subjects):
+    # Monday is 0 and Sunday is 6.
+
+    if day_to_check.weekday() == 6:
+        return False
+
+    schedule = []
+    for s in subjects:
+        for t in json.loads(s.timetable):
+            if t['day'] == day_to_check.weekday():
+                schedule.append(t)
+
+    app = [a for a in appointments if (
+                a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
+
+    if not schedule and not app:
+        return True
+
+    free = {8: [1, 1], 9: [1, 1], 10: [1, 1], 11: [1, 1], 12: [1, 1], 13: [1, 1]}
+
+    for lesson in schedule:
+        for x in range(lesson['start_hour'], lesson['end_hour'] + 1):
+            # setto 2 slot come occupati -> lezioni vanno di ora in ora
+            free[x][0] = 0
+            free[x][1] = 0
+
+    for a in app:
+        if a.date.minute == 30:
+            free[a.date.hour][1] = 0
+        else:
+            free[a.date.hour][0] = 0
+
+    for x in free:
+        if free[x][0] or free[x][1]:
+            return True
+
+    return False
