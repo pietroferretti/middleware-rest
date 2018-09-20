@@ -37,11 +37,11 @@
                     },
                     "lastname": {
                       "type": "string",
-                      "entity": "http://entities.backtoschool.io/parentlastname"
+                      "entity": "http://entities.backtoschool.io/lastname"
                     },
                     "name": {
                       "type": "string",
-                      "entity": "http://entities.backtoschool.io/parentname"
+                      "entity": "http://entities.backtoschool.io/name"
                     }
                   }
                 },
@@ -108,11 +108,11 @@
                 "properties": {
                   "lastname": {
                     "type": "string",
-                    "entity": "http://entities.backtoschool.io/parentlastname"
+                    "entity": "http://entities.backtoschool.io/lastname"
                   },
                   "name": {
                     "type": "string",
-                    "entity": "http://entities.backtoschool.io/parentname"
+                    "entity": "http://entities.backtoschool.io/name"
                   }
                 }
               },

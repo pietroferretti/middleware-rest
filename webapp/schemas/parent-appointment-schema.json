@@ -46,11 +46,11 @@
                 },
                 "lastname": {
                   "type": "string",
-                  "entity": "http://entities.backtoschool.io/teacherlastname"
+                  "entity": "http://entities.backtoschool.io/lastname"
                 },
                 "name": {
                   "type": "string",
-                  "entity": "http://entities.backtoschool.io/teachername"
+                  "entity": "http://entities.backtoschool.io/name"
                 }
               }
             }
@@ -111,11 +111,11 @@
               },
               "lastname": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teacherlastname"
+                "entity": "http://entities.backtoschool.io/lastname"
               },
               "name": {
                 "type": "string",
-                "entity": "http://entities.backtoschool.io/teachername"
+                "entity": "http://entities.backtoschool.io/name"
               }
             }
           }

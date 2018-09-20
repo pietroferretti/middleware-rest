@@ -7,7 +7,8 @@ import datetime
 import calendar
 
 from webapp import app
-from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint, validate_schema
+from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint, \
+    available_slot_in_day, teacher_available, validate_schema
 from webapp.db.db_declarative import session
 from webapp.db.db_declarative import Teacher, Parent, Student, Class, Subject, Appointment, Notification, Payment
 
@@ -297,23 +298,6 @@ def parent_child_teacher(parent_id, student_id):
     return build_response(res, links=links)
 
 
-def teacher_available(datetime_to_check, appointments, subjects):
-    check_appointment = True
-
-    app = [a for a in appointments if (a.date == datetime_to_check and a.teacher_accepted == 1)]
-    if not app:
-        i = datetime_to_check.hour
-        for s in subjects:
-            schedule = json.loads(s.timetable)
-            for t in schedule:
-                if t['day'] == datetime_to_check.weekday():
-                    if t['start_hour'] <= i and t['end_hour'] > i:
-                        return False
-    return True
-
-
-# TODO capire come vogliamo gestire gli errori, esempio id che non esiste del teacher
-# TODO provare le post durante orario di lezione
 @app.route('/parent/<int:parent_id>/appointment/', methods=['GET', 'POST'])
 @auth_check
 def parent_appointment(parent_id):
@@ -366,9 +350,9 @@ def parent_appointment(parent_id):
 
         # check if teacher available
 
-        if check_appointment_time_constraint(new_date):
+        if (check_appointment_time_constraint(new_date)):
 
-            if teacher_available(new_date, teacher.appointments, teacher.subjects):
+            if (teacher_available(new_date, teacher.appointments, teacher.subjects)):
                 new_appointment = Appointment(date=new_date, teacher_accepted=0, parent_accepted=1,
                                               teacher_id=data['teacher_id'], parent_id=parent_id)
                 session.add(new_appointment)
@@ -386,7 +370,7 @@ def parent_appointment(parent_id):
                 response.headers['Location'] = url_for('parent_appointment_with_id', parent_id=parent_id, appointment_id=a.id)
                 return response, 201
             else:
-                return build_response(error='Choose a free slot.', links=links), 400
+                return build_response(error='Teacher not available. Choose a free slot.', links=links), 400
 
         else:
             return build_response(error='Wrong date/time format.', links=links), 400
@@ -402,8 +386,9 @@ def parent_appointment(parent_id):
 
         # more hypermedia
         for i in range(min(10, len(appointments))):
-            links += build_link('parent_appointment_with_id', parent_id=parent_id, appointment_id=appointments[i].id,
-                            rel='http://relations.backtoschool.io/appointment')
+            links += build_link('parent_appointment_with_id', parent_id=parent_id,
+                                appointment_id=parent.appointments[i].id,
+                                rel='http://relations.backtoschool.io/appointment')
 
         return build_response(appointments, links=links)
 
@@ -471,32 +456,6 @@ def parent_appointment_with_id(parent_id, appointment_id):
                                                'teacher': {'name': teacher.name, 'lastname': teacher.lastname}}}, links=links)
 
 
-# TODO check caso falso
-# TODO quando è a posto spostare in utils.py
-def available_slot_in_day(day_to_check, appointments, subjects):
-    check_appointment = True
-
-    app = [a for a in appointments if (
-                a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
-    for i in range(8, 13):
-        for s in subjects:
-            schedule = json.loads(s.timetable)
-            for t in schedule:
-                if t['day'] == day_to_check.weekday():
-                    check_appointment = False
-                    if t['start_hour'] < i or t['end_hour'] >= i:
-                        for a in app:
-                            if ((a.date.hour != i) or (a.date.hour == i and a.date.minute == 30)):
-                                return True
-            if check_appointment:
-                if not app:
-                    return True
-                else:
-                    for a in app:
-                        if ((a.date.hour != i) or (a.date.hour == i and a.date.minute == 30)):
-                            return True
-
-    return False
 
 
 @app.route('/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/')
@@ -515,16 +474,27 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     links += build_link('parent_appointment', parent_id=parent_id,
                         rel='http://relations.backtoschool.io/createappointment')
 
+    if month > 12 or month < 1:
+        return build_response(error='Insert existing month.', links=links), 404
+
+    if year < datetime.date.today().year or (
+            year == datetime.date.today().year and month < datetime.date.today().month):
+        return build_response(
+            error='Wait a minute. Wait a minute, Doc. Ah... Are you telling me that you built a time machine... out of a DeLorean?',
+            links=links), 404
+
     teacher = session.query(Teacher).get(teacher_id)
 
     if not teacher:
         return build_response(error='Teacher not found.', links=links), 404
 
     res = []
-    for d in calendar.Calendar().itermonthdays(year, month):
-        if d >= datetime.date.today().day and available_slot_in_day(datetime.datetime(year, month, d),
+    for d in calendar.Calendar().itermonthdates(year, month):
+
+        if d.month == month and d >= datetime.date.today() and available_slot_in_day(d,
                                                                     teacher.appointments, teacher.subjects):
-            res.append({'date': datetime.datetime(year, month, d)})
+            res.append({'date': d})
+
     if not res:
         return build_response(error='No available appointments for this month.', links=links), 404
 
@@ -538,6 +508,7 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
     # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
 
     return build_response({'available_days': res}, links=links)
+
 
 @app.route(
     '/parent/<int:parent_id>/appointment/teacher/<int:teacher_id>/year/<int:year>/month/<int:month>/day/<int:day>/')
@@ -558,6 +529,15 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     links += build_link('parent_appointment', parent_id=parent_id,
                         rel='http://relations.backtoschool.io/createappointment')
 
+    if datetime.datetime(year, month, day) < datetime.datetime.today():
+        return build_response(
+            error='Wait a minute. Wait a minute, Doc. Ah... Are you telling me that you built a time machine... out of a DeLorean?',
+            links=links), 404
+
+    w_day = datetime.datetime(year, month, day).weekday()
+    if w_day == 6:
+        return build_response(error="No slots available on Sunday.", links=links)
+
     teacher = session.query(Teacher).get(teacher_id)
 
     if not teacher:
@@ -572,8 +552,6 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
     for a in teacher.appointments:
         if (a.date.year == year and a.date.month == month and a.date.day == day and a.teacher_accepted == 1):
             daily_slots[str(a.date.hour) + str(a.date.minute)] = 0
-
-    w_day = datetime.datetime(year, month, day).weekday()
 
     for s in teacher.subjects:
         schedule = json.loads(s.timetable)
@@ -590,6 +568,9 @@ def parent_appointment_day(parent_id, teacher_id, year, month, day):
             free.append(key)
 
     res = {'date': datetime.datetime(year, month, day), 'free_slots': free}
+
+    if not res:
+        return build_response(error="No slots available.", links=links)
 
     return build_response(res, links=links)
 

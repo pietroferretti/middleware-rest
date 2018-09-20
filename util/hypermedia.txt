@@ -59,14 +59,15 @@ http://entities.backtoschool.io/username
 http://entities.backtoschool.io/password
 http://entities.backtoschool.io/role
 
+http://entities.backtoschool.io/parentid
 http://entities.backtoschool.io/teacherid
+http://entities.backtoschool.io/studentid
+
+http://entities.backtoschool.io/lastname
+http://entities.backtoschool.io/name
+
 http://entities.backtoschool.io/date
 http://entities.backtoschool.io/appointmentid
-
-http://entities.backtoschool.io/parentid
-http://entities.backtoschool.io/parentlastname
-http://entities.backtoschool.io/parentname
-
 http://entities.backtoschool.io/room
 http://entities.backtoschool.io/teacherhasaccepted
 http://entities.backtoschool.io/parenthasaccepted
@@ -76,10 +77,6 @@ http://entities.backtoschool.io/classname
 
 http://entities.backtoschool.io/subjectid
 http://entities.backtoschool.io/subjectsname
-
-http://entities.backtoschool.io/studentid
-http://entities.backtoschool.io/studentname
-http://entities.backtoschool.io/studentlastname
 
 http://entities.backtoschool.io/gradeid
 http://entities.backtoschool.io/gradevalue
