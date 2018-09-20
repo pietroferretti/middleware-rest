@@ -8,7 +8,7 @@ import datetime
 
 from webapp import app
 from webapp.config import DEBUG, SCHEMA_FOLDER
-from webapp.utils import get_index, build_link, build_response, get_endpoint_function
+from webapp.utils import get_index, build_link, build_response, get_endpoint_function, validate_schema
 from webapp.db.db_declarative import session, Account
 
 
@@ -117,8 +117,8 @@ def login():
         return build_response(error='The request was not valid JSON.', links=links), 400
 
     # check json content
-    if not data or 'username' not in data or 'password' not in data:
-        return build_response(error='The JSON structure must contain all the requested parameters.', links=links), 400
+    if not validate_schema(data, 'login', request.method):
+        return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
     # get username, password
     username = data['username']

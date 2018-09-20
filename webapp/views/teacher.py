@@ -6,7 +6,7 @@ import json
 import datetime
 
 from webapp import app
-from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint
+from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint, validate_schema
 from webapp.db.db_declarative import session, Teacher, Parent, Student, Class, Subject, Grade, Appointment, Notification
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -75,9 +75,8 @@ def teacher_data(teacher_id):
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         # check json content
-        if 'name' not in data and 'lastname' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        if not validate_schema(data, 'teacher_data', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # update teacher with query
         teacher = session.query(Teacher).get(teacher_id)
@@ -332,8 +331,9 @@ def teacher_student_grades(teacher_id, class_id, subject_id, student_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.'), 400
 
-        if 'date' not in data or 'value' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.'), 400
+        # check json content
+        if not validate_schema(data, 'teacher_student_grades', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         teacher = session.query(Teacher).get(teacher_id)
         if not teacher:
@@ -446,6 +446,10 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.'), 400
+
+        # check json content
+        if not validate_schema(data, 'teacher_class_grades', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         teacher = session.query(Teacher).get(teacher_id)
         if not teacher:
@@ -592,6 +596,10 @@ def teacher_grade_with_id(teacher_id, class_id, subject_id, grade_id):
 
         if not grade:
             return build_response(error='Grade not found.', links=links), 404
+
+        # check json content
+        if not validate_schema(data, 'teacher_grade_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # update
         if 'date' in data:
@@ -755,9 +763,9 @@ def teacher_appointment(teacher_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.'), 400
 
-        if 'date' not in data or 'parent_id' not in data or 'room' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        # check json content
+        if not validate_schema(data, 'teacher_appointment', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         try:
             new_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
@@ -765,7 +773,7 @@ def teacher_appointment(teacher_id):
             return build_response(error='"date" must be a string following the format "yyyy-mm-dd hh:mm:ss"',
                                   links=links), 400
 
-        if (check_appointment_time_constraint(new_date)):
+        if check_appointment_time_constraint(new_date):
             new_appointment = Appointment(date=new_date, teacher_accepted=1, parent_accepted=0, teacher_id=teacher_id,
                                           room=data['room'], parent_id=data['parent_id'])
             session.add(new_appointment)
@@ -834,6 +842,10 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.'), 400
+
+        # check json content
+        if not validate_schema(data, 'teacher_appointment_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         if 'date' in data:
             try:

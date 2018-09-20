@@ -3,11 +3,18 @@
 from flask import request, url_for, abort, jsonify
 from flask import session as clienttoken
 from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+import json
 
 from functools import wraps
 
 from webapp import app
-from webapp.config import DEBUG, RESPONSE_SCHEMA
+from webapp.config import DEBUG, RESPONSE_SCHEMA, SCHEMA_FOLDER
+
+
+def schema_from_endpoint(endpoint):
+    return endpoint.replace('_', '-') + '-schema.json'
 
 
 def build_response(result=None, error=None, result_schema=None, links=[]):
@@ -29,7 +36,7 @@ def build_response(result=None, error=None, result_schema=None, links=[]):
 
 
 def build_link(endpoint, rel='http://relations.backtoschool.io/linkrelation', **kwargs):
-    filename = endpoint.replace('_', '-') + '-schema.json'
+    filename = schema_from_endpoint(endpoint)
     schema = request.url_root.rstrip('/') + url_for('schema', path=filename)
     res = [{'link': request.url_root.rstrip('/') + url_for(endpoint, **kwargs),
             'schema': schema,
@@ -42,6 +49,7 @@ def auth_check(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # avoid auth checks if debugging
         if DEBUG:
             return f(*args, **kwargs)
 
@@ -56,6 +64,36 @@ def auth_check(f):
             abort(403)
 
     return decorated_function
+
+
+def validate_schema(data, endpoint, method):
+    '''Validate the JSON input according to the endpoint schema'''
+
+    # get schema file from endpoint name
+    filename = 'webapp/' + SCHEMA_FOLDER + '/' + schema_from_endpoint(endpoint)
+    with open(filename) as f:
+        # get schema for the specific method
+        schema = json.load(f)
+        actions = schema['actions']
+        input_schema = None
+        for obj in actions:
+            if obj['method'] == method and 'inputschema' in obj:
+                input_schema = obj['inputschema']
+                break
+        # validate input
+        if input_schema is None:
+            # no validation to be done
+            return True
+        try:
+            validate(data, input_schema)
+            # the validation was successful
+            return True
+        except ValidationError as e:
+            if DEBUG:
+                # print error to terminal
+                print("* Failed validation on endpoint", endpoint)
+                print(e.message)
+            return False
 
 
 def get_index(url):

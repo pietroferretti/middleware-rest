@@ -7,7 +7,7 @@ import datetime
 import calendar
 
 from webapp import app
-from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint
+from webapp.utils import auth_check, build_link, build_response, check_appointment_time_constraint, validate_schema
 from webapp.db.db_declarative import session
 from webapp.db.db_declarative import Teacher, Parent, Student, Class, Subject, Appointment, Notification, Payment
 
@@ -65,6 +65,10 @@ def parent_data(parent_id):
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check json content
+        if not validate_schema(data, 'parent_data', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         if 'name' in data:
             parent.name = data['name']
@@ -185,6 +189,10 @@ def parent_child_data(parent_id, student_id):
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check json content
+        if not validate_schema(data, 'parent_child_data', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         if 'name' in data:
             student.name = data['name']
@@ -341,9 +349,9 @@ def parent_appointment(parent_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        if 'date' not in data or 'teacher_id' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        # check json content
+        if not validate_schema(data, 'parent_appointment', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         teacher = session.query(Teacher).filter_by(id=data['teacher_id']).one()
 
@@ -358,10 +366,9 @@ def parent_appointment(parent_id):
 
         # check if teacher available
 
+        if check_appointment_time_constraint(new_date):
 
-        if (check_appointment_time_constraint(new_date)):
-
-            if (teacher_available(new_date, teacher.appointments, teacher.subjects)):
+            if teacher_available(new_date, teacher.appointments, teacher.subjects):
                 new_appointment = Appointment(date=new_date, teacher_accepted=0, parent_accepted=1,
                                               teacher_id=data['teacher_id'], parent_id=parent_id)
                 session.add(new_appointment)
@@ -383,7 +390,6 @@ def parent_appointment(parent_id):
 
         else:
             return build_response(error='Wrong date/time format.', links=links), 400
-
 
     else:
         '''Show all appointments'''
@@ -427,6 +433,10 @@ def parent_appointment_with_id(parent_id, appointment_id):
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
+
+        # check json content
+        if not validate_schema(data, 'parent_appointment_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         if 'date' in data:
             try:
@@ -723,8 +733,8 @@ def parent_pay(parent_id, payment_id):
 
     # hypermedia
     links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id, rel='self')
-    links = build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
-                       rel='http://relations.backtoschool.io/completepayment')
+    links += build_link('parent_pay', parent_id=parent_id, payment_id=payment_id,
+                        rel='http://relations.backtoschool.io/completepayment')
     links += build_link('parent_payment', parent_id=parent_id, rel='http://relations.backtoschool.io/paymentlist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
 

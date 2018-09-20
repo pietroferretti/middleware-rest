@@ -7,7 +7,7 @@ import datetime
 import os
 
 from webapp import app
-from webapp.utils import auth_check, build_link, build_response
+from webapp.utils import auth_check, validate_schema, build_link, build_response
 from webapp.db.db_declarative import session
 from webapp.db.db_declarative import Teacher, Parent, Student, Class, Notification, Payment, Account
 
@@ -30,8 +30,8 @@ def admin():
             return build_response(error='The request was not valid JSON.'), 400
 
         # check json content
-        if 'username' not in data or 'password' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        if not validate_schema(data, 'admin', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         existing = session.query(Account).filter_by(username=data['username']).all()
         if existing:
@@ -94,9 +94,8 @@ def admin_teacher():
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         # check json content
-        if 'name' not in data or 'lastname' not in data or 'username' not in data or 'password' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        if not validate_schema(data, 'admin_teacher', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         existing = session.query(Account).filter_by(username=data['username']).all()
         if existing:
@@ -215,9 +214,8 @@ def admin_parent():
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         # check json content
-        if 'name' not in data or 'lastname' not in data or 'username' not in data or 'password' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        if not validate_schema(data, 'admin_parent', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         existing = session.query(Account).filter_by(username=data['username']).all()
         if existing:
@@ -434,9 +432,8 @@ def student():
             return build_response(error='The request was not valid JSON.', links=links), 400
 
         # check json content
-        if 'name' not in data or 'lastname' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.',
-                                  links=links), 400
+        if not validate_schema(data, 'student', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         if 'parent_id' in data:
             parent_id = data['parent_id']
@@ -530,6 +527,10 @@ def student_with_id(student_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
+        # check json content
+        if not validate_schema(data, 'student_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
+
         # check input
         st = session.query(Student).get(student_id)
         if not st:
@@ -581,7 +582,6 @@ def student_with_id(student_id):
 
         return build_response(res, links=links)
 
-
     else:
         '''Show student info'''
 
@@ -632,9 +632,9 @@ def payment():
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        if 'amount' not in data or 'date' not in data or 'reason' not in data:
-            return build_response(error='The request must contain all the required parameters', links=links), 400
+        # check json content
+        if not validate_schema(data, 'payment', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new objects
         amount = data['amount']
@@ -729,19 +729,20 @@ def payment_parent(parent_id):
         links += build_link('payment_parent', parent_id=parent_id, rel='http://relations.backtoschool.io/createpayment')
         links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
+        # check input
+        parent = session.query(Parent).get(parent_id)
+        if not parent:
+            return build_response(error='Parent not found.', links=links), 404
+
         # check content type
         try:
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        parent = session.query(Parent).get(parent_id)
-        if not parent:
-            return build_response(error='Parent not found.', links=links), 404
-
-        if 'amount' not in data or 'date' not in data or 'reason' not in data:
-            return build_response(error='The request must contain all the required parameters', links=links), 400
+        # check json content
+        if not validate_schema(data, 'payment_parent', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new objects
         amount = data['amount']
@@ -817,19 +818,20 @@ def payment_class(class_id):
         links += build_link('payment_class', class_id=class_id, rel='http://relations.backtoschool.io/createpayment')
         links += build_link('admin', rel='http://relations.backtoschool.io/index')
 
+        # check input
+        c = session.query(Class).get(class_id)
+        if not c:
+            return build_response(error='Class not found.', links=links), 404
+
         # check content type
         try:
             data = request.get_json()
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        c = session.query(Class).get(class_id)
-        if not c:
-            return build_response(error='Class not found.', links=links), 404
-
-        if 'amount' not in data or 'date' not in data or 'reason' not in data:
-            return build_response(error='The request must contain all the required parameters', links=links), 400
+        # check json content
+        if not validate_schema(data, 'payment_class', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         parents = session.query(Parent).join(Student.parent_id).filter(Student.class_id == class_id).all()
         if not parents:
@@ -913,9 +915,9 @@ def notification():
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='all')
@@ -1011,9 +1013,9 @@ def notification_parents():
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_parents', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='parents')
@@ -1110,8 +1112,9 @@ def notification_parent_with_id(parent_id):
         if not parent:
             return build_response(error='Parent not found.', links=links), 404
 
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_parent_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='one_parent',
@@ -1191,9 +1194,9 @@ def notification_teachers():
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_teachers', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='teachers')
@@ -1290,8 +1293,9 @@ def notification_teacher_with_id(teacher_id):
         if not teacher:
             return build_response(error='Teacher not found.', links=links), 404
 
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_teacher_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='one_teacher',
@@ -1386,8 +1390,9 @@ def notification_class(class_id):
         if not c:
             return build_response(error='Class not found.', links=links), 404
 
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_class', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class',
@@ -1483,8 +1488,9 @@ def notification_class_parents(class_id):
         if not c:
             return build_response(error='Class not found.', links=links), 404
 
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_class_parents', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class_parents',
@@ -1571,8 +1577,9 @@ def notification_class_teachers(class_id):
         if not c:
             return build_response(error='Class not found.', links=links), 404
 
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_class_teachers', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # create new object
         new_notification = Notification(date=datetime.datetime.now(), text=data['text'], scope='class_teachers',
@@ -1691,9 +1698,9 @@ def notification_with_id(notification_id):
         except TypeError:
             return build_response(error='The request was not valid JSON.', links=links), 400
 
-        # check input
-        if 'text' not in data:
-            return build_response(error='The request must contain all the required parameters.', links=links), 400
+        # check json content
+        if not validate_schema(data, 'notification_with_id', request.method):
+            return build_response(error="The request didn't follow the provided schema.", links=links), 400
 
         # query
         notif = session.query(Notification).get(notification_id)
