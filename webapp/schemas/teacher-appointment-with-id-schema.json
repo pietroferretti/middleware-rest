@@ -84,8 +84,7 @@
             "type": "boolean",
             "entity": "http://entities.backtoschool.io/room"
           }
-        },
-        "required": []
+        }
       },
       "outputschema": {
         "$schema": "http://json-schema.org/draft-06/schema#",

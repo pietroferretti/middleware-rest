@@ -35,7 +35,8 @@
             }
           }
         }
-      },
+      }
+    },
     {
       "method": "PUT",
       "inputschema": {
@@ -50,8 +51,7 @@
             "type": "string",
             "entity": "http://entities.backtoschool.io/name"
           }
-        },
-        "required": []
+        }
       },
       "outputschema": {
         "$schema": "http://json-schema.org/draft-06/schema#",

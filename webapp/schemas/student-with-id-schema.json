@@ -65,8 +65,7 @@
             "type": "integer",
             "entity": "http://entities.backtoschool.io/classid"
           }
-        },
-        "required": []
+        }
       },
       "outputschema": {
         "$schema": "http://json-schema.org/draft-06/schema#",

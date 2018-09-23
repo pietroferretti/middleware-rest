@@ -65,10 +65,7 @@ class Teacher(Base):
     classes = relationship("Class", secondary=teachers_classes_table, backref="teachers", lazy='immediate')
 
 
-#    notifications = relationship("Notification", secondary=teachers_notifications_table, backref='teachers')
-
 class Subject(Base):
-    # todo unire in qualche modo con class teacher table
     __tablename__ = 'subject'
     id = Column(Integer, primary_key=True)
     name = Column(String(10), nullable=False)
@@ -86,7 +83,6 @@ class Parent(Base):
     lastname = Column(String(50), nullable=False)
     children = relationship("Student")
     appointments = relationship("Appointment")
-    #    notifications = relationship("Notification", secondary=parents_notifications_table, backref='parents')
     payments = relationship("Payment")
 
 
@@ -95,7 +91,6 @@ class Class(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(2), nullable=False, unique=True)
     room = Column(String(5), nullable=False)
-    #    notifications = relationship("Notification", secondary=classes_notifications_table, backref='classes')
     students = relationship("Student")
     subjects = relationship("Subject")
 
@@ -152,7 +147,6 @@ class Payment(Base):
     parent_id = Column(Integer, ForeignKey('parent.id'))
 
 
-# da rivedere, forse meglio un tabellozzo subject+class con tutti i grade?
 class Grade(Base):
     __tablename__ = 'grade'
     id = Column(Integer, primary_key=True)
@@ -193,50 +187,4 @@ Base.metadata.bind = engine
 Base.metadata.create_all(engine)
 
 session = create_session()
-# IPython.embed()
 
-
-# rs = session.query(Parent).first()
-# rs.name
-# rs.id
-# rs.children
-# rs.children.name
-# rs.children.first()
-# list = rs.children
-# for l in list:
-#     print l.name
-# for l in list:
-#     print (l.name)
-    
-
-
-# new_parent = Parent(name='Marco', lastname= 'Rossi', pwd='pwd')
-# # With the add() method, we add the specified instance of Parent classes
-# # to the session.
-# session.add(new_parent)
-
-# # The changes are committed to the database with the commit() method.
-# session.commit()
-
-
-# rs = session.query(Parent).all()
-# for parent in rs:
-#     print(parent.id, parent.name, parent.lastname, parent.pwd)
-
-
-# new_student = Student(name='Rosa', lastname='Monte', parent_id= 8)
-# session.add(new_student)
-# session.commit()
-
-# new_appointment = Appointment(date=datetime.strptime('2018-5-3 14:30:00', '%Y-%m-%d %H:%M:%S'), room='A', teacher_accepted=0,parent_accepted=1, teacher_id=2, parent_id=1)
-# session.add(new_appointment)
-# session.commit()
-
-
-# new_payment = Payment(date=datetime.strptime('2017-5-3 14:30:00', '%Y-%m-%d %H:%M:%S'), amount=500,reason='enrollment taxes', is_pending=0,parent_id=1)
-# session.add(new_payment)
-# session.commit()
-
-# new_notification = Notification(date=datetime.strptime('2018-4-6', '%Y-%m-%d'), text='prova per class_parents', scope='class_parents', parent_id=1)
-# session.add(new_notification)
-# session.commit()

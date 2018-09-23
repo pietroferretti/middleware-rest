@@ -463,9 +463,6 @@ def teacher_class_grades(teacher_id, class_id, subject_id):
         if not subject or teacher_id != subject.teacher_id or class_id != subject.class_id:
             return build_response(error='Subject not found.', links=links), 404
 
-        if 'grades' not in data:
-            return build_response(error='The JSON structure must contain all the requested parameters.'), 400
-
         g_list = []
         for grade in data['grades']:
             try:
@@ -831,9 +828,9 @@ def teacher_appointment_with_id(teacher_id, appointment_id):
     links += build_link('teacher_appointment', teacher_id=teacher_id,
                         rel='http://relations.backtoschool.io/appointmentlist')
 
-    appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
-
-    if not appointment:
+    try:
+        appointment = session.query(Appointment).filter_by(id=appointment_id).filter_by(teacher_id=teacher_id).one()
+    except NoResultFound:
         return build_response(error='Appointment not found.'), 404
 
     if request.method == 'PUT':

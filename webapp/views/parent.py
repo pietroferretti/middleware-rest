@@ -504,9 +504,6 @@ def parent_appointment_month(parent_id, teacher_id, year, month):
                             year=year, month=month,
                             day=d['date'].day, rel='http://relations.backtoschool.io/freeslots')
 
-    # day_to_check = datetime.datetime(year,month,3)
-    # app = [a for a in teacher.appointments if (a.date.year == day_to_check.year and a.date.month == day_to_check.month and a.date.day == day_to_check.day and a.teacher_accepted == 1)]
-
     return build_response({'available_days': res}, links=links)
 
 

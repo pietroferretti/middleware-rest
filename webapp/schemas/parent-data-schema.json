@@ -45,8 +45,7 @@
             "type": "string",
             "entity": "http://entities.backtoschool.io/lastname"
           }
-        },
-        "required": []
+        }
       },
       "outputschema": {
         "$schema": "http://json-schema.org/draft-06/schema#",

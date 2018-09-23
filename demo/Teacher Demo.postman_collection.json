@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "229bc4e4-2857-4776-9255-86e6dfc27631",
-		"name": "Parent Demo",
+		"_postman_id": "978508bc-0eb3-44da-9c48-9c3b95bd7bd8",
+		"name": "Teacher Demo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "parent login",
+			"name": "teacher login",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -17,7 +17,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"username\": \"f.bianchi\", \"password\": \"12345678\"}"
+					"raw": "{\"username\": \"f.resta\", \"password\": \"password\"}"
 				},
 				"url": {
 					"raw": "127.0.0.1:5000/login/",
@@ -37,16 +37,13 @@
 			"response": []
 		},
 		{
-			"name": "parent index",
+			"name": "teacher index",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/",
+					"raw": "http://127.0.0.1:5000/teacher/1/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -56,8 +53,8 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
+						"teacher",
+						"1",
 						""
 					]
 				}
@@ -65,16 +62,13 @@
 			"response": []
 		},
 		{
-			"name": "parent notifications",
+			"name": "teacher notifications",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/notifications/",
+					"raw": "http://127.0.0.1:5000/teacher/1/notifications/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -84,8 +78,8 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
+						"teacher",
+						"1",
 						"notifications",
 						""
 					]
@@ -94,16 +88,13 @@
 			"response": []
 		},
 		{
-			"name": "parent index",
+			"name": "teacher index",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/",
+					"raw": "http://127.0.0.1:5000/teacher/1/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -113,8 +104,8 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
+						"teacher",
+						"1",
 						""
 					]
 				}
@@ -122,16 +113,13 @@
 			"response": []
 		},
 		{
-			"name": "parent children list",
+			"name": "teacher timetable",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/child/",
+					"raw": "http://127.0.0.1:5000/teacher/1/timetable/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -141,9 +129,9 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
-						"child",
+						"teacher",
+						"1",
+						"timetable",
 						""
 					]
 				}
@@ -151,16 +139,13 @@
 			"response": []
 		},
 		{
-			"name": "parent see child",
+			"name": "teacher index",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/child/4/",
+					"raw": "http://127.0.0.1:5000/teacher/1/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -170,10 +155,8 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
-						"child",
-						"4",
+						"teacher",
+						"1",
 						""
 					]
 				}
@@ -181,16 +164,13 @@
 			"response": []
 		},
 		{
-			"name": "parent see child data",
+			"name": "teacher see appointments",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/child/4/data/",
+					"raw": "http://127.0.0.1:5000/teacher/1/appointment/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -200,11 +180,9 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
-						"child",
-						"4",
-						"data",
+						"teacher",
+						"1",
+						"appointment",
 						""
 					]
 				}
@@ -212,7 +190,34 @@
 			"response": []
 		},
 		{
-			"name": "parent edit child data",
+			"name": "teacher app. info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/appointment/9/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"appointment",
+						"9",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher approve appointment",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -223,10 +228,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Marco\"\n}"
+					"raw": "{\n\t\"teacher_accepted\": true,\n\t\"room\": \"C\"\n}"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/child/4/data/",
+					"raw": "http://127.0.0.1:5000/teacher/1/appointment/9/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -236,11 +241,176 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
-						"child",
+						"teacher",
+						"1",
+						"appointment",
+						"9",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher see classes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher see class 3",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						"3",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher see subjects in class",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/subject/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						"3",
+						"subject",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher see students in class",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/student/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						"3",
+						"student",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher see student's grades",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/subject/7/student/4/grade/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						"3",
+						"subject",
+						"7",
+						"student",
 						"4",
-						"data",
+						"grade",
 						""
 					]
 				}
@@ -248,254 +418,7 @@
 			"response": []
 		},
 		{
-			"name": "parent index",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent payment list",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/payment/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"payment",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent see payment",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/payment/3/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"payment",
-						"3",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent pay",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/payment/3/pay/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"payment",
-						"3",
-						"pay",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent index",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent see appointments",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/appointment/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"appointment",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent app. free days",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/appointment/teacher/3/year/2018/month/11/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"appointment",
-						"teacher",
-						"3",
-						"year",
-						"2018",
-						"month",
-						"11",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent app. free slots",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/appointment/teacher/3/year/2018/month/11/day/2/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"parent",
-						"5",
-						"appointment",
-						"teacher",
-						"3",
-						"year",
-						"2018",
-						"month",
-						"11",
-						"day",
-						"2",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "parent ask appointment",
+			"name": "teacher publish grade",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -506,10 +429,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"teacher_id\": 1,\n\t\"date\": \"2018-11-02 09:00:00\"\n}"
+					"raw": "{\n\t\"date\": \"2018-04-20 10:00:00\",\n\t\"value\": 8\n}"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/parent/5/appointment/",
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/subject/7/student/4/grade/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -519,9 +442,54 @@
 					],
 					"port": "5000",
 					"path": [
-						"parent",
-						"5",
-						"appointment",
+						"teacher",
+						"1",
+						"class",
+						"3",
+						"subject",
+						"7",
+						"student",
+						"4",
+						"grade",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "teacher edit grade",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"value\": 9\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/teacher/1/class/3/subject/7/grade/13/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"teacher",
+						"1",
+						"class",
+						"3",
+						"subject",
+						"7",
+						"grade",
+						"13",
 						""
 					]
 				}

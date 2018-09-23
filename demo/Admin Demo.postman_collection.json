@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "42fd9854-2ced-4f0d-8b05-4f4279576c96",
+		"_postman_id": "b6e7f680-b6ce-469b-9a30-5c06951a8020",
 		"name": "Admin Demo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -42,7 +42,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -99,7 +102,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -156,7 +162,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -180,7 +189,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/class/",
 					"protocol": "http",
@@ -205,7 +217,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -229,7 +244,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/student/",
 					"protocol": "http",
@@ -288,7 +306,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -312,7 +333,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/payment/",
 					"protocol": "http",
@@ -372,7 +396,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/",
 					"protocol": "http",
@@ -396,7 +423,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/notification/",
 					"protocol": "http",
@@ -454,7 +484,10 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/notification/6/",
 					"protocol": "http",
@@ -480,7 +513,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/notification/",
 					"protocol": "http",
@@ -505,7 +541,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/admin/notification/class/2/",
 					"protocol": "http",
