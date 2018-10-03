@@ -260,7 +260,7 @@ def parent_child_teacher(parent_id, student_id):
     links = build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
                        rel='self')
     links += build_link('parent_child_teacher', parent_id=parent_id, student_id=student_id,
-                        rel='http://relations.backtoschool.io/teacgherlist')
+                        rel='http://relations.backtoschool.io/teacherlist')
     links += build_link('parent_with_id', parent_id=parent_id, rel='http://relations.backtoschool.io/index')
     links += build_link('parent_child', parent_id=parent_id, rel='http://relations.backtoschool.io/studentlist')
 
